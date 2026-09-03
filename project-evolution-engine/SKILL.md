@@ -31,25 +31,14 @@ Load supporting material only when the change needs it:
 
 ## Operating boundaries
 
-- Read enough to justify the proposed location and impact. File names, search hits, a graph, and a scanner are leads until grounded in actual code and callers.
-- Preserve user edits, including unrelated edits within a file you must change. Read the current file immediately before editing; never reset, overwrite, stage, or clean unrelated state.
-- Keep one authority for a business rule. Conflicting documentation is a question to investigate, not permission to invent a value.
-- Distinguish an authorized new contract from an unresolved product choice. Complete independent work before returning one focused question when a material ambiguity blocks the rest.
-- Treat generated artifacts through their source chain. Change the source when it is wrong; rerun the generator when only the output is stale.
-- Recheck relevant context when its code, callers, tests, or rules change. A matching Git commit alone does not prove an uncommitted workspace or external service is unchanged.
-- Do not turn a local update into an unsolicited rewrite, whole-project audit, dependency upgrade, or release.
-- Permission to update a target project does not automatically authorize committing, pushing, deploying, installing global tools, or contacting others. Honor explicit authorization already given in the session.
-- Do not promise perfect integration or universal correctness. Report the actual evidence and its limits.
+- Preserve user edits and keep changes within the requested scope, including when the same file contains unrelated work.
+- Keep rules at their authoritative owner and generated files on their source chain. Investigate conflicting domain facts before choosing a value.
+- Use the latest authorized contract. Complete independent work before asking about a material ambiguity; commits, publishing, global tool changes, and contact with others require their own authorization.
+- Ground decisions in current code and callers, recheck affected evidence after changes, and limit completion claims to observed checks.
 
 ## Optional tools and specialists
 
 Read [Tool routing](references/tool-routing.md) only when an available capability would materially help the current work.
-
-- Use Serena for supported symbol definitions and references when its tools are actually available and point to this project. Native search and file reading remain a complete fallback.
-- Use an available `codebase-convergence` for a bounded integration defect or review, with the new contract and protected behavior included in its task.
-- Use other specialists only when their expertise is relevant and their instructions and tools are available.
-
-A named Skill is not an installed dependency, and a described MCP call is not an executed call. The main agent owns the change map, authorization, and final verification.
 
 For a broad inventory, the bundled read-only helper is available:
 
@@ -57,9 +46,7 @@ For a broad inventory, the bundled read-only helper is available:
 python3 <skill-directory>/scripts/collect_evidence.py --root <repository> --pretty
 ```
 
-Its metadata and worktree fingerprint help establish context; they cannot decide module ownership or prove behavioral compatibility.
-
-The optional change-evidence helper checks declared paths, unique textual anchors, per-file freshness, and missing verification surfaces. It does not execute recorded commands or certify their results. Use it for consequential integration work; keep small updates lightweight.
+The collector's output includes its coverage limits. Use the [change-evidence helper](references/change-evidence.md) when declared file locations and checks must survive a consequential handoff.
 
 ## Delivery
 
