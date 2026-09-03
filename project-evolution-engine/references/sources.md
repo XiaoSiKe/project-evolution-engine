@@ -19,10 +19,11 @@ The update workflow replaces defect-only admission with an authorized behavior d
 | [EveryInc/compound-engineering-plugin @ d3c6f12d4b64](https://github.com/EveryInc/compound-engineering-plugin/blob/d3c6f12d4b64d36ec9924bb8cf4ad6bb8e97ce5e/skills/ce-compound/SKILL.md) | Preserve only useful, verified project reasoning; no upstream execution or shipping workflow is bundled. |
 | [obra/superpowers @ b36e0829c6d0](https://github.com/obra/superpowers/blob/b36e0829c6d0140e93cfef2ca599b1b07d4a7797/skills/writing-plans/SKILL.md) | File responsibilities and verifiable increments, paired with verification-before-completion; proportionate checks replace universal ceremony. |
 | [oraios/serena @ 813fd98f4fd3](https://github.com/oraios/serena/blob/813fd98f4fd32e0606cb52281467fc055e45a356/README.md) | Optional symbol-navigation guidance and an independent stdio client for an installed official runtime. No upstream server or parser is bundled; observed integration coverage is recorded separately. |
+| [LB623/no-negative-echo @ eba9f1d2b4c1](https://github.com/LB623/no-negative-echo/blob/eba9f1d2b4c19e699786a49427189988ad6d8d65/no-negative-echo/SKILL.md) | Generate delivery surfaces from the accepted final state while retaining required compatibility, diagnostic, audit and baseline facts; integrated without its scanner or optional high-assurance process. |
 | [Square-Q/subconscious-skill @ 06f8cf2a777c](https://github.com/Square-Q/subconscious-skill/blob/06f8cf2a777cf7e5a4de86a766d08e58c044503c/README.md) | README layout inspiration only: centered hero, icon navigation, badges, section rhythm. No memory features or claims are adopted. |
 
 Licenses are reproduced in [third-party notices](../THIRD_PARTY_NOTICES.md). The examples, eval oracles, and public README claims in this package are its own verification surface.
 
 ## Scope of reuse
 
-OpenSpec, cc-sdd, GSD, Agent OS, Compound Engineering, and Superpowers are method sources, not hard dependencies. Only actually available optional tools or specialists are invoked. GitNexus and Anthropic feature-dev are not copied into this package.
+OpenSpec, cc-sdd, GSD, Agent OS, Compound Engineering, Superpowers, and no-negative-echo are method sources, not hard dependencies. Only actually available optional tools or specialists are invoked. GitNexus and Anthropic feature-dev are not copied into this package.

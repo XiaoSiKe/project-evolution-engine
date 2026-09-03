@@ -58,11 +58,15 @@ class PackageTests(unittest.TestCase):
 
     def test_source_lock_points_to_fixed_commits_and_permitted_licenses(self):
         sources = json.loads((ROOT / "research/sources.lock.json").read_text())
-        self.assertEqual(len(sources["sources"]), 8)
+        repositories = [source["repository"] for source in sources["sources"]]
+        self.assertTrue(repositories)
+        self.assertEqual(len(repositories), len(set(repositories)))
         for source in sources["sources"]:
             with self.subTest(repo=source["repository"]):
                 self.assertRegex(source["commit"], r"^[0-9a-f]{40}$")
                 self.assertEqual(source["license"], "MIT")
+                self.assertTrue(source["reference"])
+                self.assertTrue(source["purpose"])
 
 
 if __name__ == "__main__":

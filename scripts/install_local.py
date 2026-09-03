@@ -12,12 +12,13 @@ import tempfile
 from pathlib import Path, PurePosixPath
 from typing import Any
 
+from skill_files import iter_skill_files
+
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 SOURCE = PROJECT_ROOT / "project-evolution-engine"
 SKILL_NAME = "project-evolution-engine"
 MANIFEST_NAME = ".project-evolution-engine-install.json"
-IGNORED_NAMES = {".DS_Store", "__pycache__"}
 
 
 def digest(path: Path) -> str:
@@ -25,18 +26,7 @@ def digest(path: Path) -> str:
 
 
 def source_files() -> dict[str, str]:
-    if not (SOURCE / "SKILL.md").is_file():
-        raise ValueError("source skill is missing SKILL.md")
-    files: dict[str, str] = {}
-    for path in sorted(SOURCE.rglob("*")):
-        relative = path.relative_to(SOURCE)
-        if any(part in IGNORED_NAMES for part in relative.parts) or path.suffix == ".pyc":
-            continue
-        if path.is_symlink():
-            raise ValueError(f"source contains unsupported symlink: {relative}")
-        if path.is_file():
-            files[relative.as_posix()] = digest(path)
-    return files
+    return {path.relative_to(SOURCE).as_posix(): digest(path) for path in iter_skill_files(SOURCE)}
 
 
 def validate_target(raw_target: Path) -> Path:

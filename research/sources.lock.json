@@ -53,7 +53,14 @@
       "commit": "813fd98f4fd32e0606cb52281467fc055e45a356",
       "license": "MIT",
       "reference": "README.md",
-      "purpose": "Optional symbol navigation guidance only. No server, backend, or language parser is bundled or claimed as live-tested."
+      "purpose": "Optional symbol-navigation guidance and an independent stdio client for an installed official runtime. No upstream server or parser is bundled; observed integration coverage is recorded separately."
+    },
+    {
+      "repository": "LB623/no-negative-echo",
+      "commit": "eba9f1d2b4c19e699786a49427189988ad6d8d65",
+      "license": "MIT",
+      "reference": "no-negative-echo/SKILL.md",
+      "purpose": "Generate delivery surfaces from the accepted final state while preserving required compatibility, diagnostic, audit, and baseline facts; adapted into the existing finalization workflow without its scanner or optional high-assurance process."
     },
     {
       "repository": "Square-Q/subconscious-skill",
