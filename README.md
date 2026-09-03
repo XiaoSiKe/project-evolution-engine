@@ -33,7 +33,7 @@
 
 它适合功能添加、能力扩展、流程调整，以及这些更新所需的相关修复。核心继承自[代码整理修复大师](https://github.com/XiaoSiKe/codebase-convergence)，进一步补齐了需求到实现的接入分析。
 
-**v0.3.0** 加入了项目认知的增量刷新、Serena 的真实 MCP 查询接口，以及代码整理修复大师的实际审核联调。核心仍可独立运行，小更新不需要额外的规格框架或持久化计划。
+**v0.3.0** 加入了项目认知的增量刷新、Serena 的真实 MCP 查询接口，以及代码整理修复大师的实际审核联调。当前维护版还会从最终实现和验证结果生成交付文案，避免让已放弃的中间方案主导标题、commit 或 PR。核心仍可独立运行，小更新不需要额外的规格框架或持久化计划。
 
 <a id="demo"></a>
 
@@ -117,6 +117,8 @@ flowchart TD
 每项更新都要回答：**为什么改这里、复用了什么、影响哪些调用方、用什么证明完成。**
 
 小更新只读取必要上下文；复杂更新再形成可交接的计划。已有需求足够明确时直接推进，确有业务歧义时先完成可独立处理的部分，再集中提出问题。
+
+交付时根据最终实现、任务自身的差异和实际检查生成注释、commit、PR 与说明。中间尝试只用于修正工作方向；真实的接口变化、兼容要求、失败结果、未完成事项和用户原有改动仍需准确交代。
 
 <a id="evidence"></a>
 
@@ -213,7 +215,7 @@ research/                    调研记录与固定来源版本
 
 ## 🤝 来源与致谢
 
-在用户已有的“代码整理修复大师”基础上，参考了 OpenSpec、cc-sdd、GSD、Agent OS、Compound Engineering 和 Superpowers 的相关方法；Serena 提供可选工具接入方向。
+在用户已有的“代码整理修复大师”基础上，参考了 OpenSpec、cc-sdd、GSD、Agent OS、Compound Engineering、Superpowers 和 no-negative-echo 的相关方法；Serena 提供可选工具接入方向。
 
 README 的居中标题、图标导航和徽章排版参考 [Square-Q/subconscious-skill](https://github.com/Square-Q/subconscious-skill)。该参考仅涉及展示形式。
 

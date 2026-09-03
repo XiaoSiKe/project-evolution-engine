@@ -8,9 +8,10 @@ import json
 import zipfile
 from pathlib import Path
 
+from skill_files import iter_skill_files
+
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / "project-evolution-engine"
-IGNORED = {"__pycache__", ".DS_Store"}
 
 
 def build(output: Path) -> dict[str, object]:
@@ -21,17 +22,7 @@ def build(output: Path) -> dict[str, object]:
     output = output.resolve()
     if output.is_relative_to(SOURCE.resolve()):
         raise ValueError("release output must be outside the skill source")
-    if not (SOURCE / "SKILL.md").is_file():
-        raise ValueError("skill source is missing")
-    paths = []
-    for path in sorted(SOURCE.rglob("*")):
-        relative = path.relative_to(SOURCE)
-        if any(part in IGNORED for part in relative.parts) or path.suffix == ".pyc":
-            continue
-        if path.is_symlink():
-            raise ValueError(f"source symlink: {relative}")
-        if path.is_file():
-            paths.append(path)
+    paths = iter_skill_files(SOURCE)
     output.parent.mkdir(parents=True, exist_ok=True)
     with zipfile.ZipFile(output, "w", compression=zipfile.ZIP_DEFLATED, compresslevel=9) as archive:
         for path in paths:

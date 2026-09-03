@@ -15,23 +15,19 @@ Read the existing project and make the requested update fit its actual responsib
 
 These disciplines are part of this package. No other Skill or MCP server is required.
 
-## Start with the user's intent
+## Apply the Skill
 
-State a short update brief: what changes, what stays, the relevant scope, material assumptions, and observable acceptance checks. Use the language of the user. Clear requests are authorization to perform their necessary, proportionate implementation; do not repeatedly ask to approve an already specified behavior or interface change.
+Read [Execution workflow](references/execution-workflow.md) and scale it to the requested change. Start with a short update brief covering the intended change, preserved behavior, relevant scope, material assumptions, and observable acceptance checks.
 
 A new requirement is sufficient grounds for an update. It does not need an existing bug or a Finding. Respect planning-only or review-only requests without mutating the project.
 
-## Workflow
+Load supporting material only when the change needs it:
 
-Follow this sequence while scaling its depth to the change. Read [Execution workflow](references/execution-workflow.md) when applying the Skill.
-
-1. **Define the delta.** Describe added, modified, and removed behavior, plus explicitly preserved behavior. Use the latest user requirement when it intentionally changes the old contract.
-2. **Understand the current project.** Inspect repository instructions, worktree state, relevant domain decisions, entry points, real call paths, data ownership, and verification commands. Confirm remembered locations against current code. Use [Project context](references/project-context.md) when context is missing, unfamiliar, stale, or shared across sessions.
-   When a previous context record exists or a consequential update needs a handoff, use [Incremental context](references/incremental-context.md) to find new reference candidates and refresh affected conclusions. Keep uncertain conclusions pending until their evidence has actually been reviewed.
-3. **Locate the integration.** Map each outcome to an owning file and symbol, existing reusable behavior, affected consumers, and a check. Read [Integration analysis](references/integration-analysis.md) before choosing a non-trivial or cross-module change. For compatibility-sensitive work or evidence that must survive a handoff, use [Change evidence](references/change-evidence.md) to retain file locations, consumers, explicit unknowns, and new/integration/preserved checks.
-4. **Implement a coherent increment.** Follow existing conventions and update the canonical source. Include necessary callers, configuration, schemas, generated output, and documentation. Repair related blockers within scope; keep unrelated findings out of the change.
-5. **Verify new and preserved behavior.** Exercise actual caller interfaces and inspect the combined final diff. Use [Verification](references/verification.md) to distinguish behavioral evidence from package checks, stale reports, or unexecuted assumptions.
-6. **Update useful project knowledge.** Correct affected authoritative documentation. Persist a plan only when work spans sessions or needs a reviewable handoff; record a lesson only when verified reasoning would otherwise be lost.
+- use [Project context](references/project-context.md) when current responsibilities or conventions are unclear;
+- use [Incremental context](references/incremental-context.md) when prior reasoning must be refreshed or handed off;
+- use [Integration analysis](references/integration-analysis.md) for non-trivial or cross-module placement;
+- use [Change evidence](references/change-evidence.md) for consequential compatibility or cross-layer evidence;
+- use [Verification](references/verification.md) to design checks for new, integrated, and preserved behavior.
 
 ## Operating boundaries
 
@@ -67,14 +63,6 @@ The optional change-evidence helper checks declared paths, unique textual anchor
 
 ## Delivery
 
-Give a concise, unified result:
-
-- the implemented delta and the behavior preserved;
-- changed files/modules and why those were the right integration points;
-- verification commands and actual outcomes, including any baseline failures;
-- necessary document or generated-output updates;
-- remaining gaps, or the one unresolved decision and independent work already completed.
-
-Keep small updates small. A formal table or machine-readable ledger is optional; traceability and evidence are not.
+Follow the finalization rules in [Execution workflow](references/execution-workflow.md). Keep small updates small; a formal table or machine-readable ledger is optional, while traceability and observed verification remain required.
 
 See [Sources and adaptation](references/sources.md) for provenance and [third-party notices](THIRD_PARTY_NOTICES.md) for retained licenses.

@@ -8,6 +8,8 @@ Capture added, modified, removed, and preserved behavior. Translate vague outcom
 
 Read existing user authorization before asking questions. An explicit request to change a rule or public interface authorizes that intended delta; preserve its unmentioned consumers and behaviors. If a product decision is genuinely unresolved, identify the competing interpretations and their effects. Continue independent work before asking one consolidated question.
 
+Use the accepted positive target as the identity of the update. Rejected proposals and wording corrections guide the work but do not become the title, label, filename, comment, commit, PR, or handoff unless the final reader needs them for accuracy, compatibility, safety, audit, or a requested comparison.
+
 Keep the brief in the conversation for short work. Reuse an existing plan or design location for multi-session work rather than creating parallel specifications.
 
 ## 2. Establish current evidence
@@ -52,8 +54,12 @@ If a check contradicts the plan, revisit the current evidence and adjust the pla
 
 Correct affected documentation at its canonical location. Remove only temporary instrumentation and artifacts introduced by this work.
 
+Generate every user-facing surface from the final implementation, task-owned diff, and observed checks as if its reader did not see the working conversation. Preserve real removals, migrations, API names, diagnostics, failed checks, unfinished work, executed external actions, and pre-existing user changes when they matter. Do not absorb unrelated changes into the task narrative.
+
+Inspect the complete result and its wrappers for residue from rejected session-only alternatives and for required facts lost during rewriting. If a hook or external system changes a surface, read back the actual result and inspect it again. Report the resulting state directly instead of adding a claim that the output was cleaned.
+
 ## 6. Hand back one result
 
-Report implemented and unfinished outcomes, the owning modules and reasons, preserved behaviors, and actual verification. Link to the changed code and important evidence.
+Report the implemented result, its owning modules, preserved behaviors, and actual verification. Include unfinished outcomes or baseline failures when they remain relevant to the reader.
 
 If blocked, explain the unresolved decision and show completed independent work. If a check could not run, identify the missing prerequisite and the resulting coverage gap. Never report an unavailable specialist or unexecuted command as successful.
