@@ -103,7 +103,7 @@ python3 scripts/install_local.py --check --target ~/.codex/skills/project-evolut
 ## 🧭 工作流程
 
 ```mermaid
-flowchart LR
+flowchart TD
     A["明确变化与保留行为"] --> B["读取项目与调用关系"]
     B --> C["确定接入位置"]
     C --> D["完成增量实现"]
