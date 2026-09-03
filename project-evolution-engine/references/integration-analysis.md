@@ -47,3 +47,7 @@ Required integration restructuring is part of the authorized feature when it is 
 Before editing, be able to explain: why this location, what existing capability is reused, which consumers are affected, what stays unchanged, and which check demonstrates the outcome.
 
 If the intended location cannot be justified, continue tracing. Do not hide uncertainty by building a parallel implementation that bypasses the existing system.
+
+## Retain evidence when the boundary matters
+
+For cross-layer updates, old-data compatibility, or a later handoff, record the confirmed owners and consumers alongside explicit unknowns. Pair each outcome with checks for the new behavior, its integration, and the relevant preserved behavior. Use [Change evidence](change-evidence.md) to stamp and recheck declared files when useful; a current stamp is not a completeness or correctness verdict.

@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import fnmatch
 import json
 import os
 import subprocess
@@ -24,7 +25,7 @@ EXPECTED_KEYS = {
     "required_verification",
     "routes",
 }
-OPTIONAL_EXPECTED_KEYS = {"required_changed_paths"}
+OPTIONAL_EXPECTED_KEYS = {"required_changed_paths", "allowed_added_tests", "require_test_change"}
 RESULT_KEYS = {
     "changed_files",
     "claims_full_correctness",
@@ -161,6 +162,17 @@ def validate_cases(cases: list[dict[str, Any]], contract: dict[str, Any]) -> lis
             if required_changed is not None:
                 if allowed_changed is not None and not set(required_changed).issubset(allowed_changed):
                     errors.append(f"{label}: required_changed_paths must be allowed")
+            patterns = string_list(expected.get("allowed_added_tests", []), f"{label}: allowed_added_tests", errors)
+            if patterns is not None:
+                for pattern in patterns:
+                    try:
+                        safe_relative_path(pattern)
+                        if not pattern.startswith("tests/") or not pattern.endswith(".py"):
+                            raise ValueError("added-test patterns must stay under tests/ and end in .py")
+                    except ValueError as error:
+                        errors.append(f"{label}: {error}")
+            if "require_test_change" in expected and not isinstance(expected["require_test_change"], bool):
+                errors.append(f"{label}: require_test_change must be a boolean")
         git = case.get("git", {})
         if not isinstance(git, dict):
             errors.append(f"{label}: git must be an object")
@@ -289,6 +301,9 @@ def workspace_changed_paths(case: dict[str, Any], workspace: Path) -> list[str]:
     baseline.update(case.get("git", {}).get("dirty_files", {}))
     observed = observed_workspace_paths(workspace)
     changed = observed - set(baseline)
+    for raw_path in observed:
+        if (workspace / raw_path).is_symlink():
+            raise ValueError(f"evaluation workspace contains unsupported symlink: {raw_path}")
 
     for raw_path, content in baseline.items():
         relative = safe_relative_path(raw_path)
@@ -320,6 +335,11 @@ def validate_result(
     if errors:
         return errors
 
+    path_list(result["changed_files"], "changed_files", errors)
+    path_list(actual_changed_paths, "actual_changed_paths", errors)
+    if errors:
+        return errors
+
     expected = case["expected"]
     contract = load_contract()
     for key in ("gate", "mutation", "paused", "claims_full_correctness"):
@@ -341,12 +361,17 @@ def validate_result(
     if unobserved:
         errors.append(f"changed_files reports paths unchanged in workspace: {sorted(unobserved)}")
     allowed = set(expected["allowed_changed_paths"])
-    unexpected_changes = changed - allowed
+    baseline = set(case["files"]) | set(case.get("git", {}).get("dirty_files", {}))
+    added_tests = {path for path in changed - baseline
+                   if any(fnmatch.fnmatchcase(path, pattern) for pattern in expected.get("allowed_added_tests", []))}
+    unexpected_changes = changed - allowed - added_tests
     if unexpected_changes:
         errors.append(f"changed_files contains forbidden paths: {sorted(unexpected_changes)}")
     missing_required_changes = set(expected.get("required_changed_paths", [])) - changed
     if missing_required_changes:
         errors.append(f"changed_files is missing required paths: {sorted(missing_required_changes)}")
+    if expected.get("require_test_change") and not any(path.startswith("tests/") and path.endswith(".py") for path in changed):
+        errors.append("the request requires a test change")
     if expected["mutation"] == "none" and changed:
         errors.append("mutation is forbidden but changed_files is not empty")
     if result["mutation"] == "performed" and not changed:

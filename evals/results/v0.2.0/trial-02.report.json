@@ -1,0 +1,73 @@
+{
+  "status": "completed",
+  "changed_files": [
+    "README.rst",
+    "flaskr/blog.py",
+    "flaskr/db.py",
+    "flaskr/schema.sql",
+    "flaskr/templates/blog/_status.html",
+    "flaskr/templates/blog/create.html",
+    "flaskr/templates/blog/index.html",
+    "flaskr/templates/blog/update.html",
+    "tests/test_blog.py",
+    "tests/test_db.py"
+  ],
+  "checks": [
+    {
+      "command": "git status --short --untracked-files=all",
+      "exit_code": 0,
+      "outcome": "Baseline worktree was clean."
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=. python -m pytest -q -p no:cacheprovider --basetemp ../evidence-02/pytest-baseline",
+      "exit_code": 0,
+      "outcome": "Baseline: 24 tests passed."
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=. python -m pytest -q -p no:cacheprovider --basetemp ../evidence-02/pytest-feature",
+      "exit_code": 1,
+      "outcome": "First feature run: 4 failed, 51 passed. It exposed the new CLI's missing application context and a wrong password assumption for the other fixture user; both were corrected."
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=. python - <<'PY'\nfrom pathlib import Path\nfrom tempfile import TemporaryDirectory\nimport sqlite3\nfrom werkzeug.security import check_password_hash\nfrom flaskr import create_app\n\nproject = Path.cwd()\nwith sqlite3.connect(':memory:') as db:\n    db.executescript((project / 'flaskr/schema.sql').read_text())\n    db.executescript((project / 'tests/data.sql').read_text())\n    for username, password_hash in db.execute('SELECT username, password FROM user'):\n        print('fixture login', username, {candidate: check_password_hash(password_hash, candidate) for candidate in ('test', 'other')})\nwith TemporaryDirectory(dir=project.parent / 'evidence-02') as directory:\n    app = create_app({'TESTING': True, 'DATABASE': str(Path(directory) / 'probe.sqlite')})\n    result = app.test_cli_runner().invoke(args=['init-db'])\n    print('existing init-db exit_code:', result.exit_code)\n    print('existing init-db exception:', repr(result.exception))\nPY",
+      "exit_code": 0,
+      "outcome": "Diagnostic command exited 0. It confirmed the other fixture account uses password other and reproduced the pre-existing init-db application-context failure (nested CLI exit code 1), subsequently fixed."
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=. python -m pytest -q -p no:cacheprovider --basetemp ../evidence-02/pytest-final",
+      "exit_code": 0,
+      "outcome": "Final suite: 56 tests passed, covering migration, defaults, repeatability, visibility, forms, validation, authentication, permissions, editing, deletion, and ordering."
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=. python ../evidence-02/verify_cli.py",
+      "exit_code": 0,
+      "outcome": "Real python -m flask entry point passed for init-db, a populated legacy upgrade-db, and a repeated upgrade preserving a draft. All three subprocesses exited 0."
+    },
+    {
+      "command": "git diff --check",
+      "exit_code": 0,
+      "outcome": "Final tracked diff has no whitespace errors."
+    },
+    {
+      "command": "git status --short --untracked-files=all",
+      "exit_code": 0,
+      "outcome": "Nine modified files and one new shared template; no dependency, cache, or instance paths included."
+    }
+  ],
+  "questions": [],
+  "notes": [
+    "Used only the supplied fixed project-evolution-engine Skill and its required workflow, context, integration, change-evidence, and verification references. Implementation was confined to trial-02.",
+    "Database ownership stays in flaskr/db.py and flaskr/schema.sql: status is NOT NULL, constrained to draft/published, and defaults to published. upgrade-db checks the existing table and adds the column in place, preserving users, post data, IDs, timestamps, indexes, other tables, and AUTOINCREMENT state; subsequent runs preserve drafts.",
+    "Blog routing and validation stay in flaskr/blog.py. A shared validator and status list serve create/update and the shared selector template. Create omission means published; update omission means retain current status. Existing permission checks, title validation, edit/delete paths, and created DESC ordering remain in use.",
+    "Homepage SQL returns published posts plus the viewer's own drafts. Shared create/edit status controls retain submitted valid choices on validation errors; draft posts are labelled on the homepage and edit page. Invalid status input saves no changes, with database constraints as an additional guard.",
+    "Added real database CLI tests after reproducing a pre-existing init-db application-context defect that the original mocked test did not expose; with_appcontext now wraps both database CLI commands.",
+    "README.rst documents fresh initialization separately from the repeatable upgrade, configured DATABASE selection, status compatibility, and draft visibility. Existing tests were retained and supplemented.",
+    "All executed databases and projects were temporary. No extra dependencies, real business data, commits, pushes, or additional agents were used. There are no unanswered material business decisions."
+  ],
+  "evidence_files": [
+    "evidence-02/verification-log.json",
+    "evidence-02/cli-commands.json",
+    "evidence-02/final-manifest.json",
+    "trial-02.patch"
+  ]
+}

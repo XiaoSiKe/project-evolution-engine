@@ -1,0 +1,18 @@
+[
+  {
+    "id": "todomvc-undo",
+    "repository": "tastejs/todomvc",
+    "commit": "ff43b02e59dfa604386bb382034b2cd07c2bcd8a",
+    "subdirectory": "examples/javascript-es5",
+    "license": "MIT",
+    "license_file": "license.md"
+  },
+  {
+    "id": "flaskr-drafts",
+    "repository": "pallets/flask",
+    "commit": "d318b683471101618febed18996405ad26462110",
+    "subdirectory": "examples/tutorial",
+    "license": "BSD-3-Clause",
+    "license_file": "examples/tutorial/LICENSE.txt"
+  }
+]

@@ -1,0 +1,26 @@
+[
+  {
+    "id": "todomvc-undo",
+    "fixture": "fixtures/todomvc",
+    "request": "为这个现有 TodoMVC 应用增加“清除已完成”的单步撤销功能，按钮文字为 Undo clear completed。最近一次非空批量清除可以撤销一次；恢复被清除任务原来的 ID、标题、完成状态及相对顺序。清除后新增或编辑的现存任务必须保留，其他单独删除的任务不能被恢复。即使清除后任务为空，撤销入口也必须可用；没有可撤销内容时入口隐藏或禁用。空清除不应覆盖已有撤销记录。保留已有新增、编辑、完成切换、筛选、计数和存储语义（此快照使用页面内 MemoryStorage），不要新增跨刷新持久化。沿用现有架构和构建流程，补充测试与说明。",
+    "fixture_sha256": "db791b6c55bd38b57f9128291ab0fe882f81cd7656a02ab2301d5864ef2d51d7",
+    "trials_per_condition": 1,
+    "conditions": [
+      "baseline",
+      "skill"
+    ],
+    "scope": "Open-source example application; not a production-system benchmark."
+  },
+  {
+    "id": "flaskr-drafts",
+    "fixture": "fixtures/flaskr",
+    "request": "为现有 Flaskr 博客增加草稿与发布状态，数据库 post.status 取 draft 或 published。现有数据升级后默认 published，提供 upgrade-db CLI，无损升级已有 SQLite 数据库且可重复执行。新建时不传 status 保持旧行为 published；更新时不传 status 保留文章当前状态。作者在首页可见自己的草稿，其他用户及匿名用户只可见已发布文章。创建和编辑界面要能选择状态并标出草稿；非法状态要被拒绝且不修改原数据。保留现有登录、作者权限、文章编辑/删除、排序和普通发布行为，补测试与升级说明。",
+    "fixture_sha256": "dc42fb22b10b4a072600266acd85c94842bf88a08eb2bd449c179ac1f9e24218",
+    "trials_per_condition": 1,
+    "conditions": [
+      "baseline",
+      "skill"
+    ],
+    "scope": "Open-source example application; not a production-system benchmark."
+  }
+]

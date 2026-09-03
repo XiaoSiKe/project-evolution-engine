@@ -30,3 +30,20 @@ jobs:
         run: python -m compileall -q project-evolution-engine/scripts scripts tests evals/oracles
       - name: Exercise read-only collector
         run: python project-evolution-engine/scripts/collect_evidence.py --root . > /tmp/evolution-evidence.json
+
+  public-pilot-baselines:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.16.0'
+      - name: Install isolated pilot test dependencies
+        run: |
+          python -m pip install -r evals/real-projects/requirements.lock.txt
+          npm ci --prefix evals/real-projects/node --ignore-scripts --no-audit --no-fund
+      - name: Verify original behavior and negative acceptance checks
+        run: python scripts/real_project_eval.py self-check

@@ -32,6 +32,8 @@ A new file can be a valid owner when a distinct responsibility or current interf
 
 Read [Integration analysis](integration-analysis.md) for cross-module changes. Set the order so each increment has a usable interface and meaningful verification.
 
+For consequential compatibility or cross-layer work, keep confirmed consumers and impact unknowns separate and use [Change evidence](change-evidence.md) when a durable evidence record helps. A single test can cover new, integration, and preserved behavior; distinguish those claims in the map even when the command is shared.
+
 ## 4. Implement through the existing system
 
 Reread the target before mutation, especially after another agent or tool changes it. Reuse existing policy and error handling at their authoritative location. Update consumers when their required inputs or outputs intentionally change.

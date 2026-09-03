@@ -1,0 +1,688 @@
+diff --git a/README.md b/README.md
+index 19e1dddf4d133f0c6843c9902bcd5bac468a3e67..3fe0c6521f72b0b1ec982733579ea64f8d2df0bc 100644
+--- a/README.md
++++ b/README.md
+@@ -12,6 +12,29 @@ JavaScript (JS) is a lightweight, interpreted, or just-in-time compiled programm
+ 
+ This implementation uses an explicit MVC pattern, with a clear file structure to reflect the architecture. The storage solution uses an in-memory data object that implements a simple array to hold the todos.
+ 
++## Undo clear completed
++
++After a non-empty **Clear completed**, **Undo clear completed** restores that batch once, including the tasks' original IDs, titles, completed states, and order among the remaining original tasks. Tasks added after the clear stay at the end. Later edits and completion changes to surviving tasks are kept, and independently deleted tasks stay deleted.
++
++Only the most recent non-empty clear is available to undo. An empty clear leaves that record intact; undo consumes it. The undo button is hidden and disabled without a record, and remains available when the list is empty or filtered. The existing filters and active-item count continue to apply to restored tasks.
++
++The Store owns the batch record and ordered merge, exposed through the Model and the existing Controller/View event and render interfaces. Todos and undo metadata stay in the page's `MemoryStorage`; refreshing starts a fresh list, with no undo history. No browser storage or cross-refresh persistence is added.
++
++## Tests
++
++```
++npm test
++```
++
++Tests use Node's built-in test runner and the preinstalled `jsdom` supplied with this snapshot's test environment. They exercise the Model/Store and the actual HTML, application scripts, DOM events, counts, and filters without starting a server. No additional dependencies are installed by this command.
++
++To run the same DOM flows against the copied build output:
++
++```
++npm run build
++TODOMVC_TEST_ROOT=dist node --test test/dom.test.js
++```
++
+ ## Build Steps
+ 
+ A simple build script copies all necessary files to a `dist` folder.
+diff --git a/index.html b/index.html
+index 67c29a0418664477d1473233562d740e6dccad7a..6bcb517a76e7c8f91481049c1528d43f518158bb 100644
+--- a/index.html
++++ b/index.html
+@@ -8,6 +8,7 @@
+         <title>TodoMVC: JavaScript Es5</title>
+         <link rel="stylesheet" href="node_modules/todomvc-common/base.css" />
+         <link rel="stylesheet" href="node_modules/todomvc-app-css/index.css" />
++        <link rel="stylesheet" href="src/undo.css" />
+     </head>
+     <body>
+         <section class="todoapp">
+@@ -22,6 +23,7 @@
+                 </div>
+                 <ul class="todo-list"></ul>
+             </main>
++            <button class="undo-clear-completed" type="button" hidden disabled>Undo clear completed</button>
+             <footer class="footer">
+                 <span class="todo-count"></span>
+                 <ul class="filters">
+diff --git a/package.json b/package.json
+index ac516bdb93b02a9161f733d0f7b92b974fd0784b..84cd06feef9bcba1bcacfb43a25c084e5eb1edf9 100644
+--- a/package.json
++++ b/package.json
+@@ -10,6 +10,7 @@
+     "scripts": {
+         "dev": "http-server ./ -p 7001 -c-1 --cors",
+         "build": "node scripts/build.js",
++        "test": "node --test test/*.test.js",
+         "serve": "http-server ./dist -p 7002 -c-1 --cors"
+     },
+     "dependencies": {
+diff --git a/src/controller.js b/src/controller.js
+index 229b19dde9700b91898ba1b23f1faad31e384f07..b58b59046f929dccc608fa3629d953e0da8b711f 100644
+--- a/src/controller.js
++++ b/src/controller.js
+@@ -41,6 +41,10 @@
+             self.removeCompletedItems();
+         });
+ 
++        self.view.bind("undoClearCompleted", function () {
++            self.undoClearCompleted();
++        });
++
+         self.view.bind("toggleAll", function (status) {
+             self.toggleAll(status.completed);
+         });
+@@ -161,13 +165,16 @@
+      */
+     Controller.prototype.removeCompletedItems = function () {
+         var self = this;
+-        self.model.read({ completed: true }, function (data) {
+-            data.forEach(function (item) {
+-                self.removeItem(item.id);
+-            });
++        self.model.removeCompleted(function () {
++            self._filter(true);
+         });
++    };
+ 
+-        self._filter();
++    Controller.prototype.undoClearCompleted = function () {
++        var self = this;
++        self.model.undoClearCompleted(function () {
++            self._filter(true);
++        });
+     };
+ 
+     /**
+@@ -223,6 +230,9 @@
+             self.view.render("toggleAll", { checked: todos.completed === todos.total });
+             self.view.render("contentBlockVisibility", { visible: todos.total > 0 });
+         });
++        self.model.canUndoClearCompleted(function (available) {
++            self.view.render("undoClearCompletedButton", { visible: available });
++        });
+     };
+ 
+     /**
+diff --git a/src/model.js b/src/model.js
+index 2268fe853901948354b96904dfb6e4b467ddffca..04942bed82daba0b6224a1b6322da79ab7d872f3 100644
+--- a/src/model.js
++++ b/src/model.js
+@@ -81,6 +81,18 @@
+         this.storage.remove(id, callback);
+     };
+ 
++    Model.prototype.removeCompleted = function (callback) {
++        this.storage.removeCompleted(callback);
++    };
++
++    Model.prototype.canUndoClearCompleted = function (callback) {
++        this.storage.canUndoClearCompleted(callback);
++    };
++
++    Model.prototype.undoClearCompleted = function (callback) {
++        this.storage.undoClearCompleted(callback);
++    };
++
+     /**
+      * WARNING: Will remove ALL data from storage.
+      *
+diff --git a/src/store.js b/src/store.js
+index 2493c12aa2cf14ac5a8b6a8e1c89e07f34dc0259..5bad29ba8ef8f769773d1bc5d11bcc7038183171 100644
+--- a/src/store.js
++++ b/src/store.js
+@@ -129,6 +129,73 @@
+         callback.call(this, todos);
+     };
+ 
++    /**
++     * Removes one completed batch and remembers only that batch's contents.
++     * An empty clear leaves the previous undo record available.
++     */
++    Store.prototype.removeCompleted = function (callback) {
++        var data = JSON.parse(MemoryStorage[this._dbName]);
++        var removed = data.todos.filter(function (todo) {
++            return todo.completed === true;
++        });
++
++        if (removed.length > 0) {
++            data.lastClear = {
++                todos: removed,
++                order: data.todos.map(function (todo) { return todo.id; }),
++            };
++            data.todos = data.todos.filter(function (todo) {
++                return todo.completed !== true;
++            });
++            MemoryStorage[this._dbName] = JSON.stringify(data);
++        }
++
++        callback = callback || function () {};
++        callback.call(this, removed);
++    };
++
++    Store.prototype.canUndoClearCompleted = function (callback) {
++        callback = callback || function () {};
++        callback.call(this, !!JSON.parse(MemoryStorage[this._dbName]).lastClear);
++    };
++
++    /**
++     * Merges the last cleared batch into the current list, once. Keep current
++     * edits and omit independently deleted items; new items stay at the end.
++     */
++    Store.prototype.undoClearCompleted = function (callback) {
++        var data = JSON.parse(MemoryStorage[this._dbName]);
++        var lastClear = data.lastClear;
++
++        if (lastClear) {
++            var current = {};
++            var cleared = {};
++            var restored = [];
++
++            data.todos.forEach(function (todo) { current[todo.id] = todo; });
++            lastClear.todos.forEach(function (todo) { cleared[todo.id] = todo; });
++            lastClear.order.forEach(function (id) {
++                if (current[id]) {
++                    restored.push(current[id]);
++                    delete current[id];
++                } else if (cleared[id]) {
++                    restored.push(cleared[id]);
++                }
++            });
++            data.todos.forEach(function (todo) {
++                if (current[todo.id])
++                    restored.push(todo);
++            });
++
++            data.todos = restored;
++            delete data.lastClear;
++            MemoryStorage[this._dbName] = JSON.stringify(data);
++        }
++
++        callback = callback || function () {};
++        callback.call(this, data.todos);
++    };
++
+     /**
+      * Will drop all storage and start fresh
+      *
+diff --git a/src/undo.css b/src/undo.css
+new file mode 100644
+index 0000000000000000000000000000000000000000..c573e4e1dba799b552ff37e8c9149fe4dd5ea8c3
+--- /dev/null
++++ b/src/undo.css
+@@ -0,0 +1,16 @@
++.undo-clear-completed {
++    position: relative;
++    z-index: 1;
++    box-sizing: border-box;
++    width: 100%;
++    padding: 10px 15px;
++    border-top: 1px solid #e6e6e6;
++    font-size: 15px;
++    line-height: 20px;
++    text-align: right;
++    cursor: pointer;
++}
++
++.undo-clear-completed:hover {
++    text-decoration: underline;
++}
+diff --git a/src/view.js b/src/view.js
+index b34323332f9f72c2719b64f0723d4dd70aa55e5b..db31b8ae4aeb176e48f36a1fe8d7b80bf0726c9a 100644
+--- a/src/view.js
++++ b/src/view.js
+@@ -21,6 +21,7 @@
+         this.$todoList = qs(".todo-list");
+         this.$todoItemCounter = qs(".todo-count");
+         this.$clearCompleted = qs(".clear-completed");
++        this.$undoClearCompleted = qs(".undo-clear-completed");
+         this.$main = qs(".main");
+         this.$footer = qs(".footer");
+         this.$toggleAllInput = qs(".toggle-all");
+@@ -109,6 +110,10 @@
+             clearCompletedButton: function () {
+                 self._clearCompletedButton(parameter.completed, parameter.visible);
+             },
++            undoClearCompletedButton: function () {
++                self.$undoClearCompleted.hidden = !parameter.visible;
++                self.$undoClearCompleted.disabled = !parameter.visible;
++            },
+             contentBlockVisibility: function () {
+                 self.$main.style.display = self.$footer.style.display = parameter.visible ? "block" : "none";
+             },
+@@ -182,6 +187,10 @@
+             $on(self.$clearCompleted, "click", function () {
+                 handler();
+             });
++        } else if (event === "undoClearCompleted") {
++            $on(self.$undoClearCompleted, "click", function () {
++                handler();
++            });
+         } else if (event === "toggleAll") {
+             $on(self.$toggleAll, "click", function () {
+                 self.$toggleAllInput.click();
+diff --git a/test/dom.test.js b/test/dom.test.js
+new file mode 100644
+index 0000000000000000000000000000000000000000..5164a147e1aa2a5963fdde7108c11b921e71a2af
+--- /dev/null
++++ b/test/dom.test.js
+@@ -0,0 +1,259 @@
++const assert = require("node:assert/strict");
++const fs = require("node:fs");
++const path = require("node:path");
++const test = require("node:test");
++const { JSDOM, VirtualConsole } = require("jsdom");
++
++const appRoot = path.resolve(__dirname, "..", process.env.TODOMVC_TEST_ROOT || ".");
++
++function page(t) {
++    const errors = [];
++    const virtualConsole = new VirtualConsole();
++    virtualConsole.on("jsdomError", error => errors.push(error.message));
++    const dom = new JSDOM(fs.readFileSync(path.join(appRoot, "index.html"), "utf8"), {
++        url: "http://todomvc.test/#/",
++        runScripts: "outside-only",
++        pretendToBeVisual: true,
++        virtualConsole,
++    });
++    const { window } = dom;
++    const { document } = window;
++    t.after(() => {
++        window.close();
++        assert.deepEqual(errors, [], "application DOM handlers must not throw");
++    });
++
++    // This app must keep its original page-local memory semantics.
++    for (const storage of ["localStorage", "sessionStorage"])
++        Object.defineProperty(window, storage, { get() { throw new Error(`Unexpected ${storage} access`); } });
++
++    // Load the entry point's real assets locally; no server or network is used.
++    for (const link of document.querySelectorAll('link[rel="stylesheet"]')) {
++        const style = document.createElement("style");
++        style.textContent = fs.readFileSync(path.join(appRoot, link.getAttribute("href")), "utf8");
++        document.head.appendChild(style);
++    }
++    for (const script of document.querySelectorAll("script[src]")) {
++        const file = script.getAttribute("src");
++        const source = fs.readFileSync(path.join(appRoot, file), "utf8");
++        // TodoMVC's promotional base.js is not application code and can request remote content.
++        if (path.basename(file) !== "base.js")
++            window.eval(source);
++    }
++    window.dispatchEvent(new window.Event("load"));
++
++    const ui = {
++        window,
++        document,
++        get(selector) {
++            const element = document.querySelector(selector);
++            assert.ok(element, `Missing element: ${selector}`);
++            return element;
++        },
++        stored() {
++            let todos;
++            new window.app.Store("javascript-es5").findAll(data => { todos = JSON.parse(JSON.stringify(data)); });
++            return todos;
++        },
++        rows() {
++            return Array.from(document.querySelectorAll(".todo-list > li"), li => {
++                const completed = li.querySelector(".toggle").checked;
++                assert.equal(li.classList.contains("completed"), completed);
++                return { id: Number(li.dataset.id), title: li.querySelector("label").textContent, completed };
++            });
++        },
++        visible(selector) {
++            for (let element = this.get(selector); element; element = element.parentElement) {
++                const style = window.getComputedStyle(element);
++                if (element.hidden || style.display === "none" || style.visibility === "hidden")
++                    return false;
++            }
++            return true;
++        },
++        add(title) {
++            const input = this.get(".new-todo");
++            input.value = title;
++            input.dispatchEvent(new window.Event("change", { bubbles: true }));
++            return this.stored().at(-1);
++        },
++        toggle(id) {
++            this.get(`li[data-id="${id}"] .toggle`).click();
++        },
++        remove(id) {
++            this.get(`li[data-id="${id}"] .destroy`).click();
++        },
++        edit(id, title, key = "blur") {
++            this.get(`li[data-id="${id}"] label`).dispatchEvent(new window.MouseEvent("dblclick", { bubbles: true }));
++            const input = this.get(`li[data-id="${id}"] .edit`);
++            input.value = title;
++            if (key === "blur")
++                input.blur();
++            else
++                input.dispatchEvent(new window.KeyboardEvent(key === "Escape" ? "keyup" : "keypress", {
++                    key, keyCode: key === "Escape" ? 27 : 13, bubbles: true,
++                }));
++        },
++        async filter(route) {
++            const hash = `#/${route}`;
++            if (window.location.hash !== hash) {
++                const changed = new Promise(resolve => window.addEventListener("hashchange", resolve, { once: true }));
++                this.get(`.filters [href="${hash}"]`).click();
++                await changed;
++            }
++            assert.equal(this.get(".filters .selected").getAttribute("href"), hash);
++        },
++        clear() { this.get(".clear-completed").click(); },
++        undo() { this.get(".undo-clear-completed").click(); },
++        assertUndo(available) {
++            const button = this.get(".undo-clear-completed");
++            assert.equal(button.textContent, "Undo clear completed");
++            assert.equal(this.visible(".undo-clear-completed"), available);
++            assert.equal(button.disabled, !available);
++        },
++    };
++    return ui;
++}
++
++test("the empty-list undo entry restores the batch exactly once and escapes titles", t => {
++    const ui = page(t);
++    ui.assertUndo(false);
++    assert.equal(ui.visible(".main"), false);
++    assert.equal(ui.visible(".footer"), false);
++    ui.add("   ");
++    assert.deepEqual(ui.stored(), []);
++    const original = ui.add('  <img src=x onerror="bad()"> & todo  ');
++    ui.toggle(original.id);
++    const completed = { ...original, completed: true };
++    ui.clear();
++    assert.deepEqual(ui.stored(), []);
++    assert.deepEqual(ui.rows(), []);
++    assert.equal(ui.visible(".main"), false);
++    assert.equal(ui.visible(".footer"), false);
++    ui.assertUndo(true);
++    ui.get(".undo-clear-completed").focus();
++    assert.equal(ui.document.activeElement, ui.get(".undo-clear-completed"));
++    ui.clear(); // Hidden clear invokes the same empty-batch handler without losing history.
++    ui.undo();
++    assert.deepEqual(ui.rows(), [completed]);
++    assert.deepEqual(ui.stored(), [completed]);
++    assert.equal(ui.document.querySelector(".todo-list img"), null);
++    assert.equal(ui.visible(".main"), true);
++    assert.equal(ui.visible(".footer"), true);
++    assert.equal(ui.get(".todo-count").textContent, "0 items left");
++    ui.assertUndo(false);
++    ui.undo();
++    ui.get(".undo-clear-completed").dispatchEvent(new ui.window.Event("click"));
++    assert.deepEqual(ui.stored(), [completed]);
++});
++
++test("undo preserves interleaved DOM edits, toggles, additions and independent removals", t => {
++    const ui = page(t);
++    const before = ui.add("deleted before clear");
++    const first = ui.add("first");
++    const second = ui.add("second");
++    const third = ui.add("third");
++    const fourth = ui.add("fourth");
++    ui.toggle(before.id);
++    ui.remove(before.id);
++    ui.toggle(second.id);
++    ui.toggle(fourth.id);
++    ui.clear();
++    assert.deepEqual(ui.rows(), [first, third]);
++    ui.edit(first.id, "  changed first  ", "Enter");
++    ui.toggle(first.id);
++    ui.remove(third.id);
++    const added = ui.add("added");
++    ui.edit(added.id, "edited addition");
++    const removedAddition = ui.add("removed addition");
++    ui.edit(removedAddition.id, "  ");
++    ui.undo();
++    const expected = [
++        { ...first, title: "changed first", completed: true },
++        { ...second, completed: true },
++        { ...fourth, completed: true },
++        { ...added, title: "edited addition" },
++    ];
++    assert.deepEqual(ui.rows(), expected);
++    assert.deepEqual(ui.stored(), expected);
++    assert.equal(ui.get(".todo-count").textContent, "1 item left");
++    assert.equal(ui.visible(".clear-completed"), true);
++    ui.assertUndo(false);
++    assert.ok(ui.add("unique new ID").id > removedAddition.id);
++});
++
++test("only the latest non-empty DOM clear can be undone", t => {
++    const ui = page(t);
++    const first = ui.add("older clear");
++    const second = ui.add("latest clear");
++    ui.toggle(first.id);
++    ui.clear();
++    ui.clear();
++    ui.assertUndo(true);
++    ui.toggle(second.id);
++    ui.clear();
++    ui.assertUndo(true);
++    ui.undo();
++    assert.deepEqual(ui.rows(), [{ ...second, completed: true }]);
++    assert.deepEqual(ui.stored(), [{ ...second, completed: true }]);
++    ui.assertUndo(false);
++});
++
++for (const route of ["active", "completed"]) {
++    test(`clear and undo preserve the ${route} filter and global active count`, async t => {
++        const ui = page(t);
++        const active = ui.add("active");
++        const first = ui.add("first completed");
++        const second = ui.add("second completed");
++        ui.toggle(first.id);
++        ui.toggle(second.id);
++        await ui.filter(route);
++        ui.clear();
++        assert.deepEqual(ui.rows(), route === "active" ? [active] : []);
++        ui.assertUndo(true);
++        ui.undo();
++        const completed = [{ ...first, completed: true }, { ...second, completed: true }];
++        assert.deepEqual(ui.rows(), route === "active" ? [active] : completed);
++        assert.equal(ui.get(".filters .selected").getAttribute("href"), `#/${route}`);
++        assert.equal(ui.get(".todo-count").textContent, "1 item left");
++        ui.assertUndo(false);
++        await ui.filter("completed");
++        ui.toggle(first.id);
++        assert.deepEqual(ui.rows(), [completed[1]]);
++        assert.equal(ui.get(".todo-count").textContent, "2 items left");
++        await ui.filter("");
++        assert.deepEqual(ui.rows(), [active, first, completed[1]]);
++    });
++}
++
++test("cancel editing, toggle all and blank-title deletion work while undo remains available", t => {
++    const ui = page(t);
++    const completed = ui.add("cleared");
++    const survivor = ui.add("survivor");
++    ui.toggle(completed.id);
++    ui.clear();
++    ui.edit(survivor.id, "discard this draft", "Escape");
++    assert.deepEqual(ui.rows(), [survivor]);
++    ui.get(".toggle-all-label").click();
++    assert.deepEqual(ui.rows(), [{ ...survivor, completed: true }]);
++    assert.equal(ui.get(".todo-count").textContent, "0 items left");
++    ui.get(".toggle-all-label").click();
++    assert.deepEqual(ui.rows(), [survivor]);
++    assert.equal(ui.get(".todo-count").textContent, "1 item left");
++    ui.edit(survivor.id, " ");
++    assert.deepEqual(ui.stored(), []);
++    ui.assertUndo(true);
++    ui.undo();
++    assert.deepEqual(ui.rows(), [{ ...completed, completed: true }]);
++});
++
++test("a fresh page has no todos or undo record and restarts page-local IDs", t => {
++    const firstPage = page(t);
++    const first = firstPage.add("old page");
++    firstPage.toggle(first.id);
++    firstPage.clear();
++    firstPage.assertUndo(true);
++    const freshPage = page(t);
++    assert.deepEqual(freshPage.stored(), []);
++    freshPage.assertUndo(false);
++    assert.equal(freshPage.add("fresh page").id, first.id);
++});
+diff --git a/test/model.test.js b/test/model.test.js
+new file mode 100644
+index 0000000000000000000000000000000000000000..99a33e1f09481282a34aaa18eba209cc6db63cbc
+--- /dev/null
++++ b/test/model.test.js
+@@ -0,0 +1,147 @@
++const assert = require("node:assert/strict");
++const fs = require("node:fs");
++const path = require("node:path");
++const test = require("node:test");
++const vm = require("node:vm");
++
++function models() {
++    const context = vm.createContext({ window: {} });
++    for (const file of ["store.js", "model.js"])
++        vm.runInContext(fs.readFileSync(path.join(__dirname, "../src", file), "utf8"), context);
++
++    return function (name = "todos") {
++        const model = new context.window.app.Model(new context.window.app.Store(name));
++        return {
++            model,
++            call(method, ...args) {
++                let result;
++                model[method](...args, function (value) {
++                    result = JSON.parse(JSON.stringify(value));
++                });
++                return result;
++            },
++            add(title, completed = false) {
++                const todo = this.call("create", title)[0];
++                this.call("update", todo.id, { completed });
++                return { ...todo, completed };
++            },
++        };
++    };
++}
++
++test("undo merges original batch IDs and order with current edits, additions and deletions", () => {
++    const list = models()();
++    const singleBefore = list.add("single deletion before clear", true);
++    const first = list.add("first");
++    const second = list.add("<second> & third", true);
++    const third = list.add("third");
++    const fourth = list.add("fourth", true);
++    const fifth = list.add("fifth", true);
++    list.call("remove", singleBefore.id);
++    assert.deepEqual(list.call("removeCompleted"), [second, fourth, fifth]);
++    assert.equal(list.call("canUndoClearCompleted"), true);
++
++    list.call("update", first.id, { title: "edited first", completed: true });
++    list.call("remove", third.id);
++    const newRemoved = list.add("later single deletion");
++    const newKept = list.add("new survivor");
++    list.call("remove", newRemoved.id);
++
++    const expected = [{ ...first, title: "edited first", completed: true }, second, fourth, fifth, newKept];
++    assert.deepEqual(list.call("undoClearCompleted"), expected);
++    assert.deepEqual(list.call("read"), expected);
++    assert.deepEqual(list.call("getCount"), { active: 1, completed: 4, total: 5 });
++    assert.equal(list.call("canUndoClearCompleted"), false);
++    assert.deepEqual(list.call("undoClearCompleted"), expected);
++
++    list.call("remove", second.id);
++    list.call("undoClearCompleted");
++    assert.deepEqual(list.call("read", second.id), []);
++    const next = list.add("next ID");
++    assert.ok(next.id > newKept.id);
++    assert.equal(new Set(list.call("read").map(todo => todo.id)).size, list.call("read").length);
++});
++
++test("empty clears preserve history; each non-empty clear replaces it and undo consumes it", () => {
++    const list = models()();
++    assert.equal(list.call("canUndoClearCompleted"), false);
++    assert.deepEqual(list.call("removeCompleted"), []);
++    assert.deepEqual(list.call("undoClearCompleted"), []);
++    const first = list.add("older batch", true);
++    const second = list.add("newer batch");
++    list.call("removeCompleted");
++    assert.deepEqual(list.call("removeCompleted"), []);
++    assert.equal(list.call("canUndoClearCompleted"), true);
++    list.call("update", second.id, { completed: true });
++    list.call("removeCompleted");
++    assert.deepEqual(list.call("read"), []);
++    assert.deepEqual(list.call("undoClearCompleted"), [{ ...second, completed: true }]);
++    assert.deepEqual(list.call("read", first.id), []);
++    assert.equal(list.call("canUndoClearCompleted"), false);
++    list.call("removeCompleted");
++    assert.deepEqual(list.call("undoClearCompleted"), [{ ...second, completed: true }]);
++});
++
++test("batch order is restored before new tasks when all original survivors were deleted", () => {
++    const list = models()();
++    const first = list.add("anchor before");
++    const second = list.add("completed before", true);
++    const third = list.add("anchor between");
++    const fourth = list.add("completed after", true);
++    list.call("removeCompleted");
++    list.call("remove", first.id);
++    list.call("remove", third.id);
++    const fifth = list.add("new one");
++    const sixth = list.add("new two");
++    assert.deepEqual(list.call("undoClearCompleted"), [second, fourth, fifth, sixth]);
++});
++
++test("undo restores interleaved completed tasks around surviving original tasks", () => {
++    const list = models()();
++    const original = [
++        list.add("completed before", true),
++        list.add("active before"),
++        list.add("completed between", true),
++        list.add("active after"),
++        list.add("completed after", true),
++    ];
++    list.call("removeCompleted");
++    assert.deepEqual(list.call("read"), [original[1], original[3]]);
++    assert.deepEqual(list.call("undoClearCompleted"), original);
++});
++
++test("history shares the named MemoryStorage collection and is discarded by removeAll", () => {
++    const makeModel = models();
++    const list = makeModel("shared");
++    const peer = makeModel("shared");
++    const other = makeModel("separate");
++    const restored = list.add("shared completed", true);
++    const unrelated = other.add("other completed", true);
++    list.call("removeCompleted");
++    assert.equal(peer.call("canUndoClearCompleted"), true);
++    assert.equal(other.call("canUndoClearCompleted"), false);
++    const survivor = peer.add("shared new task");
++    assert.deepEqual(peer.call("undoClearCompleted"), [restored, survivor]);
++    assert.deepEqual(list.call("read"), [restored, survivor]);
++
++    list.call("removeCompleted");
++    peer.call("removeAll");
++    assert.equal(list.call("canUndoClearCompleted"), false);
++    assert.deepEqual(list.call("undoClearCompleted"), []);
++    assert.deepEqual(other.call("read"), [unrelated]);
++});
++
++test("existing create, query, update, count and snapshot isolation behavior is retained", () => {
++    const list = models()();
++    const first = list.add("  trimmed  ");
++    const second = list.add("completed", true);
++    assert.equal(first.title, "trimmed");
++    assert.deepEqual(list.call("read", String(first.id)), [first]);
++    assert.deepEqual(list.call("read", { completed: true }), [second]);
++    list.model.read(data => { data[0].title = "external mutation"; });
++    assert.deepEqual(list.call("read", first.id), [first]);
++    list.call("update", first.id, { title: "changed", completed: true });
++    assert.deepEqual(list.call("getCount"), { active: 0, completed: 2, total: 2 });
++    list.call("remove", second.id);
++    assert.deepEqual(list.call("getCount"), { active: 0, completed: 1, total: 1 });
++});

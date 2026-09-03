@@ -1,0 +1,86 @@
+{
+  "id": 2,
+  "case": "flaskr-drafts",
+  "condition": "skill",
+  "changed_files": [
+    "README.rst",
+    "flaskr/blog.py",
+    "flaskr/db.py",
+    "flaskr/schema.sql",
+    "flaskr/templates/blog/_status.html",
+    "flaskr/templates/blog/create.html",
+    "flaskr/templates/blog/index.html",
+    "flaskr/templates/blog/update.html",
+    "tests/test_blog.py",
+    "tests/test_db.py"
+  ],
+  "report_matches_diff": true,
+  "reported_status": "completed",
+  "questions": [],
+  "upstream_tests": {
+    "command": [
+      "python",
+      "-m",
+      "pytest",
+      "-q",
+      "-c",
+      "<repository>/evals/real-projects/fixtures/flaskr/pyproject.toml",
+      "<repository>/evals/real-projects/fixtures/flaskr/tests"
+    ],
+    "exit_code": 0,
+    "stdout": "........................                                                 [100%]\n24 passed in 0.22s\n",
+    "stderr": "",
+    "wall_seconds": 0.393
+  },
+  "oracle_execution": {
+    "command": [
+      "python",
+      "<repository>/evals/real-projects/flaskr_oracle.py",
+      "<trials>/trial-02"
+    ],
+    "exit_code": 0,
+    "stdout": "{\"checks\": [{\"id\": \"existing_crud_and_author_protection\", \"kind\": \"preserved\", \"passed\": true}, {\"id\": \"existing_invalid_title_is_rejected\", \"kind\": \"preserved\", \"passed\": true}, {\"id\": \"legacy_database_upgrade_is_non_destructive_and_repeatable\", \"kind\": \"integration\", \"passed\": true}, {\"id\": \"create_default_and_draft_visibility\", \"kind\": \"new\", \"passed\": true}, {\"id\": \"editing_draft_preserves_status_and_can_publish\", \"kind\": \"integration\", \"passed\": true}, {\"id\": \"invalid_status_never_mutates_data\", \"kind\": \"integration\", \"passed\": true}, {\"id\": \"forms_expose_status_and_author_boundaries_survive\", \"kind\": \"new\", \"passed\": true}], \"passed\": 7, \"total\": 7}\n",
+    "stderr": "",
+    "wall_seconds": 0.125
+  },
+  "checks": [
+    {
+      "id": "existing_crud_and_author_protection",
+      "kind": "preserved",
+      "passed": true
+    },
+    {
+      "id": "existing_invalid_title_is_rejected",
+      "kind": "preserved",
+      "passed": true
+    },
+    {
+      "id": "legacy_database_upgrade_is_non_destructive_and_repeatable",
+      "kind": "integration",
+      "passed": true
+    },
+    {
+      "id": "create_default_and_draft_visibility",
+      "kind": "new",
+      "passed": true
+    },
+    {
+      "id": "editing_draft_preserves_status_and_can_publish",
+      "kind": "integration",
+      "passed": true
+    },
+    {
+      "id": "invalid_status_never_mutates_data",
+      "kind": "integration",
+      "passed": true
+    },
+    {
+      "id": "forms_expose_status_and_author_boundaries_survive",
+      "kind": "new",
+      "passed": true
+    }
+  ],
+  "behavior_passed": true,
+  "source_unchanged_during_verification": true,
+  "passed": true
+}

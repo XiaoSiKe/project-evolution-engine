@@ -1,0 +1,56 @@
+{
+  "changed_files": [
+    "README.rst",
+    "flaskr/blog.py",
+    "flaskr/db.py",
+    "flaskr/schema.sql",
+    "flaskr/templates/blog/_status.html",
+    "flaskr/templates/blog/create.html",
+    "flaskr/templates/blog/index.html",
+    "flaskr/templates/blog/update.html",
+    "tests/test_blog.py",
+    "tests/test_db.py"
+  ],
+  "files": {
+    "README.rst": {
+      "before": "e6c7aa25f5a857ce3b30c0b2a2d0d7a25bbf0f1c96d700e1bad2868c7ea231f5",
+      "after": "e8d4019d3f96497333a7bb1e92fe085a68e093bdaec608a5b231aced5e69a543"
+    },
+    "flaskr/blog.py": {
+      "before": "c49c5f6e3db32d74bfac13633fd328ec904cb7159d76ca78f6956432076c1fd7",
+      "after": "b89ef314b9b97954c0042831d9e10d4be69d62e8bf95c2c86b7f5a6561422fa5"
+    },
+    "flaskr/db.py": {
+      "before": "700f9d0a455bf79c9bf6de4f2784f13b96256faea19c15ddee71fb7957e14c31",
+      "after": "54ed86ff9d52bd9b18002db27dde511828427bc10ba3b73694d8a3d5fb936158"
+    },
+    "flaskr/schema.sql": {
+      "before": "c23021b8a5229cedd3191825850e963f393790a794d31ac2f83846a0c5d559f7",
+      "after": "b11a71e9063ecaacd74742ad7330eca59ba0a9037802ae5e5b84796669dc2161"
+    },
+    "flaskr/templates/blog/_status.html": {
+      "before": null,
+      "after": "bcbfed71f6f0c3b1fe637ee2600e67c10d4854ae74bcddaefc16d4482b48a83a"
+    },
+    "flaskr/templates/blog/create.html": {
+      "before": "f41e3166cfd09d41a88def1896fb93631e707b0d9968b14ccb00953263e20025",
+      "after": "031763f0dea18a28cfb30af81957ec36005f58077b863d3d4cfdd5249257cf1a"
+    },
+    "flaskr/templates/blog/index.html": {
+      "before": "67cdf10979b06f697953477d0ee8043e56a11ebe87b03b307ada12d13a240617",
+      "after": "e67355d1096ba17b392f1df9b1fb1420af29d3d59cec9e6da7870ddd2859a239"
+    },
+    "flaskr/templates/blog/update.html": {
+      "before": "0e16cd0d933914628e890411dcddd7527fb96b5a7c9113390d93b3e79b44b5ad",
+      "after": "ca224796c28f3a4b02d183b2e055e276fdf10e883783d7de1f61507ba2476210"
+    },
+    "tests/test_blog.py": {
+      "before": "a4c01c486e86aed522c3ade398bf4016f6ef59bbada2c7c5f69eb55ce297877c",
+      "after": "360b878e91dcafb0bf8196783dcd4882343a6f12d05898a3505c1b0bc1fd138c"
+    },
+    "tests/test_db.py": {
+      "before": "324baea21b981575b4e6d92b6517f21ec2ad86a6138010863a9fcfb4f984e649",
+      "after": "2c35e3a098c0ad1698b4cad2ebcd8d2bde376d75da855114bbb7acdc62e2e516"
+    }
+  }
+}

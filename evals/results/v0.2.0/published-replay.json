@@ -1,0 +1,69 @@
+{
+  "description": "Maintainer reconstructed each candidate from the published patch against the pinned fixture, then reran acceptance checks and the candidate test suite in an isolated workspace.",
+  "trials": [
+    {
+      "id": 1,
+      "patch_replayed": true,
+      "behavior_checks_passed": 9,
+      "suite": {
+        "command": [
+          "npm",
+          "test"
+        ],
+        "exit_code": 0,
+        "stdout": "\n> todomvc-javascript-es5@1.0.0 test\n> node --test test/*.test.js\n\n✔ undo starts unavailable and clearing an empty list is harmless (55.258208ms)\n✔ undo merges original records and order with later additions, edits, toggles and removals (21.574333ms)\n✔ undo remains reachable after clearing every item; empty clears keep the pending batch (29.716083ms)\n✔ only the latest nonempty batch can be undone (20.38975ms)\n✔ separate deletions stay deleted even when no original survivor remains (20.809667ms)\n✔ clear and undo honor the all filter and update counts (14.668625ms)\n✔ clear and undo honor the active filter and update counts (9.766167ms)\n✔ clear and undo honor the completed filter and update counts (9.027292ms)\n✔ editing, cancelling, empty-title deletion and toggle-all still work after undo (8.744583ms)\n✔ tasks and undo remain in page memory and are isolated by store name (13.049708ms)\nℹ tests 10\nℹ suites 0\nℹ pass 10\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 416.102917\n"
+      },
+      "passed": true
+    },
+    {
+      "id": 2,
+      "patch_replayed": true,
+      "behavior_checks_passed": 7,
+      "suite": {
+        "command": [
+          "python",
+          "-m",
+          "pytest",
+          "-q",
+          "-p",
+          "no:cacheprovider"
+        ],
+        "exit_code": 0,
+        "stdout": "........................................................                 [100%]\n56 passed in 0.66s\n"
+      },
+      "passed": true
+    },
+    {
+      "id": 3,
+      "patch_replayed": true,
+      "behavior_checks_passed": 9,
+      "suite": {
+        "command": [
+          "npm",
+          "test"
+        ],
+        "exit_code": 0,
+        "stdout": "\n> todomvc-javascript-es5@1.0.0 test\n> node --test test/*.test.js\n\n✔ the empty-list undo entry restores the batch exactly once and escapes titles (84.149625ms)\n✔ undo preserves interleaved DOM edits, toggles, additions and independent removals (40.319041ms)\n✔ only the latest non-empty DOM clear can be undone (23.400167ms)\n✔ clear and undo preserve the active filter and global active count (24.735458ms)\n✔ clear and undo preserve the completed filter and global active count (17.313ms)\n✔ cancel editing, toggle all and blank-title deletion work while undo remains available (10.986ms)\n✔ a fresh page has no todos or undo record and restarts page-local IDs (28.182584ms)\n✔ undo merges original batch IDs and order with current edits, additions and deletions (1.492292ms)\n✔ empty clears preserve history; each non-empty clear replaces it and undo consumes it (0.775542ms)\n✔ batch order is restored before new tasks when all original survivors were deleted (0.433875ms)\n✔ undo restores interleaved completed tasks around surviving original tasks (0.366208ms)\n✔ history shares the named MemoryStorage collection and is discarded by removeAll (0.388083ms)\n✔ existing create, query, update, count and snapshot isolation behavior is retained (0.329ms)\nℹ tests 13\nℹ suites 0\nℹ pass 13\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 407.242708\n"
+      },
+      "passed": true
+    },
+    {
+      "id": 4,
+      "patch_replayed": true,
+      "behavior_checks_passed": 7,
+      "suite": {
+        "command": [
+          "python",
+          "-m",
+          "pytest",
+          "-q",
+          "-p",
+          "no:cacheprovider"
+        ],
+        "exit_code": 0,
+        "stdout": "......................................................................   [100%]\n70 passed in 0.80s\n"
+      },
+      "passed": true
+    }
+  ]
+}

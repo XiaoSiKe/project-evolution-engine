@@ -27,7 +27,7 @@ Follow this sequence while scaling its depth to the change. Read [Execution work
 
 1. **Define the delta.** Describe added, modified, and removed behavior, plus explicitly preserved behavior. Use the latest user requirement when it intentionally changes the old contract.
 2. **Understand the current project.** Inspect repository instructions, worktree state, relevant domain decisions, entry points, real call paths, data ownership, and verification commands. Confirm remembered locations against current code. Use [Project context](references/project-context.md) when context is missing, unfamiliar, stale, or shared across sessions.
-3. **Locate the integration.** Map each outcome to an owning file and symbol, existing reusable behavior, affected consumers, and a check. Read [Integration analysis](references/integration-analysis.md) before choosing a non-trivial or cross-module change.
+3. **Locate the integration.** Map each outcome to an owning file and symbol, existing reusable behavior, affected consumers, and a check. Read [Integration analysis](references/integration-analysis.md) before choosing a non-trivial or cross-module change. For compatibility-sensitive work or evidence that must survive a handoff, use [Change evidence](references/change-evidence.md) to retain file locations, consumers, explicit unknowns, and new/integration/preserved checks.
 4. **Implement a coherent increment.** Follow existing conventions and update the canonical source. Include necessary callers, configuration, schemas, generated output, and documentation. Repair related blockers within scope; keep unrelated findings out of the change.
 5. **Verify new and preserved behavior.** Exercise actual caller interfaces and inspect the combined final diff. Use [Verification](references/verification.md) to distinguish behavioral evidence from package checks, stale reports, or unexecuted assumptions.
 6. **Update useful project knowledge.** Correct affected authoritative documentation. Persist a plan only when work spans sessions or needs a reviewable handoff; record a lesson only when verified reasoning would otherwise be lost.
@@ -61,6 +61,8 @@ python3 <skill-directory>/scripts/collect_evidence.py --root <repository> --pret
 ```
 
 Its metadata and worktree fingerprint help establish context; they cannot decide module ownership or prove behavioral compatibility.
+
+The optional change-evidence helper checks declared paths, unique textual anchors, per-file freshness, and missing verification surfaces. It does not execute recorded commands or certify their results. Use it for consequential integration work; keep small updates lightweight.
 
 ## Delivery
 

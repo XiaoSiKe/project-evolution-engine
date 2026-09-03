@@ -1,0 +1,90 @@
+{
+  "id": 1,
+  "case": "todomvc-undo",
+  "condition": "baseline",
+  "changed_files": [
+    "README.md",
+    "index.html",
+    "package.json",
+    "src/app.css",
+    "src/controller.js",
+    "src/model.js",
+    "src/store.js",
+    "src/view.js",
+    "test/todo.test.js"
+  ],
+  "report_matches_diff": true,
+  "reported_status": "completed",
+  "questions": [],
+  "build": {
+    "command": [
+      "node",
+      "scripts/build.js"
+    ],
+    "exit_code": 0,
+    "stdout": "done!!\n",
+    "stderr": "",
+    "wall_seconds": 0.126
+  },
+  "oracle_execution": {
+    "command": [
+      "node",
+      "<repository>/evals/real-projects/todomvc_oracle.cjs",
+      "<trials>/verification-01-0886w5et/application/dist"
+    ],
+    "exit_code": 0,
+    "stdout": "{\"checks\":[{\"id\":\"existing_add_trim_and_escape\",\"kind\":\"preserved\",\"passed\":true},{\"id\":\"existing_toggle_filter_delete\",\"kind\":\"preserved\",\"passed\":true},{\"id\":\"existing_edit_and_count\",\"kind\":\"preserved\",\"passed\":true},{\"id\":\"undo_unavailable_initially\",\"kind\":\"new\",\"passed\":true},{\"id\":\"restore_ids_order_and_state\",\"kind\":\"integration\",\"passed\":true},{\"id\":\"undo_after_all_items_cleared\",\"kind\":\"integration\",\"passed\":true},{\"id\":\"interleaved_add_edit_and_delete_survive\",\"kind\":\"integration\",\"passed\":true},{\"id\":\"new_clear_replaces_previous_history\",\"kind\":\"new\",\"passed\":true},{\"id\":\"empty_clear_retains_history_and_route\",\"kind\":\"integration\",\"passed\":true}],\"passed\":9,\"total\":9}\n",
+    "stderr": "",
+    "wall_seconds": 0.408
+  },
+  "checks": [
+    {
+      "id": "existing_add_trim_and_escape",
+      "kind": "preserved",
+      "passed": true
+    },
+    {
+      "id": "existing_toggle_filter_delete",
+      "kind": "preserved",
+      "passed": true
+    },
+    {
+      "id": "existing_edit_and_count",
+      "kind": "preserved",
+      "passed": true
+    },
+    {
+      "id": "undo_unavailable_initially",
+      "kind": "new",
+      "passed": true
+    },
+    {
+      "id": "restore_ids_order_and_state",
+      "kind": "integration",
+      "passed": true
+    },
+    {
+      "id": "undo_after_all_items_cleared",
+      "kind": "integration",
+      "passed": true
+    },
+    {
+      "id": "interleaved_add_edit_and_delete_survive",
+      "kind": "integration",
+      "passed": true
+    },
+    {
+      "id": "new_clear_replaces_previous_history",
+      "kind": "new",
+      "passed": true
+    },
+    {
+      "id": "empty_clear_retains_history_and_route",
+      "kind": "integration",
+      "passed": true
+    }
+  ],
+  "behavior_passed": true,
+  "source_unchanged_during_verification": true,
+  "passed": true
+}

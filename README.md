@@ -5,13 +5,14 @@
 </p>
 
 <p align="center">
-  <sub>项目理解 · 改动定位 · 功能接入 · 新旧行为验证</sub>
+  <sub>项目理解 · 改动定位 · 功能接入 · 影响证据 · 新旧行为验证</sub>
 </p>
 
 <p align="center">
   <a href="#demo">🎬 看 Demo</a> ·
   <a href="#quick-start">🚀 快速开始</a> ·
   <a href="#workflow">🧭 工作流程</a> ·
+  <a href="#evidence">📍 改动证据</a> ·
   <a href="#capabilities">🧩 能力</a> ·
   <a href="#verification">🧪 验证</a> ·
   <a href="#structure">📁 结构</a>
@@ -31,6 +32,8 @@
 给项目增加功能时，需要同时理解新需求、已有调用方和代码职责。项目进化引擎会先建立这些关系，再实施更新，并用实际检查验证新增能力和需要保留的旧行为。
 
 它适合功能添加、能力扩展、流程调整，以及这些更新所需的相关修复。核心继承自[代码整理修复大师](https://github.com/XiaoSiKe/codebase-convergence)，进一步补齐了需求到实现的接入分析。
+
+**v0.2.0** 增加了可核对的改动证据、文件变化提醒，以及基于 TodoMVC 和 Flaskr 的成对应用试验。核心仍可独立运行，小更新不需要额外的规格框架或持久化计划。
 
 <a id="demo"></a>
 
@@ -115,6 +118,27 @@ flowchart TD
 
 小更新只读取必要上下文；复杂更新再形成可交接的计划。已有需求足够明确时直接推进，确有业务歧义时先完成可独立处理的部分，再集中提出问题。
 
+<a id="evidence"></a>
+
+## 📍 从更新目标到可核对的证据
+
+跨模块更新时，记录目标对应的负责模块、已确认调用方、代码位置和检查。验证覆盖三个方面：
+
+| 验证方面 | 需要回答的问题 | 示例 |
+| --- | --- | --- |
+| ✨ 新能力 | 请求的变化是否实现？ | 清除已完成任务后可以撤销一次 |
+| 🔗 接入关系 | 是否沿用原有职责与调用路径？ | 撤销经过现有存储、状态和视图接口 |
+| 🛡️ 保留行为 | 相关旧能力和已有数据是否仍然正确？ | 撤销保留清除后新增、编辑的任务 |
+
+新的只读工具可以为声明的文件和文本位置保存指纹，再检查这些依据是否发生变化：
+
+```bash
+python3 project-evolution-engine/scripts/change_evidence.py stamp --root /path/to/project --record /tmp/change-draft.json > /tmp/change-evidence.json
+python3 project-evolution-engine/scripts/change_evidence.py check --root /path/to/project --record /tmp/change-evidence.json
+```
+
+记录格式与完整示例见[改动证据指南](project-evolution-engine/references/change-evidence.md)。工具会提示证据过期、缺少验证或声明的未知影响；它不会自动发现全部调用方，也不会执行记录中的测试命令。文件指纹仍然有效，不代表功能已经通过验收。
+
 <a id="capabilities"></a>
 
 ## 🧩 能力与边界
@@ -125,7 +149,8 @@ flowchart TD
 | 📍 定位改动 | 将目标对应到具体文件、符号、职责和受影响的调用方 |
 | 🧬 接入新功能 | 比较扩展现有模块、新建职责或组合实现，沿用已有规则 |
 | 🛡️ 保留旧能力 | 区分有意变化与需要保留的接口、权限、格式和状态 |
-| 🧪 验证结果 | 执行相关测试与检查，核对最终差异和遗留缺口 |
+| 🧪 验证结果 | 区分新能力、接入关系与保留行为，核对实际差异和遗留缺口 |
+| 📍 保持证据有效 | 检查声明文件与文本位置的变化，提示需要重新阅读的依据 |
 | 📚 更新认知 | 修正受影响的文档，只保留值得复用的新经验 |
 
 | 可选增强 | 当前状态 |
@@ -149,11 +174,20 @@ python3 -m unittest discover -s tests -v
 python3 scripts/eval_cases.py validate-cases
 ```
 
-GitHub Actions 在 Python 3.11 和 3.12 上运行包、采集器、安装器及评测基础设施测试。独立代理行为评测单独记录，不与 CI 测试数量混算。
+GitHub Actions 在 Python 3.11 和 3.12 上运行包、只读工具、安装器及评测基础设施测试。另一个任务验证公开应用的原始行为，并确认验收程序会拒绝尚未实现的新功能。CI 不运行独立编码代理。
 
 七类行为案例覆盖批量能力、授权规则变化、用户未提交修改、生成链、过期项目说明、缺少外部工具，以及业务冲突下的部分完成。评测者核对实际差异，并运行代理未读过的验收检查。
 
-详见[验证记录与复现方法](docs/verification.md)。这些小型 Python 案例证明的是已覆盖行为，不能替代具体业务项目自身的测试。
+v0.2.0 另加入两个固定版本的公开应用：TodoMVC 的批量清除撤销，以及 Flaskr 的草稿发布和已有数据库升级。每个应用各运行一次有 Skill 和无 Skill 条件，使用相同需求、代码快照和运行环境；依据实际差异与预先固定的验收检查评估结果。
+
+| 应用试验 | 无 Skill | 有 Skill |
+| --- | --- | --- |
+| TodoMVC：批量清除撤销 | 9/9 通过 | 9/9 通过 |
+| Flaskr：草稿与数据库升级 | 7/7 通过 | 7/7 通过 |
+
+两种条件在本轮均通过，未观察到成功率差异。项目本身的包与工具测试为 **65 项**；它们与上述独立应用验收分别统计。
+
+详见[验证记录](docs/verification.md)和[公开应用试验的复现方法](evals/real-projects/README.md)。这轮属于小样本探索，不能据此推断普遍收益，也不能替代业务项目自身的测试。
 
 <a id="structure"></a>
 
@@ -164,12 +198,12 @@ project-evolution-engine/
 ├── SKILL.md                 核心入口与触发边界
 ├── agents/openai.yaml       中文名称与默认调用
 ├── references/              工作流、项目认知、接入分析、验证和来源
-├── scripts/                 只读项目证据采集
+├── scripts/                 只读项目采集与改动证据核验
 ├── LICENSE
 └── THIRD_PARTY_NOTICES.md
 scripts/                     安装、包校验、评测与发布打包
 tests/                       确定性测试
-evals/                       原始案例、结果约定与独立验收检查
+evals/                       原始案例、公开应用、独立验收与结果补丁
 docs/                        验证结果与复现说明
 research/                    调研记录与固定来源版本
 ```
@@ -181,6 +215,8 @@ research/                    调研记录与固定来源版本
 README 的居中标题、图标导航和徽章排版参考 [Square-Q/subconscious-skill](https://github.com/Square-Q/subconscious-skill)。该参考仅涉及展示形式。
 
 每个来源的固定提交与改写范围见[来源说明](project-evolution-engine/references/sources.md)，原始许可见[第三方声明](project-evolution-engine/THIRD_PARTY_NOTICES.md)。
+
+公开应用试验使用 [TodoMVC](https://github.com/tastejs/todomvc) 与 [Flaskr](https://github.com/pallets/flask/tree/main/examples/tutorial) 的固定快照，保留其 [MIT 与 BSD-3-Clause 许可](evals/real-projects/THIRD_PARTY_NOTICES.md)。这些应用仅用于评测，不包含在可安装的 Skill 包中。
 
 ---
 

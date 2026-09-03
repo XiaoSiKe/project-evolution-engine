@@ -1,0 +1,39 @@
+{
+  "status": "completed",
+  "changed_files": [
+    "README.rst",
+    "flaskr/blog.py",
+    "flaskr/db.py",
+    "flaskr/schema.sql",
+    "flaskr/static/style.css",
+    "flaskr/templates/blog/create.html",
+    "flaskr/templates/blog/index.html",
+    "flaskr/templates/blog/update.html",
+    "tests/test_status.py",
+    "tests/test_upgrade.py"
+  ],
+  "checks": [
+    {
+      "command": "python -m pytest -q",
+      "exit_code": 0,
+      "outcome": "修改前基线：24 passed in 0.29s。"
+    },
+    {
+      "command": "python -m pytest -q",
+      "exit_code": 1,
+      "outcome": "首轮实现验证：62 passed, 7 failed；失败均指向 CLI 缺少 Flask 应用上下文。随后给 init-db 和 upgrade-db 加入 with_appcontext，最终复测通过。"
+    },
+    {
+      "command": "python -m flask --app flaskr --help",
+      "exit_code": 0,
+      "outcome": "命令清单包含 init-db 和新 upgrade-db。"
+    },
+    {
+      "command": "python -m pytest -q --basetemp <trials>/evidence-04/pytest-final",
+      "exit_code": 0,
+      "outcome": "最终验证：70 passed in 0.61s。包含原有 24 项回归测试及 46 项状态、权限、界面、真实 CLI 和数据迁移测试。"
+    }
+  ],
+  "questions": [],
+  "notes": "新库和旧库使用相同的 NOT NULL、published 默认值及 draft/published CHECK 约束。upgrade-db 在事务内以 ALTER TABLE 加列，先检查列是否存在，保留用户、文章全部原字段、索引、触发器和自增序列；重复执行保留现有草稿。首页在数据库查询中按登录作者过滤草稿，继续按创建时间倒序；创建省略 status 时发布，更新省略时保留当前状态。创建/编辑增加状态选择与草稿标记，非法状态在任何写入前被拒绝。旧 init-db 同时补齐应用上下文以支持当前运行库的真实 CLI 调用。README 补充升级、备份、非破坏性命令选择和状态兼容说明。仅修改 trial-04 应用，未读取任何 Skill、其他试验或评测答案，未联网、安装依赖、提交或推送。报告中的命令均在 trial-04 下实际执行；净修改清单通过应用文件 SHA-256 前后比较确认。"
+}

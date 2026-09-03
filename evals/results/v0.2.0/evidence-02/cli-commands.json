@@ -1,0 +1,17 @@
+[
+  {
+    "command": "python -m flask --app 'flaskr:create_app({'\"'\"'TESTING'\"'\"': True, '\"'\"'DATABASE'\"'\"': '\"'\"'<trials>/evidence-02/cli-tz3fek4m/fresh.sqlite'\"'\"'})' init-db",
+    "exit_code": 0,
+    "outcome": "Initialized the database."
+  },
+  {
+    "command": "python -m flask --app 'flaskr:create_app({'\"'\"'TESTING'\"'\"': True, '\"'\"'DATABASE'\"'\"': '\"'\"'<trials>/evidence-02/cli-tz3fek4m/legacy.sqlite'\"'\"'})' upgrade-db",
+    "exit_code": 0,
+    "outcome": "Upgraded the database."
+  },
+  {
+    "command": "python -m flask --app 'flaskr:create_app({'\"'\"'TESTING'\"'\"': True, '\"'\"'DATABASE'\"'\"': '\"'\"'<trials>/evidence-02/cli-tz3fek4m/legacy.sqlite'\"'\"'})' upgrade-db",
+    "exit_code": 0,
+    "outcome": "Upgraded the database."
+  }
+]

@@ -1,0 +1,11 @@
+{
+  "name": "evolution-pilot-tools",
+  "version": "0.2.0",
+  "private": true,
+  "dependencies": {
+    "jsdom": "26.1.0",
+    "todomvc-common": "1.0.5",
+    "todomvc-app-css": "2.4.2",
+    "http-server": "14.1.1"
+  }
+}

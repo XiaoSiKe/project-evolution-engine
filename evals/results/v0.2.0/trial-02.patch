@@ -1,0 +1,709 @@
+diff --git a/README.rst b/README.rst
+index 653c216729dd4f9aac68ee375f52587d69981645..fef02bb7edc84bc91ef25fe86a8fcf8c2d9f8eb7 100644
+--- a/README.rst
++++ b/README.rst
+@@ -45,6 +45,8 @@ installing Flaskr::
+ Run
+ ---
+ 
++For a new installation, initialize an empty database and start the app:
++
+ .. code-block:: text
+ 
+     $ flask --app flaskr init-db
+@@ -53,13 +55,49 @@ Run
+ Open http://127.0.0.1:5000 in a browser.
+ 
+ 
++Upgrade an existing database
++----------------------------
++
++Before starting this version against an existing Flaskr database, stop the app,
++back up the SQLite database, and run the migration using the same application
++configuration::
++
++    $ python -m flask --app flaskr upgrade-db
++
++The command uses the configured ``DATABASE`` path. By default this is
++``instance/flaskr.sqlite``; a custom path can be set in ``instance/config.py``.
++It adds ``post.status`` in place without dropping or recreating tables. Existing
++posts become ``published`` and retain their IDs, authors, creation times, titles,
++and bodies. Users, credentials, indexes, and other database data are preserved.
++The migration can be run repeatedly: existing statuses, including drafts, stay
++unchanged after the first upgrade. An uninitialized database reports an error;
++use ``init-db`` only for a new database. ``init-db`` clears existing data and must
++not be used to upgrade an installation.
++
++
++Drafts and publishing
++---------------------
++
++The New Post and Edit forms offer ``Published`` and ``Draft`` states. Only the
++author sees their drafts on the homepage, marked ``(Draft)``. Anonymous visitors
++and other users see only published posts. Posts keep their existing newest-first
++ordering, and only the author may edit or delete either kind of post.
++
++The ``status`` form field accepts exactly ``draft`` or ``published``. Creating a
++post without that field publishes it, preserving older form submissions. Editing
++without the field keeps the post's current status. Authors can publish a draft
++or return a published post to draft through the Edit form. Invalid values display
++a validation error and save no changes. The database also rejects invalid or
++null statuses, and inserts that omit the column default to ``published``.
++
++
+ Test
+ ----
+ 
+ ::
+ 
+     $ pip install '.[test]'
+-    $ pytest
++    $ python -m pytest
+ 
+ Run with coverage report::
+ 
+diff --git a/flaskr/blog.py b/flaskr/blog.py
+index be0d92c4354c9ffa4fa10d970995d735c2c71209..854bd15155c4e7451e4d76fc9319c876700fb11c 100644
+--- a/flaskr/blog.py
++++ b/flaskr/blog.py
+@@ -11,16 +11,27 @@ from .auth import login_required
+ from .db import get_db
+ 
+ bp = Blueprint("blog", __name__)
++POST_STATUSES = ("published", "draft")
++
++
++def validate_post(title, status):
++    """Validate the fields shared by the create and update forms."""
++    if not title:
++        return "Title is required."
++    if status not in POST_STATUSES:
++        return "Status must be draft or published."
+ 
+ 
+ @bp.route("/")
+ def index():
+-    """Show all the posts, most recent first."""
++    """Show published posts and the current author's drafts, newest first."""
+     db = get_db()
+     posts = db.execute(
+-        "SELECT p.id, title, body, created, author_id, username"
++        "SELECT p.id, title, body, created, author_id, username, status"
+         " FROM post p JOIN user u ON p.author_id = u.id"
+-        " ORDER BY created DESC"
++        " WHERE p.status = 'published' OR p.author_id = ?"
++        " ORDER BY created DESC",
++        (g.user["id"] if g.user is not None else None,),
+     ).fetchall()
+     return render_template("blog/index.html", posts=posts)
+ 
+@@ -40,7 +51,7 @@ def get_post(id, check_author=True):
+     post = (
+         get_db()
+         .execute(
+-            "SELECT p.id, title, body, created, author_id, username"
++            "SELECT p.id, title, body, created, author_id, username, status"
+             " FROM post p JOIN user u ON p.author_id = u.id"
+             " WHERE p.id = ?",
+             (id,),
+@@ -61,26 +72,26 @@ def get_post(id, check_author=True):
+ @login_required
+ def create():
+     """Create a new post for the current user."""
++    status = request.form.get("status", "published")
+     if request.method == "POST":
+         title = request.form["title"]
+         body = request.form["body"]
+-        error = None
+-
+-        if not title:
+-            error = "Title is required."
++        error = validate_post(title, status)
+ 
+         if error is not None:
+             flash(error)
+         else:
+             db = get_db()
+             db.execute(
+-                "INSERT INTO post (title, body, author_id) VALUES (?, ?, ?)",
+-                (title, body, g.user["id"]),
++                "INSERT INTO post (title, body, author_id, status) VALUES (?, ?, ?, ?)",
++                (title, body, g.user["id"], status),
+             )
+             db.commit()
+             return redirect(url_for("blog.index"))
+ 
+-    return render_template("blog/create.html")
++    return render_template(
++        "blog/create.html", status=status, post_statuses=POST_STATUSES
++    )
+ 
+ 
+ @bp.route("/<int:id>/update", methods=("GET", "POST"))
+@@ -88,26 +99,27 @@ def create():
+ def update(id):
+     """Update a post if the current user is the author."""
+     post = get_post(id)
++    status = request.form.get("status", post["status"])
+ 
+     if request.method == "POST":
+         title = request.form["title"]
+         body = request.form["body"]
+-        error = None
+-
+-        if not title:
+-            error = "Title is required."
++        error = validate_post(title, status)
+ 
+         if error is not None:
+             flash(error)
+         else:
+             db = get_db()
+             db.execute(
+-                "UPDATE post SET title = ?, body = ? WHERE id = ?", (title, body, id)
++                "UPDATE post SET title = ?, body = ?, status = ? WHERE id = ?",
++                (title, body, status, id),
+             )
+             db.commit()
+             return redirect(url_for("blog.index"))
+ 
+-    return render_template("blog/update.html", post=post)
++    return render_template(
++        "blog/update.html", post=post, status=status, post_statuses=POST_STATUSES
++    )
+ 
+ 
+ @bp.route("/<int:id>/delete", methods=("POST",))
+diff --git a/flaskr/db.py b/flaskr/db.py
+index dec22fde2d8fb4ebb0be5c03982d0f0ee69ccf17..a8d331fbb8132904607fc907439f47d237781392 100644
+--- a/flaskr/db.py
++++ b/flaskr/db.py
+@@ -4,6 +4,7 @@ from datetime import datetime
+ import click
+ from flask import current_app
+ from flask import g
++from flask.cli import with_appcontext
+ 
+ 
+ def get_db():
+@@ -39,12 +40,39 @@ def init_db():
+ 
+ 
+ @click.command("init-db")
++@with_appcontext
+ def init_db_command():
+     """Clear existing data and create new tables."""
+     init_db()
+     click.echo("Initialized the database.")
+ 
+ 
++def upgrade_db():
++    """Add publication status without replacing existing tables or data."""
++    db = get_db()
++    columns = {column["name"] for column in db.execute("PRAGMA table_info(post)")}
++
++    if not columns:
++        raise click.ClickException(
++            "No post table found. Use init-db to initialize a new database."
++        )
++
++    if "status" not in columns:
++        db.execute(
++            "ALTER TABLE post ADD COLUMN status TEXT NOT NULL"
++            " DEFAULT 'published' CHECK (status IN ('draft', 'published'))"
++        )
++        db.commit()
++
++
++@click.command("upgrade-db")
++@with_appcontext
++def upgrade_db_command():
++    """Upgrade an existing database while preserving its data."""
++    upgrade_db()
++    click.echo("Upgraded the database.")
++
++
+ sqlite3.register_converter("timestamp", lambda v: datetime.fromisoformat(v.decode()))
+ 
+ 
+@@ -54,3 +82,4 @@ def init_app(app):
+     """
+     app.teardown_appcontext(close_db)
+     app.cli.add_command(init_db_command)
++    app.cli.add_command(upgrade_db_command)
+diff --git a/flaskr/schema.sql b/flaskr/schema.sql
+index dd4c86600a4b6d022f3c7dbbd97b1d4ca78e0fdd..eaf91783ca8f715acfcaae3e0212b0830d9e2145 100644
+--- a/flaskr/schema.sql
++++ b/flaskr/schema.sql
+@@ -16,5 +16,6 @@ CREATE TABLE post (
+   created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+   title TEXT NOT NULL,
+   body TEXT NOT NULL,
++  status TEXT NOT NULL DEFAULT 'published' CHECK (status IN ('draft', 'published')),
+   FOREIGN KEY (author_id) REFERENCES user (id)
+ );
+diff --git a/flaskr/templates/blog/_status.html b/flaskr/templates/blog/_status.html
+new file mode 100644
+index 0000000000000000000000000000000000000000..ee51f33236fbf8fd461a7941dfd0e2c1a254049a
+--- /dev/null
++++ b/flaskr/templates/blog/_status.html
+@@ -0,0 +1,6 @@
++<label for="status">Status</label>
++<select name="status" id="status">
++  {% for value in post_statuses %}
++    <option value="{{ value }}"{% if status == value %} selected{% endif %}>{{ value|capitalize }}</option>
++  {% endfor %}
++</select>
+diff --git a/flaskr/templates/blog/create.html b/flaskr/templates/blog/create.html
+index 88e31e44bdc255d905e2e6b4a040c979d7e48221..d79423e063609149b910779d5dc14e399830e10c 100644
+--- a/flaskr/templates/blog/create.html
++++ b/flaskr/templates/blog/create.html
+@@ -10,6 +10,7 @@
+     <input name="title" id="title" value="{{ request.form['title'] }}" required>
+     <label for="body">Body</label>
+     <textarea name="body" id="body">{{ request.form['body'] }}</textarea>
++    {% include 'blog/_status.html' %}
+     <input type="submit" value="Save">
+   </form>
+ {% endblock %}
+diff --git a/flaskr/templates/blog/index.html b/flaskr/templates/blog/index.html
+index 3481b8e18d6022f3c0c633c0c721824cc398f79e..5c553ab4eaa8c0a3af6e1f4cf30abb82cb69067b 100644
+--- a/flaskr/templates/blog/index.html
++++ b/flaskr/templates/blog/index.html
+@@ -12,7 +12,7 @@
+     <article class="post">
+       <header>
+         <div>
+-          <h1>{{ post['title'] }}</h1>
++          <h1>{{ post['title'] }}{% if post['status'] == 'draft' %} <small>(Draft)</small>{% endif %}</h1>
+           <div class="about">by {{ post['username'] }} on {{ post['created'].strftime('%Y-%m-%d') }}</div>
+         </div>
+         {% if g.user['id'] == post['author_id'] %}
+diff --git a/flaskr/templates/blog/update.html b/flaskr/templates/blog/update.html
+index 2c405e63038ec6693ca7fcbe8af8a53150c0d3e9..24a89e0a2c25defefed41b1038ad0245e5584e6b 100644
+--- a/flaskr/templates/blog/update.html
++++ b/flaskr/templates/blog/update.html
+@@ -1,7 +1,7 @@
+ {% extends 'base.html' %}
+ 
+ {% block header %}
+-  <h1>{% block title %}Edit "{{ post['title'] }}"{% endblock %}</h1>
++  <h1>{% block title %}Edit "{{ post['title'] }}"{% if post['status'] == 'draft' %} (Draft){% endif %}{% endblock %}</h1>
+ {% endblock %}
+ 
+ {% block content %}
+@@ -10,6 +10,7 @@
+     <input name="title" id="title" value="{{ request.form['title'] or post['title'] }}" required>
+     <label for="body">Body</label>
+     <textarea name="body" id="body">{{ request.form['body'] or post['body'] }}</textarea>
++    {% include 'blog/_status.html' %}
+     <input type="submit" value="Save">
+   </form>
+   <hr>
+diff --git a/tests/test_blog.py b/tests/test_blog.py
+index 55c769d8174e10790027ccdda5ed301707ff6a8f..d8b02fc7dda293377ddf7df41c82e4532aa530ab 100644
+--- a/tests/test_blog.py
++++ b/tests/test_blog.py
+@@ -22,12 +22,14 @@ def test_login_required(client, path):
+     assert response.headers["Location"] == "/auth/login"
+ 
+ 
+-def test_author_required(app, client, auth):
++@pytest.mark.parametrize("status", ("published", "draft"))
++def test_author_required(app, client, auth, status):
+     # change the post author to another user
+     with app.app_context():
+         db = get_db()
+-        db.execute("UPDATE post SET author_id = 2 WHERE id = 1")
++        db.execute("UPDATE post SET author_id = 2, status = ? WHERE id = 1", (status,))
+         db.commit()
++        original = tuple(db.execute("SELECT * FROM post WHERE id = 1").fetchone())
+ 
+     auth.login()
+     # current user can't modify other user's post
+@@ -36,6 +38,9 @@ def test_author_required(app, client, auth):
+     # current user doesn't see edit link
+     assert b'href="/1/update"' not in client.get("/").data
+ 
++    with app.app_context():
++        assert tuple(get_db().execute("SELECT * FROM post WHERE id = 1").fetchone()) == original
++
+ 
+ @pytest.mark.parametrize("path", ("/2/update", "/2/delete"))
+ def test_exists_required(client, auth, path):
+@@ -52,6 +57,8 @@ def test_create(client, auth, app):
+         db = get_db()
+         count = db.execute("SELECT COUNT(id) FROM post").fetchone()[0]
+         assert count == 2
++        post = db.execute("SELECT * FROM post WHERE title = 'created'").fetchone()
++        assert post["status"] == "published"
+ 
+ 
+ def test_update(client, auth, app):
+@@ -63,6 +70,7 @@ def test_update(client, auth, app):
+         db = get_db()
+         post = db.execute("SELECT * FROM post WHERE id = 1").fetchone()
+         assert post["title"] == "updated"
++        assert post["status"] == "published"
+ 
+ 
+ @pytest.mark.parametrize("path", ("/create", "/1/update"))
+@@ -72,7 +80,13 @@ def test_create_update_validate(client, auth, path):
+     assert b"Title is required." in response.data
+ 
+ 
+-def test_delete(client, auth, app):
++@pytest.mark.parametrize("status", ("published", "draft"))
++def test_delete(client, auth, app, status):
++    with app.app_context():
++        db = get_db()
++        db.execute("UPDATE post SET status = ? WHERE id = 1", (status,))
++        db.commit()
++
+     auth.login()
+     response = client.post("/1/delete")
+     assert response.headers["Location"] == "/"
+@@ -81,3 +95,161 @@ def test_delete(client, auth, app):
+         db = get_db()
+         post = db.execute("SELECT * FROM post WHERE id = 1").fetchone()
+         assert post is None
++
++
++@pytest.mark.parametrize("status", ("draft", "published"))
++def test_create_with_status(app, client, auth, status):
++    auth.login()
++    response = client.post(
++        "/create", data={"title": "new post", "body": "new body", "status": status}
++    )
++    assert response.headers["Location"] == "/"
++
++    with app.app_context():
++        post = get_db().execute("SELECT * FROM post WHERE title = 'new post'").fetchone()
++        assert post["status"] == status
++        assert post["author_id"] == 1
++        assert post["body"] == "new body"
++
++
++@pytest.mark.parametrize("initial_status", ("draft", "published"))
++@pytest.mark.parametrize("new_status", ("draft", "published"))
++def test_update_status(app, client, auth, initial_status, new_status):
++    with app.app_context():
++        db = get_db()
++        db.execute("UPDATE post SET status = ? WHERE id = 1", (initial_status,))
++        db.commit()
++        original = db.execute("SELECT * FROM post WHERE id = 1").fetchone()
++
++    auth.login()
++    response = client.post(
++        "/1/update",
++        data={"title": "updated title", "body": "updated body", "status": new_status},
++    )
++    assert response.headers["Location"] == "/"
++
++    with app.app_context():
++        post = get_db().execute("SELECT * FROM post WHERE id = 1").fetchone()
++        assert post["status"] == new_status
++        assert post["title"] == "updated title"
++        assert post["body"] == "updated body"
++        assert post["created"] == original["created"]
++        assert post["author_id"] == original["author_id"]
++
++    auth.logout()
++    assert (b"updated title" in client.get("/").data) == (new_status == "published")
++
++
++def test_update_without_status_preserves_draft(app, client, auth):
++    with app.app_context():
++        db = get_db()
++        db.execute("UPDATE post SET status = 'draft' WHERE id = 1")
++        db.commit()
++
++    auth.login()
++    response = client.post("/1/update", data={"title": "still private", "body": "edited"})
++    assert response.headers["Location"] == "/"
++
++    with app.app_context():
++        post = get_db().execute("SELECT * FROM post WHERE id = 1").fetchone()
++        assert post["status"] == "draft"
++        assert post["title"] == "still private"
++        assert post["body"] == "edited"
++
++    auth.logout()
++    assert b"still private" not in client.get("/").data
++
++
++@pytest.mark.parametrize(
++    ("username", "visible"),
++    (
++        (None, ("other public", "test title")),
++        ("test", ("own draft", "other public", "test title")),
++        ("other", ("other draft", "other public", "test title")),
++    ),
++)
++def test_index_visibility_and_order(app, client, auth, username, visible):
++    with app.app_context():
++        db = get_db()
++        db.executemany(
++            "INSERT INTO post (title, body, author_id, created, status)"
++            " VALUES (?, ?, ?, ?, ?)",
++            (
++                ("own draft", "private one", 1, "2021-01-01 00:00:00", "draft"),
++                ("other draft", "private two", 2, "2022-01-01 00:00:00", "draft"),
++                ("other public", "public body", 2, "2020-01-01 00:00:00", "published"),
++            ),
++        )
++        db.commit()
++
++    if username is not None:
++        assert auth.login(username, username).status_code == 302
++
++    response = client.get("/")
++    assert response.status_code == 200
++    positions = [response.data.index(title.encode()) for title in visible]
++    assert positions == sorted(positions)
++    assert (b"own draft" in response.data) == (username == "test")
++    assert (b"private one" in response.data) == (username == "test")
++    assert (b"other draft" in response.data) == (username == "other")
++    assert (b"private two" in response.data) == (username == "other")
++    assert (b"(Draft)" in response.data) == (username is not None)
++
++
++@pytest.mark.parametrize("path", ("/create", "/1/update"))
++@pytest.mark.parametrize("status", ("", "scheduled", "Draft", " published "))
++def test_invalid_status_does_not_write(app, client, auth, path, status):
++    with app.app_context():
++        db = get_db()
++        db.execute("UPDATE post SET status = 'draft' WHERE id = 1")
++        db.commit()
++        original = [tuple(row) for row in db.execute("SELECT * FROM post ORDER BY id")]
++
++    auth.login()
++    response = client.post(
++        path, data={"title": "must not save", "body": "must not save", "status": status}
++    )
++    assert response.status_code == 200
++    assert b"Status must be draft or published." in response.data
++
++    with app.app_context():
++        assert [
++            tuple(row) for row in get_db().execute("SELECT * FROM post ORDER BY id")
++        ] == original
++
++
++@pytest.mark.parametrize(
++    ("path", "stored_status", "selected"),
++    (
++        ("/create", "draft", "published"),
++        ("/1/update", "draft", "draft"),
++        ("/1/update", "published", "published"),
++    ),
++)
++def test_status_form_selection(app, client, auth, path, stored_status, selected):
++    with app.app_context():
++        db = get_db()
++        db.execute("UPDATE post SET status = ? WHERE id = 1", (stored_status,))
++        db.commit()
++
++    auth.login()
++    response = client.get(path)
++    assert response.status_code == 200
++    assert b'<label for="status">Status</label>' in response.data
++    assert b'<select name="status" id="status">' in response.data
++    for value in ("draft", "published"):
++        option = f'<option value="{value}"'
++        if value == selected:
++            option += " selected"
++        option += f'>{value.capitalize()}</option>'
++        assert option.encode() in response.data
++    if path == "/1/update":
++        assert (b"(Draft)" in response.data) == (stored_status == "draft")
++
++
++@pytest.mark.parametrize("path", ("/create", "/1/update"))
++def test_status_choice_survives_validation(client, auth, path):
++    auth.login()
++    response = client.post(path, data={"title": "", "body": "body", "status": "draft"})
++    assert b"Title is required." in response.data
++    assert b'<option value="draft" selected>Draft</option>' in response.data
+diff --git a/tests/test_db.py b/tests/test_db.py
+index 2363bf816375198cb1bc72b134f223fbc66c7caf..9cee7bd8beb71196599cb03d3dddb5337d932ddf 100644
+--- a/tests/test_db.py
++++ b/tests/test_db.py
+@@ -1,7 +1,9 @@
+ import sqlite3
++from pathlib import Path
+ 
+ import pytest
+ 
++from flaskr import create_app
+ from flaskr.db import get_db
+ 
+ 
+@@ -27,3 +29,167 @@ def test_init_db_command(runner, monkeypatch):
+     result = runner.invoke(args=["init-db"])
+     assert "Initialized" in result.output
+     assert Recorder.called
++
++
++def test_init_db_command_creates_schema(tmp_path):
++    app = create_app({"TESTING": True, "DATABASE": str(tmp_path / "new.sqlite")})
++    result = app.test_cli_runner().invoke(args=["init-db"])
++    assert result.exit_code == 0, result.output
++    with app.app_context():
++        db = get_db()
++        db.execute("INSERT INTO user (username, password) VALUES ('new', 'test')")
++        db.execute("INSERT INTO post (author_id, title, body) VALUES (1, 'new', '')")
++        assert db.execute("SELECT status FROM post").fetchone()[0] == "published"
++
++
++@pytest.fixture
++def legacy_app(tmp_path):
++    app = create_app({"TESTING": True, "DATABASE": str(tmp_path / "legacy.sqlite")})
++    with app.app_context():
++        db = get_db()
++        # Keep this historical schema independent from the current schema.sql.
++        db.executescript(
++            """
++            CREATE TABLE user (
++                id INTEGER PRIMARY KEY AUTOINCREMENT,
++                username TEXT UNIQUE NOT NULL,
++                password TEXT NOT NULL
++            );
++            CREATE TABLE post (
++                id INTEGER PRIMARY KEY AUTOINCREMENT,
++                author_id INTEGER NOT NULL,
++                created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
++                title TEXT NOT NULL,
++                body TEXT NOT NULL,
++                FOREIGN KEY (author_id) REFERENCES user (id)
++            );
++            CREATE INDEX legacy_post_created ON post (created);
++            CREATE TABLE extra_data (value TEXT);
++            INSERT INTO extra_data VALUES ('keep this too');
++            """
++        )
++        db.executescript(Path(__file__).with_name("data.sql").read_text())
++        db.execute(
++            "INSERT INTO post (id, author_id, title, body, created)"
++            " VALUES (7, 2, 'legacy second', 'old body', '2019-02-03 04:05:06')"
++        )
++        # Deleted IDs must not be reused after the migration.
++        db.execute(
++            "INSERT INTO post (id, author_id, title, body)"
++            " VALUES (42, 1, 'deleted', '')"
++        )
++        db.execute("DELETE FROM post WHERE id = 42")
++        db.commit()
++    return app
++
++
++def test_upgrade_db_preserves_legacy_data_and_is_repeatable(legacy_app):
++    with legacy_app.app_context():
++        db = get_db()
++        original_users = [tuple(row) for row in db.execute("SELECT * FROM user ORDER BY id")]
++        original_posts = [tuple(row) for row in db.execute("SELECT * FROM post ORDER BY id")]
++        original_sequences = [
++            tuple(row) for row in db.execute("SELECT * FROM sqlite_sequence ORDER BY name")
++        ]
++        original_index = db.execute(
++            "SELECT sql FROM sqlite_master WHERE name = 'legacy_post_created'"
++        ).fetchone()[0]
++
++    runner = legacy_app.test_cli_runner()
++    result = runner.invoke(args=["upgrade-db"])
++    assert result.exit_code == 0, result.output
++    assert "Upgraded" in result.output
++
++    with legacy_app.app_context():
++        db = get_db()
++        assert [tuple(row) for row in db.execute("SELECT * FROM user ORDER BY id")] == original_users
++        assert [
++            tuple(row)
++            for row in db.execute(
++                "SELECT id, author_id, created, title, body FROM post ORDER BY id"
++            )
++        ] == original_posts
++        assert [row[0] for row in db.execute("SELECT status FROM post")] == [
++            "published", "published"
++        ]
++        assert [
++            tuple(row) for row in db.execute("SELECT * FROM sqlite_sequence ORDER BY name")
++        ] == original_sequences
++        assert db.execute(
++            "SELECT sql FROM sqlite_master WHERE name = 'legacy_post_created'"
++        ).fetchone()[0] == original_index
++        assert db.execute("SELECT value FROM extra_data").fetchone()[0] == "keep this too"
++        assert db.execute("PRAGMA integrity_check").fetchone()[0] == "ok"
++        assert db.execute("PRAGMA foreign_key_check").fetchall() == []
++
++        for invalid_status in ("scheduled", "", None):
++            with pytest.raises(sqlite3.IntegrityError):
++                db.execute("UPDATE post SET status = ? WHERE id = 1", (invalid_status,))
++            db.rollback()
++
++        db.execute("UPDATE post SET status = 'draft' WHERE id = 1")
++        cursor = db.execute(
++            "INSERT INTO post (author_id, title, body) VALUES (1, 'after upgrade', '')"
++        )
++        assert cursor.lastrowid == 43
++        db.commit()
++        assert db.execute("SELECT status FROM post WHERE id = 43").fetchone()[0] == "published"
++        before_repeat = [tuple(row) for row in db.execute("SELECT * FROM post ORDER BY id")]
++
++    result = runner.invoke(args=["upgrade-db"])
++    assert result.exit_code == 0, result.output
++    with legacy_app.app_context():
++        assert [
++            tuple(row) for row in get_db().execute("SELECT * FROM post ORDER BY id")
++        ] == before_repeat
++
++    # Old credentials and posts remain usable through the actual web routes.
++    client = legacy_app.test_client()
++    response = client.get("/")
++    assert response.status_code == 200
++    assert b"legacy second" in response.data
++    assert b"test title" not in response.data
++    assert client.post(
++        "/auth/login", data={"username": "test", "password": "test"}
++    ).headers["Location"] == "/"
++    assert b"test title" in client.get("/").data
++    assert client.post(
++        "/1/update", data={"title": "edited legacy draft", "body": "edited"}
++    ).headers["Location"] == "/"
++    with legacy_app.app_context():
++        assert get_db().execute("SELECT status FROM post WHERE id = 1").fetchone()[0] == "draft"
++
++
++def test_upgrade_db_on_current_database(app, runner):
++    with app.app_context():
++        db = get_db()
++        db.execute("UPDATE post SET status = 'draft' WHERE id = 1")
++        db.commit()
++        original = tuple(db.execute("SELECT * FROM post WHERE id = 1").fetchone())
++
++    for _ in range(2):
++        result = runner.invoke(args=["upgrade-db"])
++        assert result.exit_code == 0, result.output
++
++    with app.app_context():
++        assert tuple(get_db().execute("SELECT * FROM post WHERE id = 1").fetchone()) == original
++
++
++def test_upgrade_db_requires_existing_tables(tmp_path):
++    app = create_app({"TESTING": True, "DATABASE": str(tmp_path / "empty.sqlite")})
++    result = app.test_cli_runner().invoke(args=["upgrade-db"])
++    assert result.exit_code == 1
++    assert "No post table found" in result.output
++    with app.app_context():
++        assert get_db().execute("SELECT name FROM sqlite_master").fetchall() == []
++
++
++@pytest.mark.parametrize("status", ("scheduled", "", None))
++def test_status_database_constraint(app, status):
++    with app.app_context():
++        db = get_db()
++        original = tuple(db.execute("SELECT * FROM post WHERE id = 1").fetchone())
++        with pytest.raises(sqlite3.IntegrityError):
++            db.execute("UPDATE post SET title = 'invalid', status = ? WHERE id = 1", (status,))
++        db.rollback()
++        assert tuple(db.execute("SELECT * FROM post WHERE id = 1").fetchone()) == original

@@ -93,8 +93,44 @@ class EvalCaseTests(unittest.TestCase):
         case = self.cases[0]
         expected = case["expected"]
         result = {key: expected[key] for key in ("gate", "mutation", "routes", "paused", "claims_full_correctness")}
-        result.update(changed_files=expected["required_changed_paths"], verification=["baseline", "broader-tests", "diff"])
+        result.update(changed_files=expected["required_changed_paths"] + ["tests/test_exporter.py"], verification=["baseline", "broader-tests", "diff"])
         self.assertEqual(runner.validate_result(case, result, result["changed_files"]), [])
+
+    def test_new_test_layout_is_allowed_without_allowing_other_source_edits(self):
+        case = self.cases[0]
+        expected = case["expected"]
+        result = {key: expected[key] for key in ("gate", "mutation", "routes", "paused", "claims_full_correctness")}
+        paths = expected["required_changed_paths"] + ["tests/test_batch_behavior.py"]
+        result.update(changed_files=paths, verification=["baseline", "focused-tests", "diff"])
+        self.assertEqual(runner.validate_result(case, result, paths), [])
+        self.assertTrue(runner.validate_result(case, result, paths + ["app/unrelated.py"]))
+        for unsafe in ("tests/../test_escape.py", "tests//test_added.py"):
+            with self.subTest(path=unsafe):
+                invalid = {**result, "changed_files": paths + [unsafe]}
+                errors = runner.validate_result(case, invalid, paths + [unsafe])
+                self.assertTrue(any("unsafe fixture path" in error for error in errors))
+
+    def test_existing_disallowed_test_is_not_treated_as_a_new_test(self):
+        case = copy.deepcopy(self.cases[0])
+        case["files"]["tests/test_protected.py"] = "protected test\n"
+        expected = case["expected"]
+        paths = expected["required_changed_paths"] + ["tests/test_exporter.py", "tests/test_protected.py"]
+        result = {key: expected[key] for key in ("gate", "mutation", "routes", "paused", "claims_full_correctness")}
+        result.update(changed_files=paths, verification=["baseline", "focused-tests", "diff"])
+        self.assertTrue(any("forbidden" in error for error in runner.validate_result(case, result, paths)))
+
+    def test_added_test_globs_cannot_escape_test_directory(self):
+        cases = copy.deepcopy(self.cases)
+        cases[0]["expected"]["allowed_added_tests"] = ["../*.py"]
+        self.assertTrue(runner.validate_cases(cases, self.contract))
+
+    def test_added_test_symlink_is_rejected(self):
+        with tempfile.TemporaryDirectory() as temp:
+            target = Path(temp) / "fixture"
+            runner.materialize(self.cases[0], target)
+            (target / "tests/test_alias.py").symlink_to(target / "app/exporter.py")
+            with self.assertRaises(ValueError):
+                runner.workspace_changed_paths(self.cases[0], target)
 
     def test_generated_files_require_the_canonical_source(self):
         case = runner.case_by_id(self.cases, "generated-source")

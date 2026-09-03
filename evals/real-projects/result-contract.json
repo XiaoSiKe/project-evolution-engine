@@ -1,0 +1,10 @@
+{
+  "required_fields": {
+    "status": "completed, decision-required, or blocked",
+    "changed_files": "all net changed relative paths, excluding dependencies/caches/generated dist",
+    "checks": "array of actual commands, exit codes, and short outcomes",
+    "questions": "array of unanswered material user decisions",
+    "notes": "brief implementation and integration reasoning"
+  },
+  "limitations": "This is a reporting contract, not an expected answer or a development workflow."
+}

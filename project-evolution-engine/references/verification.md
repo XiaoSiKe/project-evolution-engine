@@ -1,6 +1,6 @@
 # Verification
 
-Verify two things separately: the requested behavior exists, and the relevant preserved behavior still works.
+Verify three surfaces: the requested behavior exists, it joins the established interfaces and policy owners correctly, and the relevant preserved behavior still works.
 
 ## Choose evidence before implementation
 
@@ -37,6 +37,8 @@ Broaden testing to resolve a concrete risk or satisfy the project's gate. Do not
 Rerun affected checks when implementation or its evidence changes. A previous passing result does not validate a later edit. An unrelated documentation edit need not invalidate an executable behavior check, but its own links or examples may need checking.
 
 An inventory or fingerprint establishes what was observed. It does not establish semantic correctness, dependency completeness, or authority to modify code.
+
+For compatibility-sensitive work, use [Change evidence](change-evidence.md) to keep the new, integration, and preserved checks connected to the same outcome. Test a populated old database when storage changes, and interleaved user operations when frontend state gains undo or recovery behavior. A new empty database or a single happy-path click does not exercise those boundaries.
 
 ## Reporting
 

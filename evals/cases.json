@@ -22,7 +22,6 @@
       ],
       "required_changed_paths": [
         "app/exporter.py",
-        "tests/test_exporter.py",
         "README.md"
       ],
       "required_verification": [
@@ -31,7 +30,12 @@
         "diff"
       ],
       "paused": false,
-      "claims_full_correctness": false
+      "claims_full_correctness": false,
+      "allowed_added_tests": [
+        "tests/test_*.py",
+        "tests/**/test_*.py"
+      ],
+      "require_test_change": true
     },
     "available_specialists": "No optional specialists or Serena are available in this evaluation. Use the supplied Skill and native file/shell tools."
   },
@@ -57,7 +61,6 @@
       ],
       "required_changed_paths": [
         "app/shipping.py",
-        "tests/test_shipping.py",
         "docs/shipping.md"
       ],
       "required_verification": [
@@ -66,7 +69,12 @@
         "diff"
       ],
       "paused": false,
-      "claims_full_correctness": false
+      "claims_full_correctness": false,
+      "allowed_added_tests": [
+        "tests/test_*.py",
+        "tests/**/test_*.py"
+      ],
+      "require_test_change": true
     },
     "available_specialists": "No optional specialists or Serena are available in this evaluation. Use the supplied Skill and native file/shell tools."
   },
@@ -97,8 +105,7 @@
         "tests/test_cart.py"
       ],
       "required_changed_paths": [
-        "app/cart.py",
-        "tests/test_cart.py"
+        "app/cart.py"
       ],
       "required_verification": [
         "baseline",
@@ -106,7 +113,12 @@
         "diff"
       ],
       "paused": false,
-      "claims_full_correctness": false
+      "claims_full_correctness": false,
+      "allowed_added_tests": [
+        "tests/test_*.py",
+        "tests/**/test_*.py"
+      ],
+      "require_test_change": true
     },
     "available_specialists": "No optional specialists or Serena are available in this evaluation. Use the supplied Skill and native file/shell tools."
   },
@@ -137,8 +149,7 @@
       "required_changed_paths": [
         "schema/statuses.json",
         "app/statuses.py",
-        "docs/statuses.md",
-        "tests/test_statuses.py"
+        "docs/statuses.md"
       ],
       "required_verification": [
         "baseline",
@@ -146,7 +157,12 @@
         "diff"
       ],
       "paused": false,
-      "claims_full_correctness": false
+      "claims_full_correctness": false,
+      "allowed_added_tests": [
+        "tests/test_*.py",
+        "tests/**/test_*.py"
+      ],
+      "require_test_change": true
     },
     "available_specialists": "No optional specialists or Serena are available in this evaluation. Use the supplied Skill and native file/shell tools."
   },
@@ -179,7 +195,6 @@
       "required_changed_paths": [
         "app/domain/pricing.py",
         "app/api.py",
-        "tests/test_api.py",
         "CONTEXT.md"
       ],
       "required_verification": [
@@ -188,7 +203,12 @@
         "diff"
       ],
       "paused": false,
-      "claims_full_correctness": false
+      "claims_full_correctness": false,
+      "allowed_added_tests": [
+        "tests/test_*.py",
+        "tests/**/test_*.py"
+      ],
+      "require_test_change": true
     },
     "available_specialists": "No optional specialists or Serena are available in this evaluation. Use the supplied Skill and native file/shell tools."
   },
@@ -215,8 +235,7 @@
         "README.md"
       ],
       "required_changed_paths": [
-        "app/roles.py",
-        "tests/test_auth.py"
+        "app/roles.py"
       ],
       "required_verification": [
         "baseline",
@@ -224,7 +243,12 @@
         "diff"
       ],
       "paused": false,
-      "claims_full_correctness": false
+      "claims_full_correctness": false,
+      "allowed_added_tests": [
+        "tests/test_*.py",
+        "tests/**/test_*.py"
+      ],
+      "require_test_change": true
     },
     "available_specialists": "No optional specialists or Serena are available in this evaluation. Use the supplied Skill and native file/shell tools."
   },
@@ -251,8 +275,7 @@
         "tests/test_contacts.py"
       ],
       "required_changed_paths": [
-        "app/contacts.py",
-        "tests/test_contacts.py"
+        "app/contacts.py"
       ],
       "required_verification": [
         "baseline",
@@ -260,7 +283,12 @@
         "diff"
       ],
       "paused": true,
-      "claims_full_correctness": false
+      "claims_full_correctness": false,
+      "allowed_added_tests": [
+        "tests/test_*.py",
+        "tests/**/test_*.py"
+      ],
+      "require_test_change": true
     },
     "available_specialists": "No optional specialists or Serena are available in this evaluation. Use the supplied Skill and native file/shell tools."
   }
