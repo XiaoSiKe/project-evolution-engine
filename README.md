@@ -124,52 +124,21 @@ flowchart TD
 
 ## 📍 从更新目标到可核对的证据
 
-跨模块更新时，记录目标对应的负责模块、已确认调用方、代码位置和检查。验证覆盖三个方面：
+跨模块或兼容性敏感的更新可以记录目标、负责模块、调用方和检查，分别说明新能力、接入关系与保留行为。格式和命令见[改动证据指南](project-evolution-engine/references/change-evidence.md)。
 
-| 验证方面 | 需要回答的问题 | 示例 |
-| --- | --- | --- |
-| ✨ 新能力 | 请求的变化是否实现？ | 清除已完成任务后可以撤销一次 |
-| 🔗 接入关系 | 是否沿用原有职责与调用路径？ | 撤销经过现有存储、状态和视图接口 |
-| 🛡️ 保留行为 | 相关旧能力和已有数据是否仍然正确？ | 撤销保留清除后新增、编辑的任务 |
-
-新的只读工具可以为声明的文件和文本位置保存指纹，再检查这些依据是否发生变化：
-
-```bash
-python3 project-evolution-engine/scripts/change_evidence.py stamp --root /path/to/project --record /tmp/change-draft.json > /tmp/change-evidence.json
-python3 project-evolution-engine/scripts/change_evidence.py check --root /path/to/project --record /tmp/change-evidence.json
-```
-
-记录格式与完整示例见[改动证据指南](project-evolution-engine/references/change-evidence.md)。工具会提示证据过期、缺少验证或声明的未知影响；它不会自动发现全部调用方，也不会执行记录中的测试命令。文件指纹仍然有效，不代表功能已经通过验收。
-
-### 🔄 让项目认知随更新刷新
-
-需要跨次迭代保留认知时，可以声明重要结论、证据文件、引用搜索范围和结论之间的依赖。刷新工具会找出新的引用候选，并把受影响的结论标为待核实；无关结论继续保留。
-
-工作顺序是 **发现变化 → 重读相关代码与调用方 → 更新结论和验证 → 绑定当前快照确认**。重复刷新不会把尚未核实的内容自动变成有效；确认期间代码再变动，旧确认会被拒绝。
-
-详见[增量认知指南](project-evolution-engine/references/incremental-context.md)。文本候选需要结合代码或语义工具核实，工具不会自动编写业务结论。
+跨次迭代需要复用项目认知时，可刷新声明的代码证据与引用候选。完整流程见[增量认知指南](project-evolution-engine/references/incremental-context.md)。这些只读工具负责提示证据变化，业务判断仍来自当前代码和实际验证。
 
 <a id="capabilities"></a>
 
 ## 🧩 能力与边界
 
-| 能力 | 实际做法 |
-| --- | --- |
-| 🧭 理解项目 | 结合现有说明、领域决策、当前代码和测试追踪真实调用路径 |
-| 📍 定位改动 | 将目标对应到具体文件、符号、职责和受影响的调用方 |
-| 🧬 接入新功能 | 比较扩展现有模块、新建职责或组合实现，沿用已有规则 |
-| 🛡️ 保留旧能力 | 区分有意变化与需要保留的接口、权限、格式和状态 |
-| 🧪 验证结果 | 区分新能力、接入关系与保留行为，核对实际差异和遗留缺口 |
-| 📍 保持证据有效 | 检查声明文件与文本位置的变化，提示需要重新阅读的依据 |
-| 📚 更新认知 | 扫描声明范围内的引用变化，传播证据失效，核实后只更新相关结论 |
+核心 Skill 可以独立完成项目理解、接入定位、增量实现和新旧行为验证。工具结果只提供证据；最终判断仍需结合当前代码。
 
 | 可选增强 | 当前状态 |
 | --- | --- |
 | Serena | 已通过 Python、TypeScript 的真实 stdio MCP 查询与更新验证；提供[可选桥接器](project-evolution-engine/references/serena-stdio.md)，不包含上游服务器，也不等同于宿主原生工具注册 |
 | 代码整理修复大师 | 已实际读取并执行限定审核、Finding 校验及修复复核；按本轮新要求验收，记录见[联调结果](evals/results/v0.3.0/integrations/summary.json) |
 | OpenSpec / cc-sdd / GSD 等 | 方法已适配到核心参考资料，运行时不要求安装整套框架 |
-
-工具结果和项目图谱用于提供证据，最终接入判断仍需要结合当前代码。完成声明只覆盖实际验证过的范围。
 
 <a id="verification"></a>
 
@@ -184,15 +153,7 @@ python3 -m unittest discover -s tests -v
 python3 scripts/eval_cases.py validate-cases
 ```
 
-GitHub Actions 在 Python 3.11 和 3.12 上运行包、只读工具、安装器及评测基础设施测试。另有公开应用基线检查，以及真实 Serena 的 Python／TypeScript 联调。CI 不运行独立编码代理。
-
-七类行为案例覆盖批量能力、授权规则变化、用户未提交修改、生成链、过期项目说明、缺少外部工具，以及业务冲突下的部分完成。评测者核对实际差异，并运行代理未读过的验收检查。
-
-公开项目对照覆盖 TodoMVC、Flaskr、HTTPX 和 Datasette。各条件使用相同需求、代码快照和运行环境，结果依据实际差异与预先固定的验收检查。
-
-已发布的小样本中，有／无 Skill 两组均通过；v0.3.0 的有 Skill 组中位耗时高约 17%–31%，尚未显示效率收益。各版本的测试数量、实际补丁、用量和覆盖边界统一保留在[验证记录](docs/verification.md)。
-
-复现步骤见[首轮公开项目试验](evals/real-projects/README.md)和[重复评测方法](evals/repeated-projects/README.md)。这些结果不能替代业务项目自身的测试。
+GitHub Actions 在 Python 3.11 和 3.12 上检查技能包、工具、安装器和评测基础设施，并运行公开应用基线及真实 Serena 联调。测试数量、实际结果和覆盖限制统一保留在[验证记录](docs/verification.md)；公开试验的复现方式见[首轮应用试验](evals/real-projects/README.md)和[重复评测](evals/repeated-projects/README.md)。
 
 <a id="structure"></a>
 
@@ -209,8 +170,8 @@ project-evolution-engine/
 scripts/                     安装、包校验、评测与发布打包
 tests/                       确定性测试
 evals/                       原始案例、公开应用、独立验收与结果补丁
-docs/                        验证结果与复现说明
-research/                    调研记录与固定来源版本
+docs/                        验证记录
+research/                    固定来源版本
 ```
 
 ## 🤝 来源与致谢

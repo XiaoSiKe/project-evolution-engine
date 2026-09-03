@@ -63,10 +63,17 @@ class PackageTests(unittest.TestCase):
         self.assertEqual(len(repositories), len(set(repositories)))
         for source in sources["sources"]:
             with self.subTest(repo=source["repository"]):
+                self.assertEqual(set(source), {"repository", "commit", "license", "reference"})
                 self.assertRegex(source["commit"], r"^[0-9a-f]{40}$")
                 self.assertEqual(source["license"], "MIT")
                 self.assertTrue(source["reference"])
-                self.assertTrue(source["purpose"])
+
+        notices = (SKILL / "THIRD_PARTY_NOTICES.md").read_text()
+        self.assertEqual(notices.count("Permission is hereby granted"), 1)
+        for source in sources["sources"]:
+            with self.subTest(notice=source["repository"]):
+                self.assertIn(source["repository"], notices)
+                self.assertIn(source["commit"], notices)
 
 
 if __name__ == "__main__":

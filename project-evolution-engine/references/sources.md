@@ -10,6 +10,8 @@ The update workflow replaces defect-only admission with an authorized behavior d
 
 ## External references
 
+This guide owns the adaptation boundary. The repository source lock stores only fixed coordinates and licenses so the prose is maintained once.
+
 | Source at fixed commit | Adaptation boundary |
 | --- | --- |
 | [Fission-AI/OpenSpec @ e062b9572be9](https://github.com/Fission-AI/OpenSpec/blob/e062b9572be933564ba3899d059377dfa1393e32/docs/existing-projects.md) | Incremental behavior deltas and scoped adoption; adapted prose, no upstream runtime. |

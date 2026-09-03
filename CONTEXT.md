@@ -13,7 +13,7 @@
 - 核心无外部 Skill/MCP 硬依赖；Serena 和代码整理修复大师属于可选增强。
 - 已安装的 Serena 可通过真实 stdio 客户端查询；连接绑定显式项目和外置状态目录。此方式不等于宿主原生工具注册。
 - 测试以可观察行为、真实差异与实际命令为准，不用措辞匹配替代行为评测。
-- Skill 蒸馏来源维护在技能包内的 sources 与 notices；公开应用的快照来源和许可分别维护在 evals/real-projects 与 evals/repeated-projects。
+- `references/sources.md` 维护蒸馏范围，`research/sources.lock.json` 只固定来源坐标与许可，`project-evolution-engine/THIRD_PARTY_NOTICES.md` 保留版权和许可正文；公开应用的快照来源和许可分别维护在 evals/real-projects 与 evals/repeated-projects。
 - 提供 Python 3.11+ 的辅助工具；生成缓存、临时评测仓库和本机原始日志不进入发布内容。可复现的公开结果保留实际命令、输出和补丁，并移除本机路径。
 
 ## 术语
