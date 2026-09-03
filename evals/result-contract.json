@@ -1,0 +1,63 @@
+{
+  "description": "Neutral reporting contract for a project update evaluation; contains no case-specific answers.",
+  "fields": {
+    "gate": {
+      "type": "string",
+      "allowed": [
+        "none",
+        "decision-required"
+      ],
+      "meaning": "Whether an unresolved material user decision blocks part of the requested update."
+    },
+    "mutation": {
+      "type": "string",
+      "allowed": [
+        "none",
+        "performed"
+      ],
+      "meaning": "Actual net fixture changes, not permission to change."
+    },
+    "routes": {
+      "type": "array[string]",
+      "allowed_items": [
+        "core",
+        "serena",
+        "codebase-convergence"
+      ],
+      "meaning": "Only capabilities actually used. Core means no optional specialist/tool was invoked."
+    },
+    "changed_files": {
+      "type": "array[string]",
+      "meaning": "All repository-relative paths whose final state differs from the initial fixture, including its pre-existing uncommitted edits. Results must be outside the fixture."
+    },
+    "verification": {
+      "type": "array[string]",
+      "allowed_items": [
+        "baseline",
+        "worktree",
+        "focused-tests",
+        "broader-tests",
+        "static-analysis",
+        "build",
+        "diff",
+        "generator",
+        "idempotence",
+        "markdown",
+        "canonical-owner",
+        "current-code",
+        "new-behavior",
+        "preserved-behavior",
+        "verification-gap"
+      ],
+      "meaning": "Checks actually performed; include commands and their actual outcomes in an optional evidence array. broader-tests means a suite that includes the affected behavior tests and therefore satisfies focused-tests coverage."
+    },
+    "paused": {
+      "type": "boolean",
+      "meaning": "True only when a remaining requested outcome needs user input."
+    },
+    "claims_full_correctness": {
+      "type": "boolean",
+      "meaning": "False: report actual coverage rather than universal correctness."
+    }
+  }
+}

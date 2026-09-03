@@ -1,0 +1,66 @@
+{
+  "snapshot_date": "2026-09-03",
+  "predecessor": {
+    "repository": "XiaoSiKe/codebase-convergence",
+    "commit": "4d413b3184b9c91e122b093384d67bcf0d89a92f",
+    "permission": "user-authorized reuse"
+  },
+  "sources": [
+    {
+      "repository": "Fission-AI/OpenSpec",
+      "commit": "e062b9572be933564ba3899d059377dfa1393e32",
+      "license": "MIT",
+      "reference": "docs/existing-projects.md",
+      "purpose": "Incremental behavior deltas and scoped adoption; adapted prose, no upstream runtime."
+    },
+    {
+      "repository": "gotalab/cc-sdd",
+      "commit": "29aee950f4addc36f9aeecb9881c46540e71ecc9",
+      "license": "MIT",
+      "reference": "tools/cc-sdd/templates/shared/settings/rules/gap-analysis.md",
+      "purpose": "Requirement-to-code mapping and extend/new/combined options; adapted to avoid a mandatory spec pipeline."
+    },
+    {
+      "repository": "gsd-build/get-shit-done",
+      "commit": "bdcaab2c752d9a33a1a1ca9acf3a3c81fb991815",
+      "license": "MIT",
+      "reference": "commands/gsd/map-codebase.md",
+      "purpose": "Project context dimensions and refresh discipline; no mandatory seven-document or multi-agent mapping step."
+    },
+    {
+      "repository": "buildermethods/agent-os",
+      "commit": "475b0cac4c7c5cf2336ad5a663b691a6d3415e05",
+      "license": "MIT",
+      "reference": "README.md",
+      "purpose": "Discover and selectively load project-specific conventions; adapted without a required standards store."
+    },
+    {
+      "repository": "EveryInc/compound-engineering-plugin",
+      "commit": "d3c6f12d4b64d36ec9924bb8cf4ad6bb8e97ce5e",
+      "license": "MIT",
+      "reference": "skills/ce-compound/SKILL.md",
+      "purpose": "Preserve only useful, verified project reasoning; no upstream execution or shipping workflow is bundled."
+    },
+    {
+      "repository": "obra/superpowers",
+      "commit": "b36e0829c6d0140e93cfef2ca599b1b07d4a7797",
+      "license": "MIT",
+      "reference": "skills/writing-plans/SKILL.md",
+      "purpose": "File responsibilities and verifiable increments, paired with verification-before-completion; proportionate checks replace universal ceremony."
+    },
+    {
+      "repository": "oraios/serena",
+      "commit": "813fd98f4fd32e0606cb52281467fc055e45a356",
+      "license": "MIT",
+      "reference": "README.md",
+      "purpose": "Optional symbol navigation guidance only. No server, backend, or language parser is bundled or claimed as live-tested."
+    },
+    {
+      "repository": "Square-Q/subconscious-skill",
+      "commit": "06f8cf2a777cf7e5a4de86a766d08e58c044503c",
+      "license": "MIT",
+      "reference": "README.md",
+      "purpose": "README layout inspiration only: centered hero, icon navigation, badges, section rhythm. No memory features or claims are adopted."
+    }
+  ]
+}

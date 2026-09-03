@@ -1,0 +1,50 @@
+--- a/app/roles.py
++++ b/app/roles.py
+@@ -1 +1,6 @@
+-CAPABILITIES = {"admin": {"view", "edit", "delete"}, "editor": {"view", "edit"}, "guest": {"view"}}
++CAPABILITIES = {
++    "admin": {"view", "edit", "delete"},
++    "editor": {"view", "edit"},
++    "guest": {"view"},
++    "reviewer": {"view"},
++}
+--- a/tests/test_auth.py
++++ b/tests/test_auth.py
+@@ -1,8 +1,34 @@
+ import unittest
+ from app.auth import can
++
++
+ class AuthTest(unittest.TestCase):
+     def test_existing(self):
+-        self.assertTrue(can("admin","delete"))
+-        self.assertFalse(can("editor","delete"))
+-        self.assertTrue(can("guest","view"))
++        for role, action, allowed in (
++            ("admin", "view", True),
++            ("admin", "edit", True),
++            ("admin", "delete", True),
++            ("editor", "view", True),
++            ("editor", "edit", True),
++            ("editor", "delete", False),
++            ("guest", "view", True),
++            ("guest", "edit", False),
++            ("guest", "delete", False),
++        ):
++            with self.subTest(role=role, action=action):
++                self.assertEqual(can(role, action), allowed)
+ 
++    def test_reviewer(self):
++        self.assertTrue(can("reviewer", "view"))
++        self.assertFalse(can("reviewer", "edit"))
++        self.assertFalse(can("reviewer", "delete"))
++
++    def test_unknown_role(self):
++        for action in ("view", "edit", "delete"):
++            with self.subTest(action=action):
++                self.assertFalse(can("unknown", action))
++
++    def test_unknown_action(self):
++        for role in ("admin", "editor", "guest", "reviewer"):
++            with self.subTest(role=role):
++                self.assertFalse(can(role, "publish"))

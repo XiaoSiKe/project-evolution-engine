@@ -1,0 +1,307 @@
+{
+  "version": "v0.1.0",
+  "recorded_at": "2026-09-03T05:13:31.576224+00:00",
+  "method": "Seven fresh independent agents; original requests and raw fixtures only; expected outcomes and oracles withheld. Main evaluator independently reconciled actual diffs, ran behavioral oracles and reran project tests.",
+  "deterministic_tests": {
+    "python": "3.12",
+    "count": 39,
+    "status": "passed"
+  },
+  "cases": [
+    {
+      "case": "batch-export",
+      "input_sha256": "c18e7002d1e9e2caa4434307a2f2035e92a8aba76f81afa2f13d41fba6f788cb",
+      "result": {
+        "gate": "none",
+        "mutation": "performed",
+        "routes": [
+          "core"
+        ],
+        "changed_files": [
+          "README.md",
+          "app/exporter.py",
+          "tests/test_exporter.py"
+        ],
+        "verification": [
+          "baseline",
+          "worktree",
+          "focused-tests",
+          "diff",
+          "markdown",
+          "canonical-owner",
+          "current-code",
+          "new-behavior",
+          "preserved-behavior"
+        ],
+        "paused": false,
+        "claims_full_correctness": false
+      },
+      "report_reconciliation": "passed",
+      "behavior_oracle": "passed",
+      "project_tests": {
+        "command": "python -B -m unittest discover -s tests -v",
+        "exit_code": 0,
+        "count": 8,
+        "output": "test_admin_can_export_records_from_different_owners (test_exporter.BatchExportTest.test_admin_can_export_records_from_different_owners) ... ok\ntest_denied_record_raises_single_export_exception (test_exporter.BatchExportTest.test_denied_record_raises_single_export_exception) ... ok\ntest_empty_input_returns_empty_list (test_exporter.BatchExportTest.test_empty_input_returns_empty_list) ... ok\ntest_formatting_follows_canonical_policy (test_exporter.BatchExportTest.test_formatting_follows_canonical_policy) ... ok\ntest_owner_preserves_order_and_format (test_exporter.BatchExportTest.test_owner_preserves_order_and_format) ... ok\ntest_updated_authorization_is_shared_by_both_interfaces (test_exporter.BatchExportTest.test_updated_authorization_is_shared_by_both_interfaces) ... ok\ntest_denied (test_exporter.ExportTest.test_denied) ... ok\ntest_owner (test_exporter.ExportTest.test_owner) ... ok\n\n----------------------------------------------------------------------\nRan 8 tests in 0.000s\n\nOK\n"
+      },
+      "patch": "batch-export.patch"
+    },
+    {
+      "case": "intentional-change",
+      "input_sha256": "3a9c6c0860ce254f79b1dcfe2e2dc95c5c0dd3bd1e32167cfb5f704cbee9b2cb",
+      "result": {
+        "gate": "none",
+        "mutation": "performed",
+        "routes": [
+          "core"
+        ],
+        "changed_files": [
+          "app/shipping.py",
+          "docs/shipping.md",
+          "tests/test_shipping.py"
+        ],
+        "verification": [
+          "baseline",
+          "worktree",
+          "focused-tests",
+          "diff",
+          "canonical-owner",
+          "current-code",
+          "new-behavior",
+          "preserved-behavior"
+        ],
+        "paused": false,
+        "claims_full_correctness": false
+      },
+      "report_reconciliation": "passed",
+      "behavior_oracle": "passed",
+      "project_tests": {
+        "command": "python -B -m unittest discover -s tests -v",
+        "exit_code": 0,
+        "count": 4,
+        "output": "test_old_calls (test_shipping.ShippingTest.test_old_calls) ... ok\ntest_positional_vip (test_shipping.ShippingTest.test_positional_vip) ... ok\ntest_regular_shipping (test_shipping.ShippingTest.test_regular_shipping) ... ok\ntest_vip_shipping (test_shipping.ShippingTest.test_vip_shipping) ... ok\n\n----------------------------------------------------------------------\nRan 4 tests in 0.000s\n\nOK\n"
+      },
+      "patch": "intentional-change.patch"
+    },
+    {
+      "case": "dirty-worktree",
+      "input_sha256": "d3a3411d37bdd3e623ae72f236d1a1cecfca713b992f58936d93a97f3449fa6f",
+      "result": {
+        "gate": "none",
+        "mutation": "performed",
+        "routes": [
+          "core"
+        ],
+        "changed_files": [
+          "app/cart.py",
+          "tests/test_cart.py"
+        ],
+        "verification": [
+          "baseline",
+          "worktree",
+          "focused-tests",
+          "broader-tests",
+          "diff",
+          "canonical-owner",
+          "current-code",
+          "new-behavior",
+          "preserved-behavior"
+        ],
+        "paused": false,
+        "claims_full_correctness": false
+      },
+      "report_reconciliation": "passed",
+      "behavior_oracle": "passed",
+      "project_tests": {
+        "command": "python -B -m unittest discover -s tests -v",
+        "exit_code": 0,
+        "count": 7,
+        "output": "test_discount_applies_to_entire_total (test_cart.CartTest.test_discount_applies_to_entire_total) ... ok\ntest_discount_boundaries (test_cart.CartTest.test_discount_boundaries) ... ok\ntest_display_preserves_eur (test_cart.CartTest.test_display_preserves_eur) ... ok\ntest_empty_cart (test_cart.CartTest.test_empty_cart) ... ok\ntest_invalid_discount (test_cart.CartTest.test_invalid_discount) ... ok\ntest_positional_discount (test_cart.CartTest.test_positional_discount) ... ok\ntest_total (test_cart.CartTest.test_total) ... ok\n\n----------------------------------------------------------------------\nRan 7 tests in 0.000s\n\nOK\n"
+      },
+      "patch": "dirty-worktree.patch"
+    },
+    {
+      "case": "generated-source",
+      "input_sha256": "816167a7999b4e23c22db066009883dc6490f3af5783222b6f3effe6392620bc",
+      "result": {
+        "gate": "none",
+        "mutation": "performed",
+        "routes": [
+          "core"
+        ],
+        "changed_files": [
+          "app/statuses.py",
+          "docs/statuses.md",
+          "schema/statuses.json",
+          "tests/test_statuses.py"
+        ],
+        "verification": [
+          "baseline",
+          "worktree",
+          "canonical-owner",
+          "current-code",
+          "focused-tests",
+          "generator",
+          "idempotence",
+          "diff",
+          "new-behavior",
+          "preserved-behavior"
+        ],
+        "paused": false,
+        "claims_full_correctness": false
+      },
+      "report_reconciliation": "passed",
+      "behavior_oracle": "passed",
+      "project_tests": {
+        "command": "python -B -m unittest discover -s tests -v",
+        "exit_code": 0,
+        "count": 3,
+        "output": "test_cancelled_appended (test_statuses.StatusTest.test_cancelled_appended) ... ok\ntest_existing (test_statuses.StatusTest.test_existing) ... ok\ntest_generated_artifacts_match_schema (test_statuses.StatusTest.test_generated_artifacts_match_schema) ... ok\n\n----------------------------------------------------------------------\nRan 3 tests in 0.000s\n\nOK\n"
+      },
+      "patch": "generated-source.patch"
+    },
+    {
+      "case": "stale-context",
+      "input_sha256": "9e6aa52a0613273f46b3f3e8ef96d2a9db93d35bd004af583c31e26ef97e8597",
+      "result": {
+        "gate": "none",
+        "mutation": "performed",
+        "routes": [
+          "core"
+        ],
+        "changed_files": [
+          "CONTEXT.md",
+          "app/api.py",
+          "app/domain/pricing.py",
+          "tests/test_api.py",
+          "tests/test_pricing.py"
+        ],
+        "verification": [
+          "baseline",
+          "worktree",
+          "broader-tests",
+          "diff",
+          "markdown",
+          "canonical-owner",
+          "current-code",
+          "new-behavior",
+          "preserved-behavior"
+        ],
+        "paused": false,
+        "claims_full_correctness": false
+      },
+      "report_reconciliation": "passed",
+      "behavior_oracle": "passed",
+      "project_tests": {
+        "command": "python -B -m unittest discover -s tests -v",
+        "exit_code": 0,
+        "count": 8,
+        "output": "test_member_positional_argument (test_api.ApiTest.test_member_positional_argument) ... ok\ntest_member_quote (test_api.ApiTest.test_member_quote) ... ok\ntest_non_member_quote (test_api.ApiTest.test_non_member_quote) ... ok\ntest_quote (test_api.ApiTest.test_quote) ... ok\ntest_legacy_importer_amount (test_pricing.LegacyPricingTest.test_legacy_importer_amount) ... ok\ntest_default_amount (test_pricing.PricingTest.test_default_amount) ... ok\ntest_member_amount (test_pricing.PricingTest.test_member_amount) ... ok\ntest_non_member_amount (test_pricing.PricingTest.test_non_member_amount) ... ok\n\n----------------------------------------------------------------------\nRan 8 tests in 0.000s\n\nOK\n"
+      },
+      "patch": "stale-context.patch"
+    },
+    {
+      "case": "native-navigation",
+      "input_sha256": "6b1c11e6f07fd210bc54ad96442761d374e4f458e9d7db8c6efdceabbba42fba",
+      "result": {
+        "gate": "none",
+        "mutation": "performed",
+        "routes": [
+          "core"
+        ],
+        "changed_files": [
+          "app/roles.py",
+          "tests/test_auth.py"
+        ],
+        "verification": [
+          "baseline",
+          "worktree",
+          "focused-tests",
+          "diff",
+          "canonical-owner",
+          "current-code",
+          "new-behavior",
+          "preserved-behavior"
+        ],
+        "paused": false,
+        "claims_full_correctness": false
+      },
+      "report_reconciliation": "passed",
+      "behavior_oracle": "passed",
+      "project_tests": {
+        "command": "python -B -m unittest discover -s tests -v",
+        "exit_code": 0,
+        "count": 4,
+        "output": "test_existing (test_auth.AuthTest.test_existing) ... ok\ntest_reviewer (test_auth.AuthTest.test_reviewer) ... ok\ntest_unknown_action (test_auth.AuthTest.test_unknown_action) ... ok\ntest_unknown_role (test_auth.AuthTest.test_unknown_role) ... ok\n\n----------------------------------------------------------------------\nRan 4 tests in 0.000s\n\nOK\n"
+      },
+      "patch": "native-navigation.patch"
+    },
+    {
+      "case": "business-conflict",
+      "input_sha256": "060affdca22c9d131d6aa5ddfca6e734eceb4d2565c52f767eab513aa50d84db",
+      "result": {
+        "gate": "decision-required",
+        "mutation": "performed",
+        "routes": [
+          "core"
+        ],
+        "changed_files": [
+          "app/contacts.py",
+          "tests/test_contacts.py"
+        ],
+        "verification": [
+          "baseline",
+          "worktree",
+          "focused-tests",
+          "broader-tests",
+          "diff",
+          "canonical-owner",
+          "current-code",
+          "new-behavior",
+          "preserved-behavior",
+          "verification-gap"
+        ],
+        "paused": true,
+        "claims_full_correctness": false
+      },
+      "report_reconciliation": "passed",
+      "behavior_oracle": "passed",
+      "project_tests": {
+        "command": "python -B -m unittest discover -s tests -v",
+        "exit_code": 0,
+        "count": 3,
+        "output": "test_total (test_checkout.CheckoutTest.test_total) ... ok\ntest_domain (test_contacts.ContactTest.test_domain) ... ok\ntest_normalize_email (test_contacts.ContactTest.test_normalize_email) ... ok\n\n----------------------------------------------------------------------\nRan 3 tests in 0.000s\n\nOK\n"
+      },
+      "patch": "business-conflict.patch"
+    }
+  ],
+  "harness_corrections": [
+    "The stale-context case initially omitted the legitimate new domain test file tests/test_pricing.py from its allowed paths. The evaluator inspected it and added that path.",
+    "A broader suite including affected tests satisfies the focused-tests reporting requirement. No Skill or candidate implementation was changed for these two corrections."
+  ],
+  "optional_integrations": {
+    "serena_live_tested": false,
+    "codebase_convergence_invoked_in_behavior_evals": false
+  },
+  "evaluated_instruction_sha256": {
+    "project-evolution-engine/SKILL.md": "6ea59e743539bf8c67c6fe6da334314fe5c50006b1f4d0a90454e1eff38f4ffd",
+    "project-evolution-engine/references/execution-workflow.md": "6301311b18adb842f78fcbbd0eaa5d8b0f6d7250bd1666d31b1695c216a219d6",
+    "project-evolution-engine/references/integration-analysis.md": "a8cfc5af7f7e83513207c575f3f428c19458a7b0c2f530cf4d637bcd65341f89",
+    "project-evolution-engine/references/project-context.md": "4d40c03f8156cbbe168d76ea33a8672545b613dcb3e2b1892013747629396710",
+    "project-evolution-engine/references/sources.md": "64e20ff1427424e32db37e1911d69a2a40b7c9ea3d84e80cbb3d8e44214de657",
+    "project-evolution-engine/references/tool-routing.md": "1e0a6b39ab141681f58795016d4b110b2fd9582e0d1135a465540f2ac7ea84af",
+    "project-evolution-engine/references/verification.md": "6ba11c287c1f2a8579f4e0df31895f5cff87b64e729ce534e65f3e1a2a86930f"
+  },
+  "release_instruction_sha256": {
+    "project-evolution-engine/SKILL.md": "8f286d22ce2562ba8bafb94b5dde40123cb767fc20def9174a58c34e82fee7eb",
+    "project-evolution-engine/references/execution-workflow.md": "b61c730461a416e39a2a27fa4d1a641a4bc57f0cd1f79348011974fff2701467",
+    "project-evolution-engine/references/integration-analysis.md": "665c7c620f30471560d0df3d6c4b8e5f65f6b194bca7919c25120e714a12e902",
+    "project-evolution-engine/references/project-context.md": "39568d69786262bcd11992d258c4786856444918681d8eeb3d269b073805cd8d",
+    "project-evolution-engine/references/sources.md": "64e20ff1427424e32db37e1911d69a2a40b7c9ea3d84e80cbb3d8e44214de657",
+    "project-evolution-engine/references/tool-routing.md": "68d118ece40bd57691f68ae1b67e1f1190157bcf9e06dbf50dd9081e22c34012",
+    "project-evolution-engine/references/verification.md": "7704f8656ef38c2f4a81bdf61820703da7aaf533d7665228ac394fbe547ef3f5"
+  },
+  "post_evaluation_instruction_changes": [
+    "Normalized terminal blank lines only; instruction content is unchanged."
+  ]
+}

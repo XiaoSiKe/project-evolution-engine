@@ -1,0 +1,42 @@
+--- a/app/statuses.py
++++ b/app/statuses.py
+@@ -1,2 +1,2 @@
+ # generated; do not edit
+-VALID_STATUSES = ('queued', 'running', 'done')
++VALID_STATUSES = ('queued', 'running', 'done', 'cancelled')
+--- a/docs/statuses.md
++++ b/docs/statuses.md
+@@ -3,3 +3,4 @@
+ - queued
+ - running
+ - done
++- cancelled
+--- a/schema/statuses.json
++++ b/schema/statuses.json
+@@ -1 +1 @@
+-["queued", "running", "done"]
++["queued", "running", "done", "cancelled"]
+--- a/tests/test_statuses.py
++++ b/tests/test_statuses.py
+@@ -1,6 +1,21 @@
++import json
++from pathlib import Path
+ import unittest
+ from app.statuses import VALID_STATUSES
+ class StatusTest(unittest.TestCase):
+     def test_existing(self):
+         self.assertEqual(VALID_STATUSES[:3],("queued","running","done"))
+ 
++    def test_cancelled_appended(self):
++        self.assertEqual(VALID_STATUSES, ("queued", "running", "done", "cancelled"))
++
++    def test_generated_artifacts_match_schema(self):
++        root = Path(__file__).resolve().parents[1]
++        states = json.loads((root / "schema/statuses.json").read_text())
++        self.assertEqual(VALID_STATUSES, tuple(states))
++        documented_states = [
++            line[2:]
++            for line in (root / "docs/statuses.md").read_text().splitlines()
++            if line.startswith("- ")
++        ]
++        self.assertEqual(documented_states, states)

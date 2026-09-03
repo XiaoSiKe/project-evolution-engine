@@ -1,0 +1,39 @@
+--- a/app/shipping.py
++++ b/app/shipping.py
+@@ -1,2 +1,3 @@
+-def fee(total):
+-    return 0 if total >= 100 else 10
++def fee(total, vip=False):
++    threshold = 80 if vip else 100
++    return 0 if total >= threshold else 10
+--- a/docs/shipping.md
++++ b/docs/shipping.md
+@@ -1,3 +1,7 @@
+ # Shipping policy
+ 
+-All orders get free shipping at 100 or above; otherwise shipping costs 10.
++- VIP orders get free shipping at 80 or above; otherwise shipping costs 10.
++- Regular orders get free shipping at 100 or above; otherwise shipping costs 10.
++
++`fee(total, vip=False)` applies the regular-order policy by default, so existing
++`fee(total)` calls keep their behavior. Pass `vip=True` to apply the VIP policy.
+--- a/tests/test_shipping.py
++++ b/tests/test_shipping.py
+@@ -5,3 +5,17 @@
+         self.assertEqual(fee(99),10)
+         self.assertEqual(fee(100),0)
+ 
++    def test_regular_shipping(self):
++        for total, expected in [(0, 10), (80, 10), (99.99, 10), (100, 0), (120, 0)]:
++            with self.subTest(total=total):
++                self.assertEqual(fee(total), expected)
++                self.assertEqual(fee(total, vip=False), expected)
++
++    def test_vip_shipping(self):
++        for total, expected in [(0, 10), (79.99, 10), (80, 0), (99.99, 0), (100, 0), (120, 0)]:
++            with self.subTest(total=total):
++                self.assertEqual(fee(total, vip=True), expected)
++
++    def test_positional_vip(self):
++        self.assertEqual(fee(80, True), 0)
++        self.assertEqual(fee(80, False), 10)

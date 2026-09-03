@@ -1,0 +1,108 @@
+--- a/README.md
++++ b/README.md
+@@ -2,3 +2,29 @@
+ 
+ app.exporter.export_one(record, actor) exports one record.
+ Policy and formatting are owned by app.policy.
++
++`app.exporter.export_many(records, actor)` returns a list of strings in input
++order, using the same authorization and formatting as `export_one`.
++An empty input returns `[]`. The record owner and `admin` may export a record;
++an unauthorized record raises `PermissionError("not your record")` in both APIs.
++Batch export stops at the first rejected record and does not return a partial list.
++The existing `export_one(record, actor)` call remains supported.
++
++```python
++from app.exporter import export_many, export_one
++
++records = [
++    {"id": 2, "owner": "lin", "amount": 12},
++    {"id": 1, "owner": "lin", "amount": 9.5},
++]
++
++assert export_one(records[0], "lin") == "2:CNY 12.00"
++assert export_many(records, "lin") == ["2:CNY 12.00", "1:CNY 9.50"]
++assert export_many([], "lin") == []
++```
++
++Run the tests from the project root:
++
++```sh
++python3 -B -m unittest discover -s tests -v
++```
+--- a/app/exporter.py
++++ b/app/exporter.py
+@@ -2,3 +2,8 @@
+ def export_one(record, actor):
+     policy.authorize(record, actor)
+     return policy.render(record)
++
++
++def export_many(records, actor):
++    """Export records in input order using the single-record policy."""
++    return [export_one(record, actor) for record in records]
+--- a/tests/test_exporter.py
++++ b/tests/test_exporter.py
+@@ -1,5 +1,6 @@
+ import unittest
+-from app.exporter import export_one
++from unittest.mock import patch
++from app.exporter import export_many, export_one
+ class ExportTest(unittest.TestCase):
+     def test_owner(self):
+         self.assertEqual(export_one({"id":1,"owner":"lin","amount":12},"lin"),"1:CNY 12.00")
+@@ -7,3 +8,54 @@
+         with self.assertRaises(PermissionError):
+             export_one({"id":1,"owner":"lin","amount":12},"other")
+ 
++
++class BatchExportTest(unittest.TestCase):
++    def test_owner_preserves_order_and_format(self):
++        records = [
++            {"id": 3, "owner": "lin", "amount": 12},
++            {"id": 1, "owner": "lin", "amount": 2.345},
++            {"id": 3, "owner": "lin", "amount": 0},
++        ]
++        self.assertEqual(
++            export_many(records, "lin"),
++            ["3:CNY 12.00", "1:CNY 2.35", "3:CNY 0.00"],
++        )
++
++    def test_admin_can_export_records_from_different_owners(self):
++        records = [
++            {"id": 1, "owner": "lin", "amount": 12},
++            {"id": 2, "owner": "mei", "amount": 9.5},
++        ]
++        self.assertEqual(
++            export_many(records, "admin"),
++            ["1:CNY 12.00", "2:CNY 9.50"],
++        )
++        self.assertEqual(export_one(records[1], "admin"), "2:CNY 9.50")
++
++    def test_empty_input_returns_empty_list(self):
++        self.assertEqual(export_many([], "other"), [])
++
++    def test_denied_record_raises_single_export_exception(self):
++        allowed = {"id": 1, "owner": "lin", "amount": 12}
++        denied = {"id": 2, "owner": "mei", "amount": 9.5}
++        with self.assertRaises(PermissionError) as single_error:
++            export_one(denied, "lin")
++        for records in ([denied], [allowed, denied]):
++            with self.subTest(records=records):
++                with self.assertRaises(type(single_error.exception)) as batch_error:
++                    export_many(records, "lin")
++                self.assertEqual(batch_error.exception.args, single_error.exception.args)
++
++    def test_formatting_follows_canonical_policy(self):
++        record = {"id": 1, "owner": "lin", "amount": 12}
++        with patch("app.policy.CURRENCY", "USD"):
++            self.assertEqual(export_one(record, "lin"), "1:USD 12.00")
++            self.assertEqual(export_many([record], "lin"), ["1:USD 12.00"])
++
++    def test_updated_authorization_is_shared_by_both_interfaces(self):
++        record = {"id": 1, "owner": "lin", "amount": 12}
++        with patch("app.policy.authorize", side_effect=PermissionError("exports disabled")):
++            with self.assertRaisesRegex(PermissionError, "^exports disabled$"):
++                export_one(record, "admin")
++            with self.assertRaisesRegex(PermissionError, "^exports disabled$"):
++                export_many([record], "admin")

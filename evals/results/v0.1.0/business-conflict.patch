@@ -1,0 +1,30 @@
+--- a/app/contacts.py
++++ b/app/contacts.py
+@@ -1,2 +1,7 @@
+ def email_domain(value):
+     return value.split("@", 1)[-1]
++
++
++def normalize_email(value):
++    """Trim surrounding whitespace and lowercase an email string."""
++    return value.strip().lower()
+--- a/tests/test_contacts.py
++++ b/tests/test_contacts.py
+@@ -1,6 +1,16 @@
+ import unittest
+-from app.contacts import email_domain
++from app.contacts import email_domain, normalize_email
+ class ContactTest(unittest.TestCase):
+     def test_domain(self):
+         self.assertEqual(email_domain("a@example.com"),"example.com")
+ 
++    def test_normalize_email(self):
++        cases = [
++            (" \tAlice.Example+Tag@EXAMPLE.COM\n", "alice.example+tag@example.com"),
++            ("already@example.com", "already@example.com"),
++            ("", ""),
++            (" \t\n", ""),
++        ]
++        for value, expected in cases:
++            with self.subTest(value=value):
++                self.assertEqual(normalize_email(value), expected)

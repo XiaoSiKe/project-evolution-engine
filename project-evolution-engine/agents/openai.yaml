@@ -1,0 +1,4 @@
+interface:
+  display_name: "项目进化引擎skill"
+  short_description: "理解已有项目，定位改动与影响范围，稳妥接入新功能并验证新旧行为"
+  default_prompt: "使用 $project-evolution-engine 在现有项目中完成这次更新，先定位接入位置和需要保留的行为，再实现并验证。"

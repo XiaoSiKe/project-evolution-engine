@@ -1,0 +1,49 @@
+--- a/app/cart.py
++++ b/app/cart.py
+@@ -1,5 +1,8 @@
+ CURRENCY = "EUR"
+-def total(items):
+-    return sum(item["price"] * item["quantity"] for item in items)
++def total(items, discount=0):
++    if not 0 <= discount <= 1:
++        raise ValueError("discount must be between 0 and 1")
++    subtotal = sum(item["price"] * item["quantity"] for item in items)
++    return subtotal * (1 - discount)
+ def display(value):
+     return f"{CURRENCY} {value:.2f}"
+--- a/tests/test_cart.py
++++ b/tests/test_cart.py
+@@ -1,6 +1,32 @@
+ import unittest
+-from app.cart import total
++from app.cart import display, total
+ class CartTest(unittest.TestCase):
+     def test_total(self):
+         self.assertEqual(total([{"price":20,"quantity":2}]),40)
+ 
++    def test_discount_applies_to_entire_total(self):
++        items = [{"price": 20, "quantity": 2}, {"price": 5, "quantity": 3}]
++        self.assertAlmostEqual(total(items, discount=0.2), 44)
++
++    def test_positional_discount(self):
++        self.assertEqual(total([{"price": 20, "quantity": 2}], 0.25), 30)
++
++    def test_discount_boundaries(self):
++        items = [{"price": 20, "quantity": 2}]
++        for discount, expected in [(0, 40), (1, 0)]:
++            with self.subTest(discount=discount):
++                self.assertEqual(total(items, discount=discount), expected)
++
++    def test_invalid_discount(self):
++        for items in [[], [{"price": 20, "quantity": 2}]]:
++            for discount in [-0.01, 1.01, float("inf"), float("-inf"), float("nan")]:
++                with self.subTest(items=items, discount=discount):
++                    with self.assertRaises(ValueError):
++                        total(items, discount=discount)
++
++    def test_empty_cart(self):
++        self.assertEqual(total([]), 0)
++        self.assertEqual(total([], discount=0.5), 0)
++
++    def test_display_preserves_eur(self):
++        self.assertEqual(display(total([{"price": 20, "quantity": 2}])), "EUR 40.00")

@@ -1,0 +1,81 @@
+--- a/CONTEXT.md
++++ b/CONTEXT.md
+@@ -1,3 +1,15 @@
+ # Project context
+ 
+-Pricing rules live in app/pricing.py. Public entry point: app.api.quote.
++Pricing rules live in `app/domain/pricing.py`, as recorded in
++[the pricing ownership decision](docs/adr/0002-pricing.md).
++The public entry point is `app.api.quote(subtotal, member=False)`, which passes
++both arguments to `app.domain.pricing.amount(subtotal, member=False)`.
++
++Members (`member=True`) receive 90% of the subtotal. Non-members, including
++existing calls that omit `member`, receive the unchanged subtotal.
++For example, `quote(200, member=True)` returns `180.0`, while `quote(200)` and
++`quote(200, member=False)` return `200`.
++
++`app/pricing.py` remains the unchanged utility for the legacy offline importer.
++
++Run the tests with `python3 -m unittest discover -s tests -v`.
+--- a/app/api.py
++++ b/app/api.py
+@@ -1,3 +1,5 @@
+ from app.domain import pricing
+-def quote(subtotal):
+-    return pricing.amount(subtotal)
++
++
++def quote(subtotal, member=False):
++    return pricing.amount(subtotal, member=member)
+--- a/app/domain/pricing.py
++++ b/app/domain/pricing.py
+@@ -1,2 +1,2 @@
+-def amount(subtotal):
+-    return subtotal
++def amount(subtotal, member=False):
++    return subtotal * 0.9 if member else subtotal
+--- a/tests/test_api.py
++++ b/tests/test_api.py
+@@ -1,6 +1,16 @@
+ import unittest
+ from app.api import quote
++
++
+ class ApiTest(unittest.TestCase):
+     def test_quote(self):
+-        self.assertEqual(quote(200),200)
++        self.assertEqual(quote(200), 200)
+ 
++    def test_non_member_quote(self):
++        self.assertEqual(quote(200, member=False), 200)
++
++    def test_member_quote(self):
++        self.assertEqual(quote(200, member=True), 180)
++
++    def test_member_positional_argument(self):
++        self.assertEqual(quote(200, True), 180)
+--- /dev/null
++++ b/tests/test_pricing.py
+@@ -0,0 +1,22 @@
++import unittest
++
++from app.domain.pricing import amount
++from app.pricing import amount as legacy_amount
++
++
++class PricingTest(unittest.TestCase):
++    def test_default_amount(self):
++        self.assertEqual(amount(200), 200)
++
++    def test_non_member_amount(self):
++        self.assertEqual(amount(200, member=False), 200)
++
++    def test_member_amount(self):
++        for subtotal, expected in ((200, 180), (12.5, 11.25), (0, 0)):
++            with self.subTest(subtotal=subtotal):
++                self.assertEqual(amount(subtotal, member=True), expected)
++
++
++class LegacyPricingTest(unittest.TestCase):
++    def test_legacy_importer_amount(self):
++        self.assertEqual(legacy_amount(200), 200)

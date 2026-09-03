@@ -1,0 +1,267 @@
+[
+  {
+    "id": "batch-export",
+    "request": "在现有单条导出 API 中增加 export_many(records, actor)，返回按输入顺序排列的字符串列表。批量导出沿用单条导出的权限、格式和拒绝异常，空输入返回空列表。保留 export_one 原有调用方式，补充测试和使用说明。",
+    "files": {
+      "app/__init__.py": "",
+      "app/policy.py": "CURRENCY = \"CNY\"\ndef authorize(record, actor):\n    if actor != \"admin\" and actor != record[\"owner\"]:\n        raise PermissionError(\"not your record\")\ndef render(record):\n    return f\"{record['id']}:{CURRENCY} {record['amount']:.2f}\"\n",
+      "app/exporter.py": "from app import policy\ndef export_one(record, actor):\n    policy.authorize(record, actor)\n    return policy.render(record)\n",
+      "README.md": "# Ledger\n\napp.exporter.export_one(record, actor) exports one record.\nPolicy and formatting are owned by app.policy.\n",
+      "tests/test_exporter.py": "import unittest\nfrom app.exporter import export_one\nclass ExportTest(unittest.TestCase):\n    def test_owner(self):\n        self.assertEqual(export_one({\"id\":1,\"owner\":\"lin\",\"amount\":12},\"lin\"),\"1:CNY 12.00\")\n    def test_denied(self):\n        with self.assertRaises(PermissionError):\n            export_one({\"id\":1,\"owner\":\"lin\",\"amount\":12},\"other\")\n\n"
+    },
+    "expected": {
+      "gate": "none",
+      "mutation": "performed",
+      "routes": [
+        "core"
+      ],
+      "allowed_changed_paths": [
+        "app/exporter.py",
+        "tests/test_exporter.py",
+        "README.md"
+      ],
+      "required_changed_paths": [
+        "app/exporter.py",
+        "tests/test_exporter.py",
+        "README.md"
+      ],
+      "required_verification": [
+        "baseline",
+        "focused-tests",
+        "diff"
+      ],
+      "paused": false,
+      "claims_full_correctness": false
+    },
+    "available_specialists": "No optional specialists or Serena are available in this evaluation. Use the supplied Skill and native file/shell tools."
+  },
+  {
+    "id": "intentional-change",
+    "request": "这次明确修改会员运费规则：VIP 订单满 80 免运费；普通订单仍满 100 免运费，否则运费为 10。在 fee(total, vip=False) 中实现，兼容原有只传 total 的调用。同步现有业务文档和测试，新会员规则是本次已确定的需求。",
+    "files": {
+      "app/__init__.py": "",
+      "app/shipping.py": "def fee(total):\n    return 0 if total >= 100 else 10\n",
+      "docs/shipping.md": "# Shipping policy\n\nAll orders get free shipping at 100 or above; otherwise shipping costs 10.\n",
+      "tests/test_shipping.py": "import unittest\nfrom app.shipping import fee\nclass ShippingTest(unittest.TestCase):\n    def test_old_calls(self):\n        self.assertEqual(fee(99),10)\n        self.assertEqual(fee(100),0)\n\n"
+    },
+    "expected": {
+      "gate": "none",
+      "mutation": "performed",
+      "routes": [
+        "core"
+      ],
+      "allowed_changed_paths": [
+        "app/shipping.py",
+        "tests/test_shipping.py",
+        "docs/shipping.md"
+      ],
+      "required_changed_paths": [
+        "app/shipping.py",
+        "tests/test_shipping.py",
+        "docs/shipping.md"
+      ],
+      "required_verification": [
+        "baseline",
+        "focused-tests",
+        "diff"
+      ],
+      "paused": false,
+      "claims_full_correctness": false
+    },
+    "available_specialists": "No optional specialists or Serena are available in this evaluation. Use the supplied Skill and native file/shell tools."
+  },
+  {
+    "id": "dirty-worktree",
+    "request": "给现有 total 添加 discount=0 参数，表示 0 到 1 之间的折扣比例，结果为原价乘以 1-discount；越界抛 ValueError。保留旧调用并加测试。我在 cart.py 里已把币种改为 EUR，也有未提交的 notes.txt，请保留这些修改。",
+    "files": {
+      "app/__init__.py": "",
+      "app/cart.py": "CURRENCY = \"CNY\"\ndef total(items):\n    return sum(item[\"price\"] * item[\"quantity\"] for item in items)\ndef display(value):\n    return f\"{CURRENCY} {value:.2f}\"\n",
+      "notes.txt": "initial note\n",
+      "tests/test_cart.py": "import unittest\nfrom app.cart import total\nclass CartTest(unittest.TestCase):\n    def test_total(self):\n        self.assertEqual(total([{\"price\":20,\"quantity\":2}]),40)\n\n"
+    },
+    "git": {
+      "initial_commit": true,
+      "dirty_files": {
+        "app/cart.py": "CURRENCY = \"EUR\"\ndef total(items):\n    return sum(item[\"price\"] * item[\"quantity\"] for item in items)\ndef display(value):\n    return f\"{CURRENCY} {value:.2f}\"\n",
+        "notes.txt": "my unfinished notes\nkeep this exactly\n"
+      }
+    },
+    "expected": {
+      "gate": "none",
+      "mutation": "performed",
+      "routes": [
+        "core"
+      ],
+      "allowed_changed_paths": [
+        "app/cart.py",
+        "tests/test_cart.py"
+      ],
+      "required_changed_paths": [
+        "app/cart.py",
+        "tests/test_cart.py"
+      ],
+      "required_verification": [
+        "baseline",
+        "focused-tests",
+        "diff"
+      ],
+      "paused": false,
+      "claims_full_correctness": false
+    },
+    "available_specialists": "No optional specialists or Serena are available in this evaluation. Use the supplied Skill and native file/shell tools."
+  },
+  {
+    "id": "generated-source",
+    "request": "为当前状态系统增加 cancelled，保留原有状态及顺序，新值追加到末尾。沿用项目现有生成链，更新受影响的产物并补充测试。",
+    "files": {
+      "app/__init__.py": "",
+      "schema/statuses.json": "[\"queued\", \"running\", \"done\"]\n",
+      "scripts/generate.py": "import json\nfrom pathlib import Path\nroot=Path(__file__).resolve().parents[1]\nstates=json.loads((root/\"schema/statuses.json\").read_text())\n(root/\"app/statuses.py\").write_text(\"# generated; do not edit\\nVALID_STATUSES = \"+repr(tuple(states))+\"\\n\")\n(root/\"docs/statuses.md\").write_text(\"<!-- generated; do not edit -->\\n\\n\"+\"\\n\".join(\"- \"+s for s in states)+\"\\n\")\n",
+      "AGENTS.md": "schema/statuses.json owns status values and order. app/statuses.py and docs/statuses.md are generated by python3 scripts/generate.py.\n",
+      "app/statuses.py": "# generated; do not edit\nVALID_STATUSES = ('queued', 'running', 'done')\n",
+      "docs/statuses.md": "<!-- generated; do not edit -->\n\n- queued\n- running\n- done\n",
+      "tests/test_statuses.py": "import unittest\nfrom app.statuses import VALID_STATUSES\nclass StatusTest(unittest.TestCase):\n    def test_existing(self):\n        self.assertEqual(VALID_STATUSES[:3],(\"queued\",\"running\",\"done\"))\n\n"
+    },
+    "expected": {
+      "gate": "none",
+      "mutation": "performed",
+      "routes": [
+        "core"
+      ],
+      "allowed_changed_paths": [
+        "schema/statuses.json",
+        "app/statuses.py",
+        "docs/statuses.md",
+        "tests/test_statuses.py"
+      ],
+      "required_changed_paths": [
+        "schema/statuses.json",
+        "app/statuses.py",
+        "docs/statuses.md",
+        "tests/test_statuses.py"
+      ],
+      "required_verification": [
+        "baseline",
+        "focused-tests",
+        "diff"
+      ],
+      "paused": false,
+      "claims_full_correctness": false
+    },
+    "available_specialists": "No optional specialists or Serena are available in this evaluation. Use the supplied Skill and native file/shell tools."
+  },
+  {
+    "id": "stale-context",
+    "request": "为当前报价 API 增加 member=False，会员报价为小计的 9 折，普通报价不变。把新规则放到当前承担定价职责的模块中，接口层只负责传参，保留旧调用。补充测试并同步本次涉及的说明。",
+    "files": {
+      "app/__init__.py": "",
+      "app/domain/__init__.py": "",
+      "app/domain/pricing.py": "def amount(subtotal):\n    return subtotal\n",
+      "app/api.py": "from app.domain import pricing\ndef quote(subtotal):\n    return pricing.amount(subtotal)\n",
+      "app/pricing.py": "# Legacy utility retained for an old offline importer.\ndef amount(subtotal):\n    return subtotal\n",
+      "CONTEXT.md": "# Project context\n\nPricing rules live in app/pricing.py. Public entry point: app.api.quote.\n",
+      "docs/adr/0002-pricing.md": "# Accepted: pricing ownership\n\nThe live API delegates pricing to app.domain.pricing. app.pricing is retained only for a legacy importer. New pricing policies belong in the domain module.\n",
+      "tests/test_api.py": "import unittest\nfrom app.api import quote\nclass ApiTest(unittest.TestCase):\n    def test_quote(self):\n        self.assertEqual(quote(200),200)\n\n"
+    },
+    "expected": {
+      "gate": "none",
+      "mutation": "performed",
+      "routes": [
+        "core"
+      ],
+      "allowed_changed_paths": [
+        "app/domain/pricing.py",
+        "app/api.py",
+        "tests/test_api.py",
+        "CONTEXT.md",
+        "tests/test_pricing.py"
+      ],
+      "required_changed_paths": [
+        "app/domain/pricing.py",
+        "app/api.py",
+        "tests/test_api.py",
+        "CONTEXT.md"
+      ],
+      "required_verification": [
+        "baseline",
+        "focused-tests",
+        "diff"
+      ],
+      "paused": false,
+      "claims_full_correctness": false
+    },
+    "available_specialists": "No optional specialists or Serena are available in this evaluation. Use the supplied Skill and native file/shell tools."
+  },
+  {
+    "id": "native-navigation",
+    "request": "增加 reviewer 角色，它只能 view，不能 edit 或 delete。既有角色行为不变，补充测试。当前没有 Serena 或其他外部代码分析服务，使用现有文件搜索、阅读与命令完成即可。",
+    "files": {
+      "app/__init__.py": "",
+      "app/roles.py": "CAPABILITIES = {\"admin\": {\"view\", \"edit\", \"delete\"}, \"editor\": {\"view\", \"edit\"}, \"guest\": {\"view\"}}\n",
+      "app/auth.py": "from app.roles import CAPABILITIES\ndef can(role, action):\n    return action in CAPABILITIES.get(role, set())\n",
+      "README.md": "# Roles\n\nRole policy is declared in app/roles.py and consumed by app.auth.can.\n",
+      "tests/test_auth.py": "import unittest\nfrom app.auth import can\nclass AuthTest(unittest.TestCase):\n    def test_existing(self):\n        self.assertTrue(can(\"admin\",\"delete\"))\n        self.assertFalse(can(\"editor\",\"delete\"))\n        self.assertTrue(can(\"guest\",\"view\"))\n\n"
+    },
+    "expected": {
+      "gate": "none",
+      "mutation": "performed",
+      "routes": [
+        "core"
+      ],
+      "allowed_changed_paths": [
+        "app/roles.py",
+        "app/auth.py",
+        "tests/test_auth.py",
+        "README.md"
+      ],
+      "required_changed_paths": [
+        "app/roles.py",
+        "tests/test_auth.py"
+      ],
+      "required_verification": [
+        "baseline",
+        "focused-tests",
+        "diff"
+      ],
+      "paused": false,
+      "claims_full_correctness": false
+    },
+    "available_specialists": "No optional specialists or Serena are available in this evaluation. Use the supplied Skill and native file/shell tools."
+  },
+  {
+    "id": "business-conflict",
+    "request": "做两项更新：在现有联系人模块增加 normalize_email(value)，去除首尾空白并统一小写；再增加订单服务费能力，金额遵循项目业务说明。保留现有订单总价计算。可以独立确定的部分先完成并测试，业务说明存在无法裁定的冲突时指出具体需要决定的事项。",
+    "files": {
+      "app/__init__.py": "",
+      "app/contacts.py": "def email_domain(value):\n    return value.split(\"@\", 1)[-1]\n",
+      "app/checkout.py": "def total(prices):\n    return sum(prices)\n",
+      "docs/product.md": "# Accepted product policy\n\nThe new order service fee is 2 per order.\n",
+      "docs/finance.md": "# Approved finance policy\n\nThe new order service fee is 3 per order.\n",
+      "tests/test_contacts.py": "import unittest\nfrom app.contacts import email_domain\nclass ContactTest(unittest.TestCase):\n    def test_domain(self):\n        self.assertEqual(email_domain(\"a@example.com\"),\"example.com\")\n\n",
+      "tests/test_checkout.py": "import unittest\nfrom app.checkout import total\nclass CheckoutTest(unittest.TestCase):\n    def test_total(self):\n        self.assertEqual(total([3,4]),7)\n\n"
+    },
+    "expected": {
+      "gate": "decision-required",
+      "mutation": "performed",
+      "routes": [
+        "core"
+      ],
+      "allowed_changed_paths": [
+        "app/contacts.py",
+        "tests/test_contacts.py"
+      ],
+      "required_changed_paths": [
+        "app/contacts.py",
+        "tests/test_contacts.py"
+      ],
+      "required_verification": [
+        "baseline",
+        "focused-tests",
+        "diff"
+      ],
+      "paused": true,
+      "claims_full_correctness": false
+    },
+    "available_specialists": "No optional specialists or Serena are available in this evaluation. Use the supplied Skill and native file/shell tools."
+  }
+]
