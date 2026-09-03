@@ -179,7 +179,13 @@ def install(target: Path, plan: dict[str, Any], current_source: dict[str, str]) 
         source = SOURCE.joinpath(*PurePosixPath(relative).parts)
         destination = safe_target_path(target, relative)
         destination.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copy2(source, destination)
+        with tempfile.NamedTemporaryFile(dir=destination.parent, delete=False) as handle:
+            temporary = Path(handle.name)
+        try:
+            shutil.copy2(source, temporary)
+            os.replace(temporary, destination)
+        finally:
+            temporary.unlink(missing_ok=True)
 
     write_manifest(target, current_source)
 

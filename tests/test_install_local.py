@@ -1,15 +1,37 @@
 from __future__ import annotations
 
 import json
+import importlib.util
+import os
 import subprocess
 import sys
 import tempfile
 import unittest
+from contextlib import contextmanager
 from pathlib import Path
+from unittest.mock import patch
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = PROJECT_ROOT / "scripts" / "install_local.py"
+spec = importlib.util.spec_from_file_location("install_local", SCRIPT)
+installer = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(installer)
+
+
+@contextmanager
+def managed_update():
+    with tempfile.TemporaryDirectory() as temp:
+        source = Path(temp) / "source"
+        source.mkdir()
+        (source / "SKILL.md").write_text("old version\n")
+        target = installer.validate_target(Path(temp) / "project-evolution-engine")
+        with patch.object(installer, "SOURCE", source):
+            old = installer.source_files()
+            installer.install(target, installer.inspect_target(target, old), old)
+            (source / "SKILL.md").write_text("new version\n")
+            current = installer.source_files()
+            yield target, installer.inspect_target(target, current), current
 
 
 def run_cli(*args: str) -> subprocess.CompletedProcess[str]:
@@ -23,6 +45,28 @@ def run_cli(*args: str) -> subprocess.CompletedProcess[str]:
 
 
 class InstallLocalTests(unittest.TestCase):
+    def test_update_preserves_hard_linked_backup_outside_target(self) -> None:
+        with managed_update() as (target, plan, current):
+            backup = target.parent / "backup.md"
+            os.link(target / "SKILL.md", backup)
+            installer.install(target, plan, current)
+            self.assertEqual("new version\n", (target / "SKILL.md").read_text())
+            self.assertEqual("old version\n", backup.read_text())
+            self.assertEqual("current", installer.inspect_target(target, current)["status"])
+
+    def test_failed_file_copy_preserves_existing_install_without_temporary_residue(self) -> None:
+        with managed_update() as (target, plan, current):
+            before = {p.name: p.read_bytes() for p in target.iterdir()}
+
+            def interrupted_copy(source, destination):
+                Path(destination).write_bytes(b"partial write")
+                raise OSError("copy interrupted")
+
+            with patch.object(installer.shutil, "copy2", interrupted_copy):
+                with self.assertRaises(OSError):
+                    installer.install(target, plan, current)
+            self.assertEqual(before, {p.name: p.read_bytes() for p in target.iterdir()})
+
     def test_install_into_explicit_empty_directory(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             target = Path(temp_dir) / "project-evolution-engine"
