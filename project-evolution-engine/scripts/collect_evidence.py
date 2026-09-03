@@ -95,16 +95,26 @@ def relative(path: Path, root: Path) -> str:
 def repository_files(root: Path) -> tuple[list[Path], list[str]]:
     files: list[Path] = []
     skipped_symlinks: list[str] = []
-    for path in sorted(root.rglob("*")):
-        parts = path.relative_to(root).parts
-        if any(part in SKIPPED_DIRECTORIES for part in parts):
-            continue
-        if path.is_symlink():
-            skipped_symlinks.append(relative(path, root))
-            continue
-        if path.is_file():
-            files.append(path)
-    return files, skipped_symlinks
+    for directory, folders, names in os.walk(root, followlinks=False):
+        retained = []
+        for name in folders:
+            if name in SKIPPED_DIRECTORIES:
+                continue
+            path = Path(directory) / name
+            if path.is_symlink():
+                skipped_symlinks.append(relative(path, root))
+            else:
+                retained.append(name)
+        folders[:] = sorted(retained)
+        for name in names:
+            if name in SKIPPED_DIRECTORIES:
+                continue
+            path = Path(directory) / name
+            if path.is_symlink():
+                skipped_symlinks.append(relative(path, root))
+            elif path.is_file():
+                files.append(path)
+    return sorted(files), sorted(skipped_symlinks)
 
 
 def has_part(path: Path, *names: str) -> bool:
@@ -158,7 +168,7 @@ def generated_file(path: Path) -> bool:
 def explicit_commands(root: Path) -> list[str]:
     commands: set[str] = set()
     package_json = root / "package.json"
-    if package_json.is_file():
+    if not package_json.is_symlink() and package_json.is_file():
         try:
             scripts = json.loads(package_json.read_text(encoding="utf-8")).get("scripts", {})
             if isinstance(scripts, dict):
@@ -167,7 +177,7 @@ def explicit_commands(root: Path) -> list[str]:
             pass
 
     makefile = root / "Makefile"
-    if makefile.is_file():
+    if not makefile.is_symlink() and makefile.is_file():
         try:
             for line in makefile.read_text(encoding="utf-8", errors="ignore").splitlines():
                 match = re.match(r"^([A-Za-z0-9_.-]+):(?:\s|$)", line)

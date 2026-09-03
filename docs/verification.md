@@ -1,6 +1,6 @@
 # 验证记录
 
-本文件记录确定性检查与独立代理行为评测。CI 徽章只代表自动化测试状态，不代表外部 MCP 集成已经验证。
+本文件按版本保留确定性检查、独立代理评测及工具联调的结果。当前自动化检查范围以 [GitHub Actions 配置](../.github/workflows/validate.yml)为准；历史结果不替代当前代码的重新验证。
 
 ## v0.3.0 结果 · 2026-09-03
 
@@ -142,7 +142,7 @@ python3 scripts/eval_cases.py verify-behavior --case batch-export --workspace /t
 
 `validate-result` 核对结果字段和真实改动；`verify-behavior` 检查功能与保留行为。仅通过前者不足以证明新功能完成。
 
-## 可选集成
+## v0.1.0／v0.2.0 的可选集成边界
 
 v0.1.0 与 v0.2.0 环境都没有可用的 Serena MCP 工具，因此验证的是缺少 Serena 时的核心独立路径。Serena 的真实连接、语言后端与符号查询需要在接入环境中另行验证。
 

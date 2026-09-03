@@ -28,20 +28,28 @@ def validate(root: Path) -> list[str]:
         return [str(error)]
     if not isinstance(data, dict):
         return ["frontmatter must be a mapping"]
+    if not isinstance(ui, dict):
+        return ["agents/openai.yaml must be a mapping"]
     if data.get("name") != NAME or root.name != NAME:
         errors.append("name must match the skill directory")
     if not isinstance(data.get("description"), str) or not data["description"].strip():
         errors.append("description must be a non-empty string")
-    interface = ui.get("interface", {}) if isinstance(ui, dict) else {}
-    if interface.get("display_name") != "项目进化引擎skill":
-        errors.append("unexpected display name")
-    short = interface.get("short_description", "")
-    if not isinstance(short, str) or not 25 <= len(short) <= 64:
-        errors.append("short_description must have 25–64 characters")
-    prompt = interface.get("default_prompt", "")
-    if not isinstance(prompt, str) or "$" + NAME not in prompt:
-        errors.append("default_prompt must invoke the skill")
-    if isinstance(ui, dict) and ui.get("policy", {}).get("allow_implicit_invocation") is False:
+    interface = ui.get("interface", {})
+    if not isinstance(interface, dict):
+        errors.append("interface must be a mapping")
+    else:
+        if interface.get("display_name") != "项目进化引擎skill":
+            errors.append("unexpected display name")
+        short = interface.get("short_description", "")
+        if not isinstance(short, str) or not 25 <= len(short) <= 64:
+            errors.append("short_description must have 25–64 characters")
+        prompt = interface.get("default_prompt", "")
+        if not isinstance(prompt, str) or "$" + NAME not in prompt:
+            errors.append("default_prompt must invoke the skill")
+    policy = ui.get("policy", {})
+    if not isinstance(policy, dict):
+        errors.append("policy must be a mapping")
+    elif policy.get("allow_implicit_invocation") is False:
         errors.append("automatic discovery must remain enabled")
     for name in ("LICENSE", "THIRD_PARTY_NOTICES.md"):
         if not (root / name).is_file():

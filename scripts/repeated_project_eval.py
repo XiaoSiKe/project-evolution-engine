@@ -201,6 +201,13 @@ def check_frozen(manifest: dict) -> None:
         raise ValueError("fixed Skill changed after preparation")
 
 
+def trial_baseline(trial: dict) -> dict[str, str]:
+    files = json.loads((Path(trial["artifacts"]) / "baseline.json").read_text())
+    if tree_digest(files) != trial["baseline_sha256"]:
+        raise ValueError("trial baseline record changed after preparation")
+    return files
+
+
 def run_trial(manifest: dict, trial: dict) -> dict:
     check_frozen(manifest)
     if configuration() != manifest["configured_model"]:
@@ -208,6 +215,8 @@ def run_trial(manifest: dict, trial: dict) -> dict:
     artifacts, app = Path(trial["artifacts"]), Path(trial["application"])
     if (artifacts / "execution.json").exists():
         raise ValueError("this trial already has a run; preserve it and prepare a new trial for a retry")
+    if snapshot(app) != trial_baseline(trial):
+        raise ValueError("trial application changed from its prepared baseline")
     prompt = (artifacts / "prompt.txt").read_text()
     argv = [manifest["cli"], "exec", "--json", "--ephemeral", "--sandbox", "workspace-write",
             "-C", str(app), "--add-dir", str(artifacts), "--output-schema", manifest["schema"],
@@ -242,22 +251,24 @@ def evaluate(manifest: dict, trial: dict) -> dict:
     check_frozen(manifest)
     case = next(c for c in json.loads((DATA / "cases.json").read_text()) if c["id"] == trial["case"])
     artifacts, app = Path(trial["artifacts"]), Path(trial["application"])
-    before = json.loads((artifacts / "baseline.json").read_text())
+    before = trial_baseline(trial)
     after = snapshot(app)
     changed = sorted(path for path in before.keys() | after.keys() if before.get(path) != after.get(path))
     report_path = artifacts / "report.json"
     report = json.loads(report_path.read_text()) if report_path.is_file() else {}
     forbidden = [p for p in changed if not matches(p, case["allowed_changes"]) or p in case["protected"]]
     test_change = any(p.startswith("tests/") and p.endswith(".py") for p in changed)
+    source_name = "httpx" if case["id"].startswith("httpx") else "datasette"
+    original = Path(manifest["source_roots"][source_name])
+    if snapshot(original) != before:
+        raise ValueError("upstream source changed from the prepared trial baseline")
     verification = artifacts / "verification-application"
     if verification.exists():
         raise ValueError("verification output exists; preserve previous evaluation before a new one")
     copy_source(app, verification)
     # Overlay unchanged upstream tests into the verification copy. Testing external
     # package-style tests can otherwise import the pristine package instead of the candidate.
-    source_name = "httpx" if case["id"].startswith("httpx") else "datasette"
-    original = Path(manifest["source_roots"][source_name])
-    for path in snapshot(original):
+    for path in before:
         if path.startswith("tests/"):
             target = verification / path
             target.parent.mkdir(parents=True, exist_ok=True)

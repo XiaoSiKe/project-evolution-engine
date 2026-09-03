@@ -9,7 +9,6 @@ from datetime import timedelta
 import json
 import os
 from pathlib import Path
-import sys
 import tempfile
 from typing import Any
 

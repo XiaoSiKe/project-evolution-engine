@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import importlib.util
+import json
 import shutil
 import tempfile
 import unittest
@@ -14,6 +15,19 @@ spec.loader.exec_module(validator)
 
 
 class PackageTests(unittest.TestCase):
+    def test_non_mapping_ui_sections_produce_validation_errors(self):
+        with tempfile.TemporaryDirectory() as temp:
+            target = Path(temp) / SKILL.name
+            shutil.copytree(SKILL, target)
+            path = target / "agents/openai.yaml"
+            original = validator.yaml.safe_load(path.read_text())
+            for field in ("interface", "policy"):
+                for value in (None, [], True, 1, "invalid"):
+                    with self.subTest(field=field, value=value):
+                        path.write_text(json.dumps({**original, field: value}))
+                        errors = validator.validate(target)
+                        self.assertIn(f"{field} must be a mapping", errors)
+
     def test_installable_metadata_and_reference_graph(self):
         self.assertEqual(validator.validate(SKILL), [])
 
@@ -43,7 +57,6 @@ class PackageTests(unittest.TestCase):
         self.assertEqual((ROOT / "LICENSE").read_bytes(), (SKILL / "LICENSE").read_bytes())
 
     def test_source_lock_points_to_fixed_commits_and_permitted_licenses(self):
-        import json
         sources = json.loads((ROOT / "research/sources.lock.json").read_text())
         self.assertEqual(len(sources["sources"]), 8)
         for source in sources["sources"]:

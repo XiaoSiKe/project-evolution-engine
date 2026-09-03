@@ -3,10 +3,12 @@ from __future__ import annotations
 import hashlib
 import importlib.util
 import json
+import os
 import subprocess
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
@@ -56,6 +58,42 @@ def initialize_repository(root: Path) -> None:
 
 
 class CollectEvidenceTests(unittest.TestCase):
+    def test_inventory_does_not_traverse_excluded_directories(self) -> None:
+        module = load_module()
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            (root / "src").mkdir()
+            (root / "src/app.py").write_text("pass\n")
+            for name in (".git", "node_modules", "vendor"):
+                (root / name / "nested").mkdir(parents=True)
+                (root / name / "nested/dependency.py").write_text("pass\n")
+            visited = []
+            scandir = os.scandir
+
+            def track(path):
+                visited.append(Path(path).relative_to(root))
+                return scandir(path)
+
+            with patch("os.scandir", track):
+                files, skipped = module.repository_files(root)
+            self.assertEqual(["src/app.py"], [p.relative_to(root).as_posix() for p in files])
+            self.assertEqual([], skipped)
+            self.assertFalse(any(set(p.parts) & module.SKIPPED_DIRECTORIES for p in visited), visited)
+
+    def test_command_discovery_does_not_follow_skipped_configuration_links(self) -> None:
+        module = load_module()
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp) / "repo"
+            root.mkdir()
+            for name, content in (("package.json", '{"scripts":{"outside-only":"echo outside"}}'),
+                                  ("Makefile", "outside-only:\n\techo outside\n")):
+                outside = Path(temp) / name
+                outside.write_text(content)
+                (root / name).symlink_to(outside)
+            evidence = module.collect_evidence(root)
+            self.assertEqual(["Makefile", "package.json"], evidence["coverage"]["skipped_symlinks"])
+            self.assertEqual([], evidence["available_commands"])
+
     def test_subproject_fingerprint_excludes_sibling_worktree_changes(self) -> None:
         module = load_module()
         with tempfile.TemporaryDirectory() as temp_dir:

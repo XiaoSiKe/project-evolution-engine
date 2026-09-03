@@ -3,7 +3,6 @@ from __future__ import annotations
 import importlib.util
 import json
 from pathlib import Path
-import shutil
 import sys
 import tempfile
 import unittest
@@ -16,6 +15,55 @@ spec.loader.exec_module(runner)
 
 
 class RepeatedEvaluationTests(unittest.TestCase):
+    def test_changed_baseline_record_or_upstream_source_is_rejected_before_verification(self):
+        for changed_input in ("record", "upstream"):
+            with self.subTest(changed_input=changed_input), tempfile.TemporaryDirectory() as temp:
+                root = Path(temp)
+                original, app, artifacts, data = [root / name for name in ("original", "app", "artifacts", "data")]
+                for path in (original / "tests", artifacts, data):
+                    path.mkdir(parents=True)
+                (original / "app.py").write_text("VALUE = 0\n")
+                (original / "tests/test_old.py").write_text("assert True\n")
+                runner.copy_source(original, app)
+                before = runner.snapshot(app)
+                runner.write_json(artifacts / "baseline.json", before)
+                runner.write_json(data / "cases.json", [{"id": "httpx-probe", "allowed_changes": ["**"],
+                    "protected": [], "upstream_tests": ["tests/test_old.py"]}])
+                trial = {"id": 1, "case": "httpx-probe", "condition": "baseline", "round": 1,
+                    "application": str(app), "artifacts": str(artifacts), "python": sys.executable,
+                    "baseline_sha256": runner.tree_digest(before)}
+                if changed_input == "record":
+                    runner.write_json(artifacts / "baseline.json", {**before, "app.py": "0" * 64})
+                else:
+                    (original / "tests/test_old.py").write_text("assert False\n")
+                manifest = {"source_roots": {"httpx": str(original)}}
+                with patch.object(runner, "DATA", data), patch.object(runner, "check_frozen"), \
+                        patch.object(runner, "invoke", side_effect=AssertionError("stale input reached verification")) as invoked:
+                    with self.assertRaisesRegex(ValueError, "baseline|upstream"):
+                        runner.evaluate(manifest, trial)
+                    invoked.assert_not_called()
+                self.assertFalse((artifacts / "verification-application").exists())
+
+    def test_changed_application_is_rejected_before_starting_a_coding_trial(self):
+        with tempfile.TemporaryDirectory() as temp:
+            app, artifacts = Path(temp) / "app", Path(temp) / "artifacts"
+            app.mkdir()
+            artifacts.mkdir()
+            source = app / "app.py"
+            source.write_text("VALUE = 0\n")
+            before = runner.snapshot(app)
+            runner.write_json(artifacts / "baseline.json", before)
+            (artifacts / "prompt.txt").write_text("fixed request")
+            source.write_text("VALUE = 1\n")
+            trial = {"application": str(app), "artifacts": str(artifacts), "baseline_sha256": runner.tree_digest(before)}
+            manifest = {"configured_model": {}, "cli": sys.executable, "schema": str(artifacts / "schema.json")}
+            with patch.object(runner, "check_frozen"), patch.object(runner, "configuration", return_value={}), \
+                    patch.object(runner.subprocess, "Popen", side_effect=AssertionError("unexpected coding run")) as launched:
+                with self.assertRaisesRegex(ValueError, "baseline|application"):
+                    runner.run_trial(manifest, trial)
+                launched.assert_not_called()
+            self.assertFalse((artifacts / "events.jsonl").exists())
+
     def test_usage_is_observed_not_inferred_and_started_commands_are_not_double_counted(self):
         with tempfile.TemporaryDirectory() as temp:
             path = Path(temp) / "events.jsonl"
@@ -98,7 +146,8 @@ class RepeatedEvaluationTests(unittest.TestCase):
                 "raise SystemExit(0 if sample.VALUE == 1 else 1)\n")
             manifest = {"source_roots": {"httpx": str(original)}}
             trial = {"id": 1, "case": "httpx-probe", "condition": "baseline", "round": 1,
-                     "artifacts": str(artifacts), "application": str(app), "python": sys.executable}
+                     "artifacts": str(artifacts), "application": str(app), "python": sys.executable,
+                     "baseline_sha256": runner.tree_digest(before)}
             real_invoke = runner.invoke
 
             def stdlib_test_command(argv, cwd, env=None, timeout=180):
