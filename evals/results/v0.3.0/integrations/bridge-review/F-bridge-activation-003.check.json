@@ -1,0 +1,30 @@
+{
+  "differences": [],
+  "eligible_for_remedy_review": true,
+  "finding_id": "F-bridge-activation-003",
+  "freshness": "current",
+  "matches_recorded_freshness": true,
+  "observations": [
+    {
+      "path": "project-evolution-engine/scripts/change_evidence.py",
+      "role": "subject",
+      "sha256": "sha256:b601879a57a09a3da8ea076e3c4d4df4b2219a5177da6e75df1e24eca721dc6f",
+      "state": "present"
+    },
+    {
+      "path": "project-evolution-engine/scripts/serena_mcp.py",
+      "role": "canonical-owner",
+      "sha256": "sha256:77fce985d217b98fbb292a8930fd25633952c45e7e8e681c9065fd13bc09575a",
+      "state": "present"
+    },
+    {
+      "path": "tests/test_serena_mcp.py",
+      "role": "test",
+      "sha256": "sha256:4492d0e05657956e6c3bc193095adc058eb29db2621832e1564485bb51ce3514",
+      "state": "present"
+    }
+  ],
+  "ok": true,
+  "recorded_freshness": "current",
+  "unavailable": []
+}

@@ -1,0 +1,58 @@
+{
+  "canonical_owner": {
+    "path": "project-evolution-engine/scripts/serena_mcp.py",
+    "status": "confirmed"
+  },
+  "category": "bug",
+  "claim": "A managed state's last-server.log symlink is followed and truncated, allowing --describe to overwrite an existing project file while reporting success.",
+  "confidence": "confirmed",
+  "disposition": "direct-repair",
+  "evidence": [
+    {
+      "end_line": 96,
+      "kind": "file",
+      "path": "project-evolution-engine/scripts/serena_mcp.py",
+      "start_line": 95,
+      "summary": "connect opens last-server.log in write mode and passes the stream to the real server without rejecting a linked log file."
+    },
+    {
+      "end_line": 45,
+      "kind": "file",
+      "path": "project-evolution-engine/scripts/serena_mcp.py",
+      "start_line": 37,
+      "summary": "The reused state is admitted using its marker; symlink checks cover serena_config.yml and project, but not the log that is immediately opened for writing."
+    },
+    {
+      "kind": "reproduction",
+      "summary": "PYTHONDONTWRITEBYTECODE=1 <evaluation>/serena-env/bin/python <evaluation>/bridge-review/reproduce_bridge.py symlink-log. The first real stdio --describe succeeds without changing the fixture project. Replace state/last-server.log with a symlink to fixture project/protected.mcpfixture and run --describe again. It exits 0 and reports ok=true; the original 45-byte file is replaced by 9803 bytes of server log, and its original contents are absent. Evidence: <evaluation>/bridge-review/symlink-log-evidence.json."
+    }
+  ],
+  "evidence_basis": {
+    "files": [
+      {
+        "path": "project-evolution-engine/scripts/change_evidence.py",
+        "role": "subject",
+        "sha256": "sha256:b601879a57a09a3da8ea076e3c4d4df4b2219a5177da6e75df1e24eca721dc6f",
+        "state": "present"
+      },
+      {
+        "path": "project-evolution-engine/scripts/serena_mcp.py",
+        "role": "canonical-owner",
+        "sha256": "sha256:77fce985d217b98fbb292a8930fd25633952c45e7e8e681c9065fd13bc09575a",
+        "state": "present"
+      },
+      {
+        "path": "tests/test_serena_mcp.py",
+        "role": "test",
+        "sha256": "sha256:4492d0e05657956e6c3bc193095adc058eb29db2621832e1564485bb51ce3514",
+        "state": "present"
+      }
+    ],
+    "method": "sha256-file-content-v1"
+  },
+  "freshness": "current",
+  "id": "F-bridge-log-001",
+  "impact": "Reusing a managed state directory containing a linked log can destroy the linked file's existing contents, including files inside the requested project or other writable user files. The bridge reports connected=true/ok=true despite violating its file protection boundary.",
+  "schema_version": 1,
+  "severity": "high"
+}

@@ -1,0 +1,57 @@
+[
+  {
+    "id": "httpx-line-endings",
+    "repository": "encode/httpx",
+    "commit": "b5addb64f0161ff6bfe94c124ef76f6a1fba5254",
+    "license": "BSD-3-Clause",
+    "license_file": "LICENSE.md",
+    "request": "为现有 HTTPX 的 Response.iter_lines() 和 Response.aiter_lines() 增加 keepends=False 参数。默认和显式 False 必须保持当前行为；True 时，每个返回行保留原始行尾，结果应等价于完整文本的 str.splitlines(keepends=True)，包括 CRLF、单独 CR、LF 及其余 splitlines 支持的分隔符。必须正确处理任意字节分块、跨块 UTF-8、跨块 CRLF、空块、空文本和没有行尾的最后一行；已经缓存的响应与真正的流都要支持。保持增量产出、现有流消费/关闭行为和其他解码接口，沿用现有解码职责，避免为同步和异步复制两套规则。补充相关测试与文档，不升级依赖或发布版本。",
+    "upstream_tests": [
+      "tests/test_decoders.py",
+      "tests/models/test_responses.py"
+    ],
+    "allowed_changes": [
+      "httpx/**/*.py",
+      "tests/**/*.py",
+      "docs/**/*.md",
+      "README.md",
+      "CHANGELOG.md"
+    ],
+    "protected": [
+      "pyproject.toml",
+      "requirements.txt",
+      "httpx/__version__.py",
+      "LICENSE.md"
+    ],
+    "rounds_per_condition": 2
+  },
+  {
+    "id": "datasette-csv-null",
+    "repository": "simonw/datasette",
+    "commit": "bdc973174096cae350ddaa733a10ed8b3ffd970b",
+    "license": "Apache-2.0",
+    "license_file": "LICENSE",
+    "request": "为现有 Datasette CSV 导出增加可选查询参数 _null=<文本>，用它表示 SQL NULL。未传参数以及显式空字符串时，输出必须保持现状；非 NULL 的空字符串、0 和其他值不能被替换。表格 CSV、自定义 SQL 查询 CSV、_stream=1 的全部分页以及 _header=off 都要一致支持。_labels=1 展开外键时，NULL 外键的值列与标签列都使用该标记；真实的空字符串标签继续为空，不能把所有假值统一替换。标记可以包含 Unicode、逗号、引号和换行，交给已有 CSV 写入规则正确转义；_trace=1 仍须经过已有 HTML 转义。保留已有权限、下载文件名、CORS、流限制和普通 JSON 行数据；同时处理这次导出接入中的相关缺陷，带显式主键的 blob 表也必须输出可访问原始字节的有效 blob 链接，沿用共享导出路径，补相关测试和用户文档，不升级依赖或发布版本。",
+    "upstream_tests": [
+      "tests/test_csv.py"
+    ],
+    "allowed_changes": [
+      "datasette/**/*.py",
+      "tests/**/*.py",
+      "docs/**/*.md",
+      "docs/**/*.rst",
+      "README.md"
+    ],
+    "protected": [
+      "pyproject.toml",
+      "pytest.ini",
+      "datasette/version.py",
+      "LICENSE"
+    ],
+    "rounds_per_condition": 2,
+    "baseline_notes": [
+      "The original CSV regression selection has 15 passing tests and one expected failure.",
+      "Before dispatch, the evaluator observed an existing explicit-primary-key blob CSV defect. Repairing this integration blocker is included in the raw task; no cause or implementation is supplied to either condition."
+    ]
+  }
+]

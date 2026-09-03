@@ -1,0 +1,587 @@
+{
+  "schema_version": 1,
+  "status": "passed",
+  "summary": "三个旧 Finding 均已按原始真实场景复核为 resolved。日志链接被拒绝且目标文件不变；缺失外部 project 目录被重建，项目原有 .serena 未被使用或改写；自定义 context 仍提供 activate_project 时，实际 --describe 调用路径仅发送 get_current_config。11 项单元测试通过，正常首次/复用文本查询及失败传播保持可用。",
+  "mode": "read-only recheck",
+  "skill": {
+    "name": "codebase-convergence",
+    "path": "<codebase-convergence>/SKILL.md",
+    "references": [
+      "<codebase-convergence>/references/execution-workflow.md",
+      "<codebase-convergence>/references/architecture-deepening.md",
+      "<codebase-convergence>/references/finding-contract.md",
+      "<codebase-convergence>/references/finding.schema.json"
+    ],
+    "usage": "沿用已读取 Skill 的当前 Finding 新鲜度检查、原始复现、修复独立验证和再裁定流程；没有把旧证据重新 stamp 为 current 或改写历史报告。"
+  },
+  "scope": {
+    "repository": "<repository>",
+    "files": [
+      "project-evolution-engine/scripts/serena_mcp.py",
+      "tests/test_serena_mcp.py",
+      "project-evolution-engine/scripts/change_evidence.py"
+    ],
+    "rechecked_findings": [
+      "F-bridge-log-001",
+      "F-bridge-state-002",
+      "F-bridge-activation-003"
+    ],
+    "current_authorized_behavior": "缺失 state/project 时允许在已核对配置的外部位置重建目录；日志用独立临时文件并原子替换；即使服务器提供 activate_project 也不调用。",
+    "excluded": "没有扩展其他模块，没有读取其他实现、评测或代理输出。"
+  },
+  "old_finding_freshness": {
+    "checks": [
+      {
+        "id": "F-bridge-log-001",
+        "command": [
+          "python3",
+          "<codebase-convergence>/scripts/finding_contract.py",
+          "check",
+          "--root",
+          "<repository>",
+          "--finding",
+          "<evaluation>/bridge-review/F-bridge-log-001.json"
+        ],
+        "exit_code": 1,
+        "result": {
+          "differences": [
+            {
+              "current": {
+                "path": "project-evolution-engine/scripts/serena_mcp.py",
+                "role": "canonical-owner",
+                "sha256": "sha256:9a792ef48d6efb4d6e438bd2b3034ed39660281da3f82c138e6b1a41751e6310",
+                "state": "present"
+              },
+              "path": "project-evolution-engine/scripts/serena_mcp.py",
+              "recorded": {
+                "path": "project-evolution-engine/scripts/serena_mcp.py",
+                "role": "canonical-owner",
+                "sha256": "sha256:77fce985d217b98fbb292a8930fd25633952c45e7e8e681c9065fd13bc09575a",
+                "state": "present"
+              }
+            },
+            {
+              "current": {
+                "path": "tests/test_serena_mcp.py",
+                "role": "test",
+                "sha256": "sha256:29d3e444ff6a32bb9fa71f95e5e2cebf7d3c0d5be294d3151d4000a5eec06f4e",
+                "state": "present"
+              },
+              "path": "tests/test_serena_mcp.py",
+              "recorded": {
+                "path": "tests/test_serena_mcp.py",
+                "role": "test",
+                "sha256": "sha256:4492d0e05657956e6c3bc193095adc058eb29db2621832e1564485bb51ce3514",
+                "state": "present"
+              }
+            }
+          ],
+          "eligible_for_remedy_review": false,
+          "finding_id": "F-bridge-log-001",
+          "freshness": "stale",
+          "matches_recorded_freshness": false,
+          "observations": [
+            {
+              "path": "project-evolution-engine/scripts/change_evidence.py",
+              "role": "subject",
+              "sha256": "sha256:b601879a57a09a3da8ea076e3c4d4df4b2219a5177da6e75df1e24eca721dc6f",
+              "state": "present"
+            },
+            {
+              "path": "project-evolution-engine/scripts/serena_mcp.py",
+              "role": "canonical-owner",
+              "sha256": "sha256:9a792ef48d6efb4d6e438bd2b3034ed39660281da3f82c138e6b1a41751e6310",
+              "state": "present"
+            },
+            {
+              "path": "tests/test_serena_mcp.py",
+              "role": "test",
+              "sha256": "sha256:29d3e444ff6a32bb9fa71f95e5e2cebf7d3c0d5be294d3151d4000a5eec06f4e",
+              "state": "present"
+            }
+          ],
+          "ok": false,
+          "recorded_freshness": "current",
+          "unavailable": []
+        },
+        "stderr": ""
+      },
+      {
+        "id": "F-bridge-state-002",
+        "command": [
+          "python3",
+          "<codebase-convergence>/scripts/finding_contract.py",
+          "check",
+          "--root",
+          "<repository>",
+          "--finding",
+          "<evaluation>/bridge-review/F-bridge-state-002.json"
+        ],
+        "exit_code": 1,
+        "result": {
+          "differences": [
+            {
+              "current": {
+                "path": "project-evolution-engine/scripts/serena_mcp.py",
+                "role": "canonical-owner",
+                "sha256": "sha256:9a792ef48d6efb4d6e438bd2b3034ed39660281da3f82c138e6b1a41751e6310",
+                "state": "present"
+              },
+              "path": "project-evolution-engine/scripts/serena_mcp.py",
+              "recorded": {
+                "path": "project-evolution-engine/scripts/serena_mcp.py",
+                "role": "canonical-owner",
+                "sha256": "sha256:77fce985d217b98fbb292a8930fd25633952c45e7e8e681c9065fd13bc09575a",
+                "state": "present"
+              }
+            },
+            {
+              "current": {
+                "path": "tests/test_serena_mcp.py",
+                "role": "test",
+                "sha256": "sha256:29d3e444ff6a32bb9fa71f95e5e2cebf7d3c0d5be294d3151d4000a5eec06f4e",
+                "state": "present"
+              },
+              "path": "tests/test_serena_mcp.py",
+              "recorded": {
+                "path": "tests/test_serena_mcp.py",
+                "role": "test",
+                "sha256": "sha256:4492d0e05657956e6c3bc193095adc058eb29db2621832e1564485bb51ce3514",
+                "state": "present"
+              }
+            }
+          ],
+          "eligible_for_remedy_review": false,
+          "finding_id": "F-bridge-state-002",
+          "freshness": "stale",
+          "matches_recorded_freshness": false,
+          "observations": [
+            {
+              "path": "project-evolution-engine/scripts/change_evidence.py",
+              "role": "subject",
+              "sha256": "sha256:b601879a57a09a3da8ea076e3c4d4df4b2219a5177da6e75df1e24eca721dc6f",
+              "state": "present"
+            },
+            {
+              "path": "project-evolution-engine/scripts/serena_mcp.py",
+              "role": "canonical-owner",
+              "sha256": "sha256:9a792ef48d6efb4d6e438bd2b3034ed39660281da3f82c138e6b1a41751e6310",
+              "state": "present"
+            },
+            {
+              "path": "tests/test_serena_mcp.py",
+              "role": "test",
+              "sha256": "sha256:29d3e444ff6a32bb9fa71f95e5e2cebf7d3c0d5be294d3151d4000a5eec06f4e",
+              "state": "present"
+            }
+          ],
+          "ok": false,
+          "recorded_freshness": "current",
+          "unavailable": []
+        },
+        "stderr": ""
+      },
+      {
+        "id": "F-bridge-activation-003",
+        "command": [
+          "python3",
+          "<codebase-convergence>/scripts/finding_contract.py",
+          "check",
+          "--root",
+          "<repository>",
+          "--finding",
+          "<evaluation>/bridge-review/F-bridge-activation-003.json"
+        ],
+        "exit_code": 1,
+        "result": {
+          "differences": [
+            {
+              "current": {
+                "path": "project-evolution-engine/scripts/serena_mcp.py",
+                "role": "canonical-owner",
+                "sha256": "sha256:9a792ef48d6efb4d6e438bd2b3034ed39660281da3f82c138e6b1a41751e6310",
+                "state": "present"
+              },
+              "path": "project-evolution-engine/scripts/serena_mcp.py",
+              "recorded": {
+                "path": "project-evolution-engine/scripts/serena_mcp.py",
+                "role": "canonical-owner",
+                "sha256": "sha256:77fce985d217b98fbb292a8930fd25633952c45e7e8e681c9065fd13bc09575a",
+                "state": "present"
+              }
+            },
+            {
+              "current": {
+                "path": "tests/test_serena_mcp.py",
+                "role": "test",
+                "sha256": "sha256:29d3e444ff6a32bb9fa71f95e5e2cebf7d3c0d5be294d3151d4000a5eec06f4e",
+                "state": "present"
+              },
+              "path": "tests/test_serena_mcp.py",
+              "recorded": {
+                "path": "tests/test_serena_mcp.py",
+                "role": "test",
+                "sha256": "sha256:4492d0e05657956e6c3bc193095adc058eb29db2621832e1564485bb51ce3514",
+                "state": "present"
+              }
+            }
+          ],
+          "eligible_for_remedy_review": false,
+          "finding_id": "F-bridge-activation-003",
+          "freshness": "stale",
+          "matches_recorded_freshness": false,
+          "observations": [
+            {
+              "path": "project-evolution-engine/scripts/change_evidence.py",
+              "role": "subject",
+              "sha256": "sha256:b601879a57a09a3da8ea076e3c4d4df4b2219a5177da6e75df1e24eca721dc6f",
+              "state": "present"
+            },
+            {
+              "path": "project-evolution-engine/scripts/serena_mcp.py",
+              "role": "canonical-owner",
+              "sha256": "sha256:9a792ef48d6efb4d6e438bd2b3034ed39660281da3f82c138e6b1a41751e6310",
+              "state": "present"
+            },
+            {
+              "path": "tests/test_serena_mcp.py",
+              "role": "test",
+              "sha256": "sha256:29d3e444ff6a32bb9fa71f95e5e2cebf7d3c0d5be294d3151d4000a5eec06f4e",
+              "state": "present"
+            }
+          ],
+          "ok": false,
+          "recorded_freshness": "current",
+          "unavailable": []
+        },
+        "stderr": ""
+      }
+    ],
+    "interpretation": "三个 check 子命令均退出 1，旧证据因桥接器及测试已变化而正确判为 stale；解决结论由本次对修复后的源代码和真实运行的独立验证支持。",
+    "output_path": "<evaluation>/bridge-review/recheck-old-finding-freshness.json"
+  },
+  "finding_resolutions": [
+    {
+      "id": "F-bridge-log-001",
+      "status": "resolved",
+      "old_evidence_freshness": "stale",
+      "current_locations": [
+        {
+          "path": "project-evolution-engine/scripts/serena_mcp.py",
+          "start_line": 28,
+          "end_line": 30
+        },
+        {
+          "path": "project-evolution-engine/scripts/serena_mcp.py",
+          "start_line": 51,
+          "end_line": 65
+        }
+      ],
+      "original_reproduction_command": "PYTHONDONTWRITEBYTECODE=1 <evaluation>/serena-env/bin/python <evaluation>/bridge-review/recheck-original/reproduce_bridge.py symlink-log",
+      "outer_exit_code": 0,
+      "real_bridge_exit_code": 2,
+      "observed": {
+        "reported_ok": false,
+        "victim_changed": false,
+        "victim_before_bytes": 45,
+        "victim_after_bytes": 45,
+        "victim_before_sha256": "0e6d5b969ba39e6f6a63d3b53c93eb27e64b9b1ef8200cf6080fb635a8e76ab1",
+        "victim_after_sha256": "0e6d5b969ba39e6f6a63d3b53c93eb27e64b9b1ef8200cf6080fb635a8e76ab1",
+        "rejection": "managed state path cannot be a symlink: last-server.log"
+      },
+      "evidence_path": "<evaluation>/bridge-review/recheck-original/symlink-log-evidence.json",
+      "hardlink_check": "test_log_replacement_does_not_truncate_an_external_hardlink 在 11 项测试中通过；日志目录项被替换，原始硬链接目标的字节保持不变。"
+    },
+    {
+      "id": "F-bridge-state-002",
+      "status": "resolved",
+      "old_evidence_freshness": "stale",
+      "current_locations": [
+        {
+          "path": "project-evolution-engine/scripts/serena_mcp.py",
+          "start_line": 31,
+          "end_line": 44
+        },
+        {
+          "path": "project-evolution-engine/scripts/serena_mcp.py",
+          "start_line": 82,
+          "end_line": 89
+        }
+      ],
+      "original_reproduction_command": "PYTHONDONTWRITEBYTECODE=1 <evaluation>/serena-env/bin/python <evaluation>/bridge-review/recheck-original/reproduce_bridge.py missing-state",
+      "outer_exit_code": 0,
+      "real_bridge_exit_code": 0,
+      "observed": {
+        "reported_ok": true,
+        "external_project_state_recreated": true,
+        "local_config_changed": false,
+        "changed_project_paths": [],
+        "project_files_before": {
+          ".serena/project.yml": "19b5fdd0c44d607fb0398fb525f90816f2480d93427d0f6f7d7fd7bd0be8d77b",
+          "facts.mcpfixture": "97d76124faa8ed6f40d94322c360fb6c217b8f71ab80563f9b395eed36956e75"
+        },
+        "project_files_after": {
+          ".serena/project.yml": "19b5fdd0c44d607fb0398fb525f90816f2480d93427d0f6f7d7fd7bd0be8d77b",
+          "facts.mcpfixture": "97d76124faa8ed6f40d94322c360fb6c217b8f71ab80563f9b395eed36956e75"
+        }
+      },
+      "evidence_path": "<evaluation>/bridge-review/recheck-original/missing-state-evidence.json"
+    },
+    {
+      "id": "F-bridge-activation-003",
+      "status": "resolved",
+      "old_evidence_freshness": "stale",
+      "current_locations": [
+        {
+          "path": "project-evolution-engine/scripts/serena_mcp.py",
+          "start_line": 151,
+          "end_line": 165
+        }
+      ],
+      "original_reproduction_command": "PYTHONDONTWRITEBYTECODE=1 <evaluation>/serena-env/bin/python <evaluation>/bridge-review/recheck-original/reproduce_bridge.py context-override",
+      "outer_exit_code": 0,
+      "real_bridge_exit_code": 0,
+      "observed": {
+        "reported_ok": true,
+        "activation_metadata": null,
+        "project_unchanged": true,
+        "activate_project_still_offered": true,
+        "actual_call_tool_dispatches": [
+          "get_current_config"
+        ],
+        "activate_project_dispatched": false
+      },
+      "evidence_path": "<evaluation>/bridge-review/recheck-original/context-override-evidence.json",
+      "dispatch_trace": {
+        "command": "PYTHONDONTWRITEBYTECODE=1 <evaluation>/serena-env/bin/python <evaluation>/bridge-review/recheck_trace_describe.py <evaluation>/bridge-review/recheck-original/context-override-a8gx9oyr",
+        "exit_code": 0,
+        "evidence_path": "<evaluation>/bridge-review/recheck-describe-call-trace.json",
+        "method": "在真实 bridge.run(requests=None) 路径记录 ClientSession.call_tool/list_tools 的参数，然后原样 await 官方 SDK 原方法。Serena 子进程、协议、工具列表与响应均为真实值；未替换服务或伪造返回结果。"
+      }
+    }
+  ],
+  "normal_flow_verification": {
+    "unit_tests": {
+      "command": "PYTHONDONTWRITEBYTECODE=1 <evaluation>/serena-env/bin/python -m unittest discover -s tests -p test_serena_mcp.py -v",
+      "exit_code": 0,
+      "run": 11,
+      "passed": 11,
+      "output_path": "<evaluation>/bridge-review/recheck-unit-tests.txt"
+    },
+    "first_connections": [
+      {
+        "case": "symlink-log",
+        "command": [
+          "<evaluation>/serena-env/bin/python",
+          "-B",
+          "<repository>/project-evolution-engine/scripts/serena_mcp.py",
+          "--root",
+          "<evaluation>/bridge-review/recheck-original/symlink-log-xmp45bhp/project",
+          "--state-dir",
+          "<evaluation>/bridge-review/recheck-original/symlink-log-xmp45bhp/state",
+          "--serena",
+          "<evaluation>/serena-env/bin/serena",
+          "--timeout",
+          "15",
+          "--describe"
+        ],
+        "exit_code": 0,
+        "project_unchanged": true
+      },
+      {
+        "case": "missing-state",
+        "command": [
+          "<evaluation>/serena-env/bin/python",
+          "-B",
+          "<repository>/project-evolution-engine/scripts/serena_mcp.py",
+          "--root",
+          "<evaluation>/bridge-review/recheck-original/missing-state-xzwa1jfw/project",
+          "--state-dir",
+          "<evaluation>/bridge-review/recheck-original/missing-state-xzwa1jfw/state",
+          "--serena",
+          "<evaluation>/serena-env/bin/serena",
+          "--timeout",
+          "15",
+          "--describe"
+        ],
+        "exit_code": 0,
+        "project_unchanged": true
+      },
+      {
+        "case": "context-override",
+        "command": [
+          "<evaluation>/serena-env/bin/python",
+          "-B",
+          "<repository>/project-evolution-engine/scripts/serena_mcp.py",
+          "--root",
+          "<evaluation>/bridge-review/recheck-original/context-override-a8gx9oyr/project",
+          "--state-dir",
+          "<evaluation>/bridge-review/recheck-original/context-override-a8gx9oyr/state",
+          "--serena",
+          "<evaluation>/serena-env/bin/serena",
+          "--timeout",
+          "15",
+          "--describe"
+        ],
+        "exit_code": 0,
+        "project_unchanged": true
+      },
+      {
+        "case": "query-error",
+        "command": [
+          "<evaluation>/serena-env/bin/python",
+          "-B",
+          "<repository>/project-evolution-engine/scripts/serena_mcp.py",
+          "--root",
+          "<evaluation>/bridge-review/recheck-original/query-error-ivd6pwn3/project",
+          "--state-dir",
+          "<evaluation>/bridge-review/recheck-original/query-error-ivd6pwn3/state",
+          "--serena",
+          "<evaluation>/serena-env/bin/serena",
+          "--timeout",
+          "15",
+          "--describe"
+        ],
+        "exit_code": 0,
+        "project_unchanged": true
+      }
+    ],
+    "reused_query_session": {
+      "command": [
+        "<evaluation>/serena-env/bin/python",
+        "-B",
+        "<repository>/project-evolution-engine/scripts/serena_mcp.py",
+        "--root",
+        "<evaluation>/bridge-review/recheck-original/query-error-ivd6pwn3/project",
+        "--state-dir",
+        "<evaluation>/bridge-review/recheck-original/query-error-ivd6pwn3/state",
+        "--serena",
+        "<evaluation>/serena-env/bin/serena",
+        "--timeout",
+        "15",
+        "--requests",
+        "<evaluation>/bridge-review/recheck-original/query-error-ivd6pwn3/query-results-requests.json"
+      ],
+      "exit_code": 1,
+      "connected": true,
+      "ok": false,
+      "valid_query_is_error": false,
+      "valid_query_result": {
+        "meta": null,
+        "content": [
+          {
+            "type": "text",
+            "text": "{\"facts.mcpfixture\": [\"  >   0:bridge_review_token = unchanged\"]}",
+            "annotations": null,
+            "meta": null
+          }
+        ],
+        "structuredContent": {
+          "result": "{\"facts.mcpfixture\": [\"  >   0:bridge_review_token = unchanged\"]}"
+        },
+        "isError": false
+      },
+      "missing_file_query_is_error": true,
+      "missing_file_error": [
+        {
+          "type": "text",
+          "text": "Error executing tool search_for_pattern: FileNotFoundError: Relative path missing.mcpfixture does not exist.",
+          "annotations": null,
+          "meta": null
+        }
+      ],
+      "project_unchanged": true,
+      "interpretation": "同一复用会话先成功读取专有 token，再对不存在路径返回 isError=true。批次 CLI=1、ok=false 正确体现第二条查询失败。",
+      "evidence_path": "<evaluation>/bridge-review/recheck-original/query-error-evidence.json"
+    }
+  },
+  "commands": [
+    {
+      "label": "bridge-recheck-current-source",
+      "command": "nl -ba project-evolution-engine/scripts/serena_mcp.py",
+      "exit_code": 0
+    },
+    {
+      "label": "bridge-recheck-current-tests",
+      "command": "nl -ba tests/test_serena_mcp.py",
+      "exit_code": 0
+    },
+    {
+      "label": "bridge-recheck-old-evidence-freshness",
+      "command": "python3 - <<'PY'\nimport json,subprocess\nfrom pathlib import Path\nroot='<repository>'\nfolder=Path('<evaluation>/bridge-review')\nvalidator='<codebase-convergence>/scripts/finding_contract.py'\nresults=[]\nfor key in ['F-bridge-log-001','F-bridge-state-002','F-bridge-activation-003']:\n    command=['python3',validator,'check','--root',root,'--finding',str(folder/(key+'.json'))]\n    result=subprocess.run(command,capture_output=True,text=True)\n    results.append({'id':key,'command':command,'exit_code':result.returncode,'result':json.loads(result.stdout),'stderr':result.stderr})\nprint(json.dumps(results,ensure_ascii=False,indent=2))\nPY",
+      "exit_code": 0
+    },
+    {
+      "label": "bridge-recheck-preserve-old-evidence-and-copy-reproduction",
+      "command": "python3 - <<'PY'\nfrom pathlib import Path\nimport hashlib,json,shutil\nfolder=Path('<evaluation>/bridge-review').resolve()\nrepo=Path('<repository>')\nkeys=['F-bridge-log-001','F-bridge-state-002','F-bridge-activation-003']\nartifacts=['report.json','commands.json','unit-tests.txt','baseline-describe.json','reproduce_bridge.py']\nartifacts += [key+suffix for key in keys for suffix in ['.draft.json','.json','.check.json']]\ncases=['query-error','symlink-log','missing-state','context-override']\nartifacts += [case+'-evidence.json' for case in cases]\nfixtures=[Path(json.loads((folder/'baseline-describe.json').read_text())['fixture'])]\nfixtures += [Path(json.loads((folder/(case+'-evidence.json')).read_text())['fixture']) for case in cases]\npaths={folder/name for name in artifacts}\nfor fixture in fixtures:\n    assert fixture.is_relative_to(folder)\n    paths.update(path for path in fixture.rglob('*') if path.is_file() or path.is_symlink())\nsnapshot={}\nfor path in sorted(paths):\n    key=path.relative_to(folder).as_posix()\n    snapshot[key]={'symlink':str(path.readlink())} if path.is_symlink() else {'sha256':hashlib.sha256(path.read_bytes()).hexdigest()}\nsource_files=['project-evolution-engine/scripts/serena_mcp.py','tests/test_serena_mcp.py','project-evolution-engine/scripts/change_evidence.py']\nrecord={'original_artifacts':snapshot,'source_files':{name:hashlib.sha256((repo/name).read_bytes()).hexdigest() for name in source_files}}\n(folder/'recheck-preservation-baseline.json').write_text(json.dumps(record,ensure_ascii=False,indent=2)+'\\n')\ncopy=folder/'recheck-original'/'reproduce_bridge.py'\ncopy.parent.mkdir(exist_ok=True)\nshutil.copyfile(folder/'reproduce_bridge.py',copy)\nassert copy.read_bytes()==(folder/'reproduce_bridge.py').read_bytes()\nprint(json.dumps({'preserved_artifact_count':len(snapshot),'source_files':record['source_files'],'original_reproduction_copy':str(copy),'copy_sha256':hashlib.sha256(copy.read_bytes()).hexdigest()},ensure_ascii=False,indent=2))\nPY",
+      "exit_code": 0
+    },
+    {
+      "label": "bridge-recheck-eleven-unit-tests",
+      "command": "PYTHONDONTWRITEBYTECODE=1 <evaluation>/serena-env/bin/python -m unittest discover -s tests -p test_serena_mcp.py -v",
+      "exit_code": 0
+    },
+    {
+      "label": "bridge-recheck-original-symlink-log",
+      "command": "PYTHONDONTWRITEBYTECODE=1 <evaluation>/serena-env/bin/python <evaluation>/bridge-review/recheck-original/reproduce_bridge.py symlink-log",
+      "exit_code": 0
+    },
+    {
+      "label": "bridge-recheck-original-missing-state",
+      "command": "PYTHONDONTWRITEBYTECODE=1 <evaluation>/serena-env/bin/python <evaluation>/bridge-review/recheck-original/reproduce_bridge.py missing-state",
+      "exit_code": 0
+    },
+    {
+      "label": "bridge-recheck-original-context-override",
+      "command": "PYTHONDONTWRITEBYTECODE=1 <evaluation>/serena-env/bin/python <evaluation>/bridge-review/recheck-original/reproduce_bridge.py context-override",
+      "exit_code": 0
+    },
+    {
+      "label": "bridge-recheck-original-query-error",
+      "command": "PYTHONDONTWRITEBYTECODE=1 <evaluation>/serena-env/bin/python <evaluation>/bridge-review/recheck-original/reproduce_bridge.py query-error",
+      "exit_code": 0
+    },
+    {
+      "label": "bridge-recheck-trace-real-describe-dispatch",
+      "command": "PYTHONDONTWRITEBYTECODE=1 <evaluation>/serena-env/bin/python <evaluation>/bridge-review/recheck_trace_describe.py <evaluation>/bridge-review/recheck-original/context-override-a8gx9oyr",
+      "exit_code": 0
+    },
+    {
+      "label": "bridge-recheck-final-behavior-and-preservation-assertions",
+      "command": "python3 - <<'PY'\nfrom pathlib import Path\nimport hashlib,json\nfolder=Path('<evaluation>/bridge-review').resolve()\nrepo=Path('<repository>')\nbefore=json.loads((folder/'recheck-preservation-baseline.json').read_text())\nchanged=[]\nfor name,expected in before['original_artifacts'].items():\n    path=folder/name\n    if path.is_symlink():\n        actual={'symlink':str(path.readlink())}\n    elif path.is_file():\n        actual={'sha256':hashlib.sha256(path.read_bytes()).hexdigest()}\n    else:\n        actual={'state':'missing'}\n    if actual!=expected:\n        changed.append(name)\nafter_sources={name:hashlib.sha256((repo/name).read_bytes()).hexdigest() for name in before['source_files']}\nreplay=folder/'recheck-original'\nlinked=json.loads((replay/'symlink-log-evidence.json').read_text())\nmissing=json.loads((replay/'missing-state-evidence.json').read_text())\nactivation=json.loads((replay/'context-override-evidence.json').read_text())\nqueries=json.loads((replay/'query-error-evidence.json').read_text())\ntrace=json.loads((folder/'recheck-describe-call-trace.json').read_text())\nlinked_error=json.loads((Path(linked['fixture'])/'describe-with-linked-log.json').read_text())['result']['error']\nassert linked['retry_exit_code']==2 and not linked['victim_changed'] and linked['original_content_preserved']\nassert missing['retry_exit_code']==0 and not missing['local_config_changed'] and missing['changed_project_paths']==[] and missing['external_project_state_recreated']\nassert activation['retry_exit_code']==0 and activation['activation_during_describe'] is None\nassert trace['activate_project_offered'] and not trace['activate_project_dispatched']\nassert queries['query_exit_code']==1 and queries['calls'][0]['result']['isError'] is False and queries['calls'][1]['result']['isError'] is True\nassert all(case['first_describe_exit_code']==0 and case['first_project_unchanged'] for case in [linked,missing,activation,queries])\nassert not changed\nassert after_sources==before['source_files']\nresult={'original_artifacts_preserved':True,'original_artifact_count':len(before['original_artifacts']),'changed_original_artifacts':changed,'source_files_unchanged_during_recheck':True,'source_files':after_sources,'linked_log_rejection':linked_error,'all_requested_scenarios_verified':True}\n(folder/'recheck-verification-evidence.json').write_text(json.dumps(result,ensure_ascii=False,indent=2)+'\\n')\nprint(json.dumps(result,ensure_ascii=False,indent=2))\nPY",
+      "exit_code": 0
+    }
+  ],
+  "exit_code_notes": "三个修复场景复现脚本和正常查询复现脚本的外层命令均退出 0。内部真实桥接 CLI 在日志符号链接场景应退出 2，在缺失目录恢复与自定义 context 场景退出 0；包含不存在文件查询的批次退出 1。这些预期非零状态均已核对。",
+  "current_evidence_basis": {
+    "project-evolution-engine/scripts/serena_mcp.py": "9a792ef48d6efb4d6e438bd2b3034ed39660281da3f82c138e6b1a41751e6310",
+    "tests/test_serena_mcp.py": "29d3e444ff6a32bb9fa71f95e5e2cebf7d3c0d5be294d3151d4000a5eec06f4e",
+    "project-evolution-engine/scripts/change_evidence.py": "b601879a57a09a3da8ea076e3c4d4df4b2219a5177da6e75df1e24eca721dc6f"
+  },
+  "preservation": {
+    "repository_modified_by_reviewer": false,
+    "real_user_configuration_modified": false,
+    "repository_files_unchanged_during_recheck": true,
+    "all_original_artifacts_preserved": true,
+    "original_artifact_count": 78,
+    "changed_original_artifacts": [],
+    "baseline_manifest": "<evaluation>/bridge-review/recheck-preservation-baseline.json",
+    "verification_evidence": "<evaluation>/bridge-review/recheck-verification-evidence.json",
+    "original_report": "<evaluation>/bridge-review/report.json",
+    "statement": "本次没有修改审核仓库源码、测试、配置或 Git 状态，没有修改用户真实 Serena 配置。78 个旧证据文件及链接均逐项校验未变；旧复现脚本以字节相同副本在 recheck-original 内运行。"
+  },
+  "architecture_assessment": {
+    "interface": "公共 --describe/--requests 接口保持不变。",
+    "locality": "状态目录完整性检查集中在每次复用的入口；日志安全写入由 server_log 封装；握手移除了禁止的 activate_project 调用。",
+    "verification_surface": "复用了原始官方 stdio 场景、公共 CLI 和新增日志/状态回归测试；对可能被 metadata 隐藏的调用用真实 SDK 参数追踪独立确认。",
+    "new_candidates": []
+  },
+  "new_findings": [],
+  "repairs_performed_by_reviewer": [],
+  "uncovered": [
+    "本次限定为三个原始问题及正常查询回归，没有审核其他模块。",
+    "Python/TypeScript 完整语言服务联调不计入本报告，未读取其其他运行结果。",
+    "未执行文件系统并发竞态压力测试。",
+    "解决结论基于记录的当前源文件指纹及上述实际场景，不等于全系统正确性证明。"
+  ]
+}

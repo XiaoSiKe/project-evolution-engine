@@ -1,0 +1,54 @@
+{
+  "schema_version": 1,
+  "category": "bug",
+  "confidence": "confirmed",
+  "evidence_basis": {
+    "files": [
+      {
+        "path": "project-evolution-engine/scripts/serena_mcp.py",
+        "role": "canonical-owner"
+      },
+      {
+        "path": "tests/test_serena_mcp.py",
+        "role": "test"
+      },
+      {
+        "path": "project-evolution-engine/scripts/change_evidence.py",
+        "role": "subject"
+      }
+    ]
+  },
+  "canonical_owner": {
+    "status": "confirmed",
+    "path": "project-evolution-engine/scripts/serena_mcp.py"
+  },
+  "disposition": "direct-repair",
+  "id": "F-bridge-state-002",
+  "severity": "high",
+  "claim": "Reusing a managed state whose project directory is missing lets Serena fall back to and rewrite the target project's existing .serena configuration.",
+  "impact": "A partial or cleaned external state directory silently loses the isolation guaranteed on first creation. A normal --describe restart can rewrite an existing project.yml and create .serena/.gitignore inside the target project, while the bridge returns ok=true and claims project-specific external state.",
+  "evidence": [
+    {
+      "kind": "file",
+      "path": "project-evolution-engine/scripts/serena_mcp.py",
+      "start_line": 33,
+      "end_line": 45,
+      "summary": "The marker validates the requested root but the reuse branch returns without requiring state/project to exist or checking the effective metadata directory."
+    },
+    {
+      "kind": "file",
+      "path": "project-evolution-engine/scripts/serena_mcp.py",
+      "start_line": 46,
+      "end_line": 50,
+      "summary": "Only initial creation ensures the external project directory exists; that existence is required to prevent the upstream fallback."
+    },
+    {
+      "kind": "command",
+      "summary": "The provided official Serena source config/serena_config.py get_project_serena_folder (lines 1394-1412) falls back to <project>/.serena when the configured folder is absent; ProjectConfig.load (lines 698-733) re-saves incomplete existing project.yml files."
+    },
+    {
+      "kind": "reproduction",
+      "summary": "PYTHONDONTWRITEBYTECODE=1 <evaluation>/serena-env/bin/python <evaluation>/bridge-review/reproduce_bridge.py missing-state. Start with a fixture's original .serena/project.yml and an absent external state. First --describe exits 0 and preserves all project files. Move state/project to state/project.saved, retaining the marker and config, and run --describe again. It exits 0 and reports ok=true, rewrites .serena/project.yml and creates .serena/.gitignore. Evidence: <evaluation>/bridge-review/missing-state-evidence.json."
+    }
+  ]
+}

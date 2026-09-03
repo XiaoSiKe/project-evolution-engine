@@ -1,0 +1,26 @@
+{
+  "status": "completed",
+  "changed_files": [
+    "docs/api.md",
+    "docs/async.md",
+    "docs/quickstart.md",
+    "httpx/_decoders.py",
+    "httpx/_models.py",
+    "tests/models/test_responses.py",
+    "tests/test_decoders.py"
+  ],
+  "checks": [
+    {
+      "command": "<evaluation>/eval-env/bin/python -m pytest -q tests/test_decoders.py tests/models/test_responses.py",
+      "exit_code": 0,
+      "outcome": "最终 507 项测试通过；修改前基线为 146 项通过。"
+    },
+    {
+      "command": "git diff --check",
+      "exit_code": 0,
+      "outcome": "通过，无空白错误。"
+    }
+  ],
+  "questions": [],
+  "notes": "两个接口已增加 keepends=False，共用 LineDecoder 实现原始行尾保留，保持默认行为、增量产出和现有解码及关闭流程。测试覆盖全部 splitlines 分隔符、跨块 UTF-8/CRLF、空块、缓存与真实流、UTF-16 和 gzip。文档已更新，依赖和版本未变。现有环境未安装 Ruff/Mypy，未运行这两项检查。"
+}

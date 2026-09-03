@@ -47,3 +47,20 @@ jobs:
           npm ci --prefix evals/real-projects/node --ignore-scripts --no-audit --no-fund
       - name: Verify original behavior and negative acceptance checks
         run: python scripts/real_project_eval.py self-check
+
+  serena-integration:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.16.0'
+      - name: Install the pinned optional MCP runtime
+        run: python -m pip install 'uv==0.12.3' 'serena-agent @ git+https://github.com/oraios/serena.git@813fd98f4fd32e0606cb52281467fc055e45a356'
+      - name: Exercise real Python and TypeScript symbol queries and context refresh
+        run: python scripts/check_serena_integration.py --serena "$(command -v serena)" --output /tmp/evolution-serena-ci

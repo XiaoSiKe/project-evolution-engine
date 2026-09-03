@@ -1,0 +1,412 @@
+{
+  "version": "v0.3.0",
+  "prepared_at": 1788420034.063148,
+  "cli_version": "codex-cli 0.152.1",
+  "configured_model": {
+    "model": "gpt-5.6-sol",
+    "model_provider": null,
+    "model_reasoning_effort": "max",
+    "profile": null
+  },
+  "method": "Two pinned public projects, two independent runs per condition; same original task, tool environment, model configuration and acceptance checks.",
+  "frozen_evaluators": {
+    "cases.json": "3301302542aa90563e8baedb8c78ef047c80a6edee4a64a3552628f6f31d6c68",
+    "httpx_oracle.py": "59a6e64a553d5fec932331b423ec8c72932b73b8d060d9d3de6eeb3101f76d8b",
+    "datasette_oracle.py": "c2a7d21c7d6521c799b9aa775222e522d7d4716c3a91f16e2eaa5326d94afdb4"
+  },
+  "skill_snapshot_files": {
+    "LICENSE": "bb696443e9f972ea52d6c8204e5248fafbf9989f71da1be79adcc15e5476cae9",
+    "SKILL.md": "332329e38909de3d1106abe59bc8638a29af1ad2495a1016df9b788940544912",
+    "THIRD_PARTY_NOTICES.md": "077ac907acd0d513237e8b68ba778ec351492f0a42f5ec4ad8b5db2c9728b30d",
+    "agents/openai.yaml": "41f1395226a07142019c91557cf8dd306223dc917b9949cac42ada876beb9649",
+    "references/change-evidence.md": "9f1acd323caadca830f3128d73b05ef1db3a309e46e23fc1982449c50eaa4771",
+    "references/execution-workflow.md": "5935a85c758646fe5f87862376a40b68745725e065b848d18c67ca1aa54a4a66",
+    "references/incremental-context.md": "5b4722bf415c947655b2a74eb0e19a33a162c3c3cedbe0b3f4225513d9d79725",
+    "references/integration-analysis.md": "b17c870ed76345ff8265d1ab38c629540b58035a86683ae9d703e32cef4e921a",
+    "references/project-context.md": "f3aeb2b9b7c165c8be9e6748b1823d00e61b73b6f58e63539d5caddf9491299f",
+    "references/serena-stdio.md": "1adaf403b2f403f3351549d6585d37048b01222ab78765266311e240a092a0d3",
+    "references/sources.md": "64e20ff1427424e32db37e1911d69a2a40b7c9ea3d84e80cbb3d8e44214de657",
+    "references/tool-routing.md": "f9646e615fe71e438bdf6fb8c1d730b2ae829c68cab4c9f272a71f1666897765",
+    "references/verification.md": "da1049c757776a8e14dc54023c6edecf7a4f00cac7f6b864fd24cb2e4c14b35d",
+    "scripts/change_evidence.py": "b601879a57a09a3da8ea076e3c4d4df4b2219a5177da6e75df1e24eca721dc6f",
+    "scripts/collect_evidence.py": "6293f3cc73bd4dbcfaf7b897f97e77e762e8fa96185ed83bb0666072a76520c6",
+    "scripts/refresh_context.py": "bc47ac29a4bf10312daeb0898e78cc7e30a09cdd76ec6bfcc52911f764fab2a4",
+    "scripts/serena_mcp.py": "77fce985d217b98fbb292a8930fd25633952c45e7e8e681c9065fd13bc09575a"
+  },
+  "release_package_differences_from_frozen_input": [
+    "references/serena-stdio.md",
+    "references/sources.md",
+    "scripts/serena_mcp.py"
+  ],
+  "groups": [
+    {
+      "case": "datasette-csv-null",
+      "condition": "baseline",
+      "runs": 2,
+      "passed": 2,
+      "wall_seconds": {
+        "median": 532.0809999999999,
+        "min": 483.525,
+        "max": 580.637
+      },
+      "input_tokens_median": 2228037.0,
+      "cached_input_tokens_median": 2109952.0,
+      "uncached_input_tokens_median": 118085.0,
+      "output_tokens_median": 24503.5,
+      "commands_median": 40.0
+    },
+    {
+      "case": "datasette-csv-null",
+      "condition": "skill",
+      "runs": 2,
+      "passed": 2,
+      "wall_seconds": {
+        "median": 620.3264999999999,
+        "min": 593.161,
+        "max": 647.492
+      },
+      "input_tokens_median": 2452432.0,
+      "cached_input_tokens_median": 2314496.0,
+      "uncached_input_tokens_median": 137936.0,
+      "output_tokens_median": 28786.0,
+      "commands_median": 41.5
+    },
+    {
+      "case": "httpx-line-endings",
+      "condition": "baseline",
+      "runs": 2,
+      "passed": 2,
+      "wall_seconds": {
+        "median": 366.32,
+        "min": 359.527,
+        "max": 373.113
+      },
+      "input_tokens_median": 691604.0,
+      "cached_input_tokens_median": 620096.0,
+      "uncached_input_tokens_median": 71508.0,
+      "output_tokens_median": 18450.5,
+      "commands_median": 29.0
+    },
+    {
+      "case": "httpx-line-endings",
+      "condition": "skill",
+      "runs": 2,
+      "passed": 2,
+      "wall_seconds": {
+        "median": 478.996,
+        "min": 419.247,
+        "max": 538.745
+      },
+      "input_tokens_median": 999966.0,
+      "cached_input_tokens_median": 907392.0,
+      "uncached_input_tokens_median": 92574.0,
+      "output_tokens_median": 23963.5,
+      "commands_median": 46.0
+    }
+  ],
+  "trials": [
+    {
+      "id": 1,
+      "case": "httpx-line-endings",
+      "condition": "baseline",
+      "round": 1,
+      "source_commit": "b5addb64f0161ff6bfe94c124ef76f6a1fba5254",
+      "baseline_sha256": "cdecdfa83f77bbac621b8d0ba277c8fa1baa9dd7ab2e8c22cbd90a4aa7364638",
+      "passed": true,
+      "behavior_passed": true,
+      "checks_passed": 8,
+      "checks_total": 8,
+      "changed_files": [
+        "docs/api.md",
+        "docs/async.md",
+        "docs/quickstart.md",
+        "httpx/_decoders.py",
+        "httpx/_models.py",
+        "tests/models/test_responses.py",
+        "tests/test_decoders.py"
+      ],
+      "report_matches_diff": true,
+      "unanswered_questions": [],
+      "wall_seconds": 373.113,
+      "usage": {
+        "input_tokens": 795871,
+        "cached_input_tokens": 723840,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 18899,
+        "reasoning_output_tokens": 10404
+      },
+      "command_count": 32,
+      "tool_count": 0,
+      "report": "trial-01.report.json",
+      "score": "trial-01.score.json",
+      "execution": "trial-01.execution.json",
+      "patch": "trial-01.patch",
+      "patch_sha256": "0fc9128ce91176a1bfa36b845e86c192ff83e116ac7f8d31657c51131fef6694"
+    },
+    {
+      "id": 2,
+      "case": "datasette-csv-null",
+      "condition": "skill",
+      "round": 1,
+      "source_commit": "bdc973174096cae350ddaa733a10ed8b3ffd970b",
+      "baseline_sha256": "453c7477939cf127144444bdf9540c11a3db23c8ccc9774e107b10855ca67f46",
+      "passed": true,
+      "behavior_passed": true,
+      "checks_passed": 8,
+      "checks_total": 8,
+      "changed_files": [
+        "datasette/views/base.py",
+        "datasette/views/table.py",
+        "docs/csv_export.rst",
+        "tests/test_csv.py"
+      ],
+      "report_matches_diff": true,
+      "unanswered_questions": [],
+      "wall_seconds": 647.492,
+      "usage": {
+        "input_tokens": 2860209,
+        "cached_input_tokens": 2710144,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 30480,
+        "reasoning_output_tokens": 18679
+      },
+      "command_count": 43,
+      "tool_count": 0,
+      "report": "trial-02.report.json",
+      "score": "trial-02.score.json",
+      "execution": "trial-02.execution.json",
+      "patch": "trial-02.patch",
+      "patch_sha256": "6ae83698bf22cae4946d123ba00650160f0a865fef595e47d2f08e854a5b1655"
+    },
+    {
+      "id": 3,
+      "case": "httpx-line-endings",
+      "condition": "skill",
+      "round": 1,
+      "source_commit": "b5addb64f0161ff6bfe94c124ef76f6a1fba5254",
+      "baseline_sha256": "cdecdfa83f77bbac621b8d0ba277c8fa1baa9dd7ab2e8c22cbd90a4aa7364638",
+      "passed": true,
+      "behavior_passed": true,
+      "checks_passed": 8,
+      "checks_total": 8,
+      "changed_files": [
+        "docs/api.md",
+        "docs/async.md",
+        "docs/quickstart.md",
+        "httpx/_decoders.py",
+        "httpx/_models.py",
+        "tests/models/test_responses.py",
+        "tests/test_decoders.py"
+      ],
+      "report_matches_diff": true,
+      "unanswered_questions": [],
+      "wall_seconds": 538.745,
+      "usage": {
+        "input_tokens": 1275182,
+        "cached_input_tokens": 1162368,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 27137,
+        "reasoning_output_tokens": 16820
+      },
+      "command_count": 52,
+      "tool_count": 0,
+      "report": "trial-03.report.json",
+      "score": "trial-03.score.json",
+      "execution": "trial-03.execution.json",
+      "patch": "trial-03.patch",
+      "patch_sha256": "76c7fc730d28609fc8aed33dc400ecb9af93c31d068c3123d31121f501ba4e60"
+    },
+    {
+      "id": 4,
+      "case": "datasette-csv-null",
+      "condition": "baseline",
+      "round": 1,
+      "source_commit": "bdc973174096cae350ddaa733a10ed8b3ffd970b",
+      "baseline_sha256": "453c7477939cf127144444bdf9540c11a3db23c8ccc9774e107b10855ca67f46",
+      "passed": true,
+      "behavior_passed": true,
+      "checks_passed": 8,
+      "checks_total": 8,
+      "changed_files": [
+        "datasette/blob_renderer.py",
+        "datasette/views/base.py",
+        "datasette/views/table.py",
+        "docs/csv_export.rst",
+        "tests/test_csv.py"
+      ],
+      "report_matches_diff": true,
+      "unanswered_questions": [],
+      "wall_seconds": 580.637,
+      "usage": {
+        "input_tokens": 2472219,
+        "cached_input_tokens": 2351360,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 25471,
+        "reasoning_output_tokens": 13980
+      },
+      "command_count": 30,
+      "tool_count": 0,
+      "report": "trial-04.report.json",
+      "score": "trial-04.score.json",
+      "execution": "trial-04.execution.json",
+      "patch": "trial-04.patch",
+      "patch_sha256": "4b305f969fef86ec033a437f3e2422a3025950d5d2e5d005d7a7c4ea295a2edd"
+    },
+    {
+      "id": 5,
+      "case": "httpx-line-endings",
+      "condition": "skill",
+      "round": 2,
+      "source_commit": "b5addb64f0161ff6bfe94c124ef76f6a1fba5254",
+      "baseline_sha256": "cdecdfa83f77bbac621b8d0ba277c8fa1baa9dd7ab2e8c22cbd90a4aa7364638",
+      "passed": true,
+      "behavior_passed": true,
+      "checks_passed": 8,
+      "checks_total": 8,
+      "changed_files": [
+        "docs/api.md",
+        "docs/async.md",
+        "docs/quickstart.md",
+        "httpx/_decoders.py",
+        "httpx/_models.py",
+        "tests/models/test_responses.py",
+        "tests/test_decoders.py"
+      ],
+      "report_matches_diff": true,
+      "unanswered_questions": [],
+      "wall_seconds": 419.247,
+      "usage": {
+        "input_tokens": 724750,
+        "cached_input_tokens": 652416,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 20790,
+        "reasoning_output_tokens": 12090
+      },
+      "command_count": 40,
+      "tool_count": 0,
+      "report": "trial-05.report.json",
+      "score": "trial-05.score.json",
+      "execution": "trial-05.execution.json",
+      "patch": "trial-05.patch",
+      "patch_sha256": "6048a1a89536e6ba5309445c326b8b4856c9911b01dfc2f1587792c9ceeb1f74"
+    },
+    {
+      "id": 6,
+      "case": "datasette-csv-null",
+      "condition": "baseline",
+      "round": 2,
+      "source_commit": "bdc973174096cae350ddaa733a10ed8b3ffd970b",
+      "baseline_sha256": "453c7477939cf127144444bdf9540c11a3db23c8ccc9774e107b10855ca67f46",
+      "passed": true,
+      "behavior_passed": true,
+      "checks_passed": 8,
+      "checks_total": 8,
+      "changed_files": [
+        "datasette/blob_renderer.py",
+        "datasette/views/base.py",
+        "datasette/views/table.py",
+        "docs/csv_export.rst",
+        "tests/test_csv.py"
+      ],
+      "report_matches_diff": true,
+      "unanswered_questions": [],
+      "wall_seconds": 483.525,
+      "usage": {
+        "input_tokens": 1983855,
+        "cached_input_tokens": 1868544,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 23536,
+        "reasoning_output_tokens": 11933
+      },
+      "command_count": 50,
+      "tool_count": 0,
+      "report": "trial-06.report.json",
+      "score": "trial-06.score.json",
+      "execution": "trial-06.execution.json",
+      "patch": "trial-06.patch",
+      "patch_sha256": "ec9c35010ead74308b50da50a6e36bdbb55bf61526e148fdb186f10bb84c4f8c"
+    },
+    {
+      "id": 7,
+      "case": "httpx-line-endings",
+      "condition": "baseline",
+      "round": 2,
+      "source_commit": "b5addb64f0161ff6bfe94c124ef76f6a1fba5254",
+      "baseline_sha256": "cdecdfa83f77bbac621b8d0ba277c8fa1baa9dd7ab2e8c22cbd90a4aa7364638",
+      "passed": true,
+      "behavior_passed": true,
+      "checks_passed": 8,
+      "checks_total": 8,
+      "changed_files": [
+        "docs/api.md",
+        "docs/async.md",
+        "docs/quickstart.md",
+        "httpx/_decoders.py",
+        "httpx/_models.py",
+        "tests/models/test_responses.py",
+        "tests/test_decoders.py"
+      ],
+      "report_matches_diff": true,
+      "unanswered_questions": [],
+      "wall_seconds": 359.527,
+      "usage": {
+        "input_tokens": 587337,
+        "cached_input_tokens": 516352,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 18002,
+        "reasoning_output_tokens": 10425
+      },
+      "command_count": 26,
+      "tool_count": 0,
+      "report": "trial-07.report.json",
+      "score": "trial-07.score.json",
+      "execution": "trial-07.execution.json",
+      "patch": "trial-07.patch",
+      "patch_sha256": "4d5185003678868681a5f3378a211b80fe92981876d6bc003f5b3f8cb32c8403"
+    },
+    {
+      "id": 8,
+      "case": "datasette-csv-null",
+      "condition": "skill",
+      "round": 2,
+      "source_commit": "bdc973174096cae350ddaa733a10ed8b3ffd970b",
+      "baseline_sha256": "453c7477939cf127144444bdf9540c11a3db23c8ccc9774e107b10855ca67f46",
+      "passed": true,
+      "behavior_passed": true,
+      "checks_passed": 8,
+      "checks_total": 8,
+      "changed_files": [
+        "datasette/views/base.py",
+        "datasette/views/table.py",
+        "docs/csv_export.rst",
+        "tests/test_csv.py"
+      ],
+      "report_matches_diff": true,
+      "unanswered_questions": [],
+      "wall_seconds": 593.161,
+      "usage": {
+        "input_tokens": 2044655,
+        "cached_input_tokens": 1918848,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 27092,
+        "reasoning_output_tokens": 16574
+      },
+      "command_count": 40,
+      "tool_count": 0,
+      "report": "trial-08.report.json",
+      "score": "trial-08.score.json",
+      "execution": "trial-08.execution.json",
+      "patch": "trial-08.patch",
+      "patch_sha256": "2d7638f9f51b80b04208b0fcacca2f0577e351ddb70fea4fc4189562aa32b62c"
+    }
+  ],
+  "limitations": [
+    "Two runs per condition do not establish statistical significance or universal improvement.",
+    "The configured model is recorded from local settings, not independently verified at the provider.",
+    "Usage and wall time measure the coding agents only, excluding preparation, evaluator runs, integration work and maintainer review.",
+    "Cached-input and reasoning-output fields are subtotals, not extra tokens to add again. No billing amount is inferred.",
+    "Final unanswered questions are observed in reports; this is not an exhaustive count of internal uncertainty or every possible clarification.",
+    "Serena and specialist integration are evaluated separately, not included as extra tools in the core-only comparison."
+  ],
+  "release_snapshot_note": "The release corrects three files after independent bridge review: the optional Serena client, its guide, and attribution. The captured commands show these files were neither read nor executed by the four core Skill trials. Core instructions and the resources actually used by those trials match their frozen inputs; the bridge was separately retested against real servers."
+}

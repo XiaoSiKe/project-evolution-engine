@@ -1,0 +1,101 @@
+{
+  "commands": [
+    {
+      "command": [
+        "python",
+        "-B",
+        "<repository>/project-evolution-engine/scripts/refresh_context.py",
+        "capture",
+        "--root",
+        "<evaluation>/convergence-review/recheck-scope-5nw78mfw",
+        "--record",
+        "-"
+      ],
+      "exit_code": 0,
+      "stderr": ""
+    },
+    {
+      "command": [
+        "python",
+        "-B",
+        "<repository>/project-evolution-engine/scripts/refresh_context.py",
+        "refresh",
+        "--root",
+        "<evaluation>/convergence-review/recheck-scope-5nw78mfw",
+        "--record",
+        "-"
+      ],
+      "exit_code": 0,
+      "stderr": ""
+    },
+    {
+      "command": [
+        "python",
+        "-B",
+        "<repository>/project-evolution-engine/scripts/refresh_context.py",
+        "refresh",
+        "--root",
+        "<evaluation>/convergence-review/recheck-scope-5nw78mfw",
+        "--record",
+        "-"
+      ],
+      "exit_code": 1,
+      "stderr": ""
+    }
+  ],
+  "outside_scope": {
+    "statuses": {
+      "quote": "current",
+      "api": "current",
+      "port": "current",
+      "notes": "current"
+    },
+    "pending": [],
+    "coverage_gaps": [],
+    "snapshot_matches_captured": true
+  },
+  "inside_scope": {
+    "statuses": {
+      "quote": "unknown",
+      "api": "needs-review",
+      "port": "current",
+      "notes": "current"
+    },
+    "pending": [
+      "api",
+      "quote"
+    ],
+    "coverage_gaps": [
+      "symlink directory not scanned: src/link"
+    ],
+    "fact_reports": [
+      {
+        "id": "quote",
+        "reasons": [
+          "declared fact, evidence, or reference search changed",
+          "evidence is unavailable, ambiguous, or the search has a coverage gap"
+        ],
+        "status": "unknown"
+      },
+      {
+        "id": "api",
+        "reasons": [
+          "depends on facts requiring review: quote"
+        ],
+        "status": "needs-review"
+      },
+      {
+        "id": "port",
+        "reasons": [],
+        "status": "current"
+      },
+      {
+        "id": "notes",
+        "reasons": [],
+        "status": "current"
+      }
+    ],
+    "unaffected_fact_basis_preserved": true
+  },
+  "simulated_project_file_contents_unchanged": true
+}

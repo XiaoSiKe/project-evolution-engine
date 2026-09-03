@@ -1,0 +1,451 @@
+diff --git a/datasette/blob_renderer.py b/datasette/blob_renderer.py
+index b6c8b77ffef17646cc57048760e99b12e0450a02..032e62409a7bed573018b0ea314a1bf6562ae507 100644
+--- a/datasette/blob_renderer.py
++++ b/datasette/blob_renderer.py
+@@ -21,7 +21,10 @@ async def render_blob(datasette, database, rows, columns, request, table, view_n
+         blob_hash = request.args[_BLOB_HASH]
+         for row in rows:
+             value = row[blob_column]
+-            if hashlib.sha256(value).hexdigest() == blob_hash:
++            if (
++                isinstance(value, bytes)
++                and hashlib.sha256(value).hexdigest() == blob_hash
++            ):
+                 break
+         else:
+             # Loop did not break
+diff --git a/datasette/views/base.py b/datasette/views/base.py
+index 48108ceccc3870fb3737727035c57e456ddee8de..1a13a3e1aa006d4bc4704ce2d7398bee1320ae29 100644
+--- a/datasette/views/base.py
++++ b/datasette/views/base.py
+@@ -178,6 +178,7 @@ class BaseView:
+ async def stream_csv(datasette, fetch_data, request, database):
+     kwargs = {}
+     stream = request.args.get("_stream")
++    null_value = request.args.get("_null", "")
+     # Do not calculate facets or counts:
+     extra_parameters = [
+         f"{key}=1" for key in ("_nofacet", "_nocount") if not request.args.get(key)
+@@ -262,7 +263,7 @@ async def stream_csv(datasette, fetch_data, request, database):
+                 for row in data["rows"]:
+                     if any(isinstance(r, bytes) for r in row):
+                         new_row = []
+-                        for column, cell in zip(headings, row):
++                        for column, cell in zip(data["columns"], row):
+                             if isinstance(cell, bytes):
+                                 # If this is a table page, use .urls.row_blob()
+                                 if data.get("table"):
+@@ -297,16 +298,13 @@ async def stream_csv(datasette, fetch_data, request, database):
+                                     )
+                             new_row.append(cell)
+                         row = new_row
+-                    if not expanded_columns:
+-                        # Simple path
+-                        await writer.writerow(row)
+-                    else:
++                    if expanded_columns:
+                         # Look for {"value": "label": } dicts and expand
+                         new_row = []
+                         for heading, cell in zip(data["columns"], row):
+                             if heading in expanded_columns:
+                                 if cell is None:
+-                                    new_row.extend(("", ""))
++                                    new_row.extend((None, None))
+                                 else:
+                                     if not isinstance(cell, dict):
+                                         new_row.extend((cell, ""))
+@@ -315,7 +313,10 @@ async def stream_csv(datasette, fetch_data, request, database):
+                                         new_row.append(cell["label"])
+                             else:
+                                 new_row.append(cell)
+-                        await writer.writerow(new_row)
++                        row = new_row
++                    await writer.writerow(
++                        null_value if cell is None else cell for cell in row
++                    )
+             except Exception as ex:  # noqa: BLE001
+                 # Streaming CSV: report the error into the response body and stop
+                 sys.stderr.write(f"Caught this error: {ex}\n")
+diff --git a/datasette/views/table.py b/datasette/views/table.py
+index 7c814b2728724a3b246e9523c4eb250c88b868a8..4b85d3dd7c1d7cd785c6d849243ca9c2580c10ef 100644
+--- a/datasette/views/table.py
++++ b/datasette/views/table.py
+@@ -1771,6 +1771,7 @@ async def table_view_traced(datasette, request):
+             )
+             data["rows"] = rows
+             data["table"] = resolved.table
++            data["primary_keys"] = await resolved.db.primary_keys(resolved.table)
+             data["columns"] = columns
+             data["expanded_columns"] = expanded_columns
+             return data, None, None
+@@ -2226,8 +2227,6 @@ async def table_view_data(
+                 new_rows.append(new_row)
+             rows = new_rows
+ 
+-    _next = request.args.get("_next")
+-
+     # Pagination next link
+     next_value, next_url = await _next_value_and_url(
+         datasette,
+diff --git a/docs/csv_export.rst b/docs/csv_export.rst
+index 34d81594b36e558f7bb0a8beb0c4cce7ad50beab..7972a5a602b5d2f6cc1387cd7de6935c76d654d1 100644
+--- a/docs/csv_export.rst
++++ b/docs/csv_export.rst
+@@ -45,6 +45,22 @@ The following options can be used to customize the CSVs returned by Datasette.
+ ``?_dl=on``
+     Causes Datasette to return a ``content-disposition: attachment; filename="filename.csv"`` header.
+ 
++``?_null=TEXT``
++    Use ``TEXT`` to represent SQL ``NULL`` values. For example,
++    ``/database/table.csv?_null=NULL`` exports those values as ``NULL``.
++    Omitting this parameter or passing ``?_null=`` keeps the default empty
++    CSV fields. Non-NULL empty strings, zero and other values are unchanged.
++
++    This works for tables, views and custom SQL queries, including every page
++    of a ``?_stream=1`` export and exports using ``?_header=off``. With
++    ``?_labels=1``, a NULL foreign key uses the marker in both its value and
++    label columns. NULL labels also use the marker, while actual empty-string
++    labels remain empty.
++
++    URL-encode the marker when constructing a URL. Unicode, commas, quotes
++    and newlines are supported and escaped using the usual CSV quoting rules.
++    The marker only affects CSV output; JSON values are unchanged.
++
+ Streaming all records
+ ---------------------
+ 
+diff --git a/tests/test_csv.py b/tests/test_csv.py
+index 7758a3c089d12cdac856b69dfae808548997d071..e891fb9a6581ebf598d5a0a1f4c7caa7793427a3 100644
+--- a/tests/test_csv.py
++++ b/tests/test_csv.py
+@@ -1,6 +1,11 @@
++import asyncio
++import csv
++import io
++import secrets
+ import urllib.parse
+ 
+ import pytest
++import pytest_asyncio
+ from bs4 import BeautifulSoup as Soup
+ 
+ from datasette.app import Datasette
+@@ -44,6 +49,285 @@ pk,foreign_key_with_label,foreign_key_with_label_label,foreign_key_with_blank_la
+ """.lstrip().replace("\n", "\r\n")
+ 
+ 
++@pytest_asyncio.fixture
++async def nulls_ds():
++    ds = Datasette(
++        settings={"default_page_size": 2, "max_returned_rows": 3, "num_sql_threads": 1}
++    )
++    db = ds.add_memory_database(f"csv_nulls_{secrets.token_hex(8)}", name="csv_nulls")
++    await db.execute_write_script("""
++        create table nulls (id integer primary key, nullable, empty, zero, text);
++        insert into nulls values
++            (1, null, '', 0, 'one'),
++            (2, null, '', 0, 'two'),
++            (3, null, '', 0, 'three'),
++            (4, null, '', 0, 'four'),
++            (5, null, '', 0, 'five'),
++            (6, null, '', 0, 'six'),
++            (7, null, '', 0, 'seven');
++        create view nulls_view as select * from nulls;
++    """)
++    await ds.invoke_startup()
++    try:
++        yield ds
++    finally:
++        ds.close()
++
++
++@pytest.mark.asyncio
++@pytest.mark.parametrize(
++    "null_marker", [None, "", "NULL", "0", '缺失,"quoted"\n下一行\r\n']
++)
++@pytest.mark.parametrize("header", ["on", "off"])
++@pytest.mark.parametrize("source", ["nulls", "nulls/1", "-/query"])
++async def test_csv_null_marker(nulls_ds, null_marker, header, source):
++    params = {"_header": header}
++    if source == "-/query":
++        params["sql"] = "select * from nulls where id <= 2 order by id"
++    if null_marker is not None:
++        params["_null"] = null_marker
++    response = await nulls_ds.client.get(f"/csv_nulls/{source}.csv", params=params)
++    assert response.status_code == 200
++    assert response.headers["content-type"] == "text/plain; charset=utf-8"
++    marker = "" if null_marker is None else null_marker
++    expected = [["1", marker, "", "0", "one"]]
++    if source != "nulls/1":
++        expected.append(["2", marker, "", "0", "two"])
++    if header == "on":
++        expected.insert(0, ["id", "nullable", "empty", "zero", "text"])
++    assert list(csv.reader(io.StringIO(response.text, newline=""))) == expected
++    if null_marker in (None, ""):
++        assert response.text == "".join(",".join(row) + "\r\n" for row in expected)
++
++
++@pytest.mark.asyncio
++@pytest.mark.parametrize("null_marker", [None, "", "∅"])
++@pytest.mark.parametrize("header", ["on", "off"])
++@pytest.mark.parametrize("source", ["nulls", "nulls_view"])
++async def test_csv_null_marker_stream(nulls_ds, null_marker, header, source):
++    params = {"_stream": "1", "_header": header}
++    if null_marker is not None:
++        params["_null"] = null_marker
++    # There must be at least three pages, including NULLs on the last page.
++    response = await asyncio.wait_for(
++        nulls_ds.client.get(f"/csv_nulls/{source}.csv", params=params), timeout=5
++    )
++    assert response.status_code == 200
++    marker = "" if null_marker is None else null_marker
++    expected = [
++        [str(i), marker, "", "0", word]
++        for i, word in enumerate(
++            ["one", "two", "three", "four", "five", "six", "seven"], 1
++        )
++    ]
++    if header == "on":
++        expected.insert(0, ["id", "nullable", "empty", "zero", "text"])
++    assert list(csv.reader(io.StringIO(response.text, newline=""))) == expected
++
++
++@pytest.mark.asyncio
++@pytest.mark.parametrize("source", ["nulls", "nulls/1", "-/query"])
++async def test_csv_null_marker_does_not_change_json(nulls_ds, source):
++    params = {}
++    if source == "-/query":
++        params["sql"] = "select * from nulls where id <= 2 order by id"
++    before = await nulls_ds.client.get(f"/csv_nulls/{source}.json", params=params)
++    after = await nulls_ds.client.get(
++        f"/csv_nulls/{source}.json", params={**params, "_null": "NULL"}
++    )
++    assert before.status_code == after.status_code == 200
++    assert before.json()["rows"] == after.json()["rows"]
++    assert after.json()["rows"][0] == {
++        "id": 1,
++        "nullable": None,
++        "empty": "",
++        "zero": 0,
++        "text": "one",
++    }
++
++
++@pytest.mark.asyncio
++@pytest.mark.parametrize("null_marker", [None, "", "NULL"])
++@pytest.mark.parametrize("header", ["on", "off"])
++async def test_csv_null_marker_with_labels(nulls_ds, null_marker, header):
++    await nulls_ds.get_database("csv_nulls").execute_write_script("""
++        create table labels (id integer primary key, name);
++        insert into labels values (0, 0), (1, ''), (2, null), (3, 'three');
++        create table labeled (id integer primary key, fk integer references labels(id));
++        insert into labeled values (1, null), (2, 0), (3, 1), (4, 2), (5, 3), (6, 99);
++    """)
++    params = {"_labels": "1", "_stream": "1", "_header": header}
++    if null_marker is not None:
++        params["_null"] = null_marker
++    response = await nulls_ds.client.get("/csv_nulls/labeled.csv", params=params)
++    assert response.status_code == 200
++    marker = "" if null_marker is None else null_marker
++    expected = [
++        ["1", marker, marker],
++        ["2", "0", "0"],
++        ["3", "1", ""],
++        ["4", "2", marker],
++        ["5", "3", "three"],
++        ["6", "99", ""],
++    ]
++    if header == "on":
++        expected.insert(0, ["id", "fk", "fk_label"])
++    assert list(csv.reader(io.StringIO(response.text, newline=""))) == expected
++
++
++@pytest.mark.asyncio
++@pytest.mark.parametrize(
++    "id_type,primary_keys", [("integer", "id"), ("text", "id"), ("text", "id, part")]
++)
++@pytest.mark.parametrize("labels", [False, True])
++@pytest.mark.parametrize("null_marker", [None, "NULL"])
++async def test_csv_blob_links_with_primary_keys(
++    nulls_ds, id_type, primary_keys, labels, null_marker
++):
++    db = nulls_ds.get_database("csv_nulls")
++    await db.execute_write_script(f"""
++        create table blob_labels (id integer primary key, name text);
++        insert into blob_labels values (0, '');
++        create table blobs (
++            id {id_type}, part integer, fk integer references blob_labels(id),
++            data blob, nullable, primary key ({primary_keys})
++        );
++    """)
++    ids = (
++        list(range(1, 6))
++        if id_type == "integer"
++        else ["a/b,~缺失", "b", "c", "d", "e"]
++    )
++    payloads = [b"\x00\xff", None, b"", b"other", b"last"]
++    for i, (pk, payload) in enumerate(zip(ids, payloads)):
++        await db.execute_write(
++            "insert into blobs values (?, ?, ?, ?, null)",
++            [pk, i, 0 if i % 2 == 0 else None, payload],
++        )
++    params = {"_stream": "1", "_labels": "1" if labels else "0"}
++    if null_marker is not None:
++        params["_null"] = null_marker
++    response = await nulls_ds.client.get("/csv_nulls/blobs.csv", params=params)
++    assert response.status_code == 200
++    rows = list(csv.DictReader(io.StringIO(response.text, newline="")))
++    assert len(rows) == len(payloads)
++    marker = "" if null_marker is None else null_marker
++    for i, (row, payload) in enumerate(zip(rows, payloads)):
++        assert row["id"] == str(ids[i])
++        assert row["nullable"] == marker
++        assert row["fk"] == ("0" if i % 2 == 0 else marker)
++        if labels:
++            assert row["fk_label"] == ("" if i % 2 == 0 else marker)
++        if payload is None:
++            assert row["data"] == marker
++        else:
++            url = row["data"]
++            assert url.startswith("http://localhost/csv_nulls/blobs/")
++            assert urllib.parse.parse_qs(urllib.parse.urlsplit(url).query) == {
++                "_blob_column": ["data"]
++            }
++            blob = await nulls_ds.client.get(url.removeprefix("http://localhost"))
++            assert blob.status_code == 200
++            assert blob.content == payload
++
++
++@pytest.mark.asyncio
++async def test_custom_sql_csv_blob_links_with_nulls(ds_client):
++    response = await ds_client.get(
++        "/fixtures/-/query.csv",
++        params={
++            "sql": "select null as data union all select '' union all select 0 "
++            "union all select x'' union all select x'00ff'",
++            "_null": "NULL",
++        },
++    )
++    assert response.status_code == 200
++    rows = list(csv.reader(io.StringIO(response.text, newline="")))
++    assert rows[:4] == [["data"], ["NULL"], [""], ["0"]]
++    assert len(rows) == 6
++    for row, payload in zip(rows[4:], [b"", b"\x00\xff"]):
++        assert row[0].startswith("http://localhost/fixtures/-/query.blob?")
++        blob = await ds_client.get(row[0].removeprefix("http://localhost"))
++        assert blob.status_code == 200
++        assert blob.content == payload
++
++
++@pytest.mark.asyncio
++@pytest.mark.parametrize(
++    "source,filename", [("nulls", "nulls"), ("-/query", "csv_nulls")]
++)
++async def test_csv_null_marker_download_and_cors(nulls_ds, source, filename):
++    nulls_ds.cors = True
++    params = {"_null": "NULL", "_dl": "1", "_stream": "1", "_header": "off"}
++    if source == "-/query":
++        params["sql"] = "select * from nulls where id = 1"
++    response = await nulls_ds.client.get(f"/csv_nulls/{source}.csv", params=params)
++    assert response.status_code == 200
++    assert response.headers["content-type"] == "text/csv; charset=utf-8"
++    assert (
++        response.headers["content-disposition"]
++        == f'attachment; filename="{filename}.csv"'
++    )
++    assert response.headers["access-control-allow-origin"] == "*"
++    assert response.text.startswith("1,NULL,,0,one\r\n")
++
++
++@pytest.mark.asyncio
++@pytest.mark.parametrize(
++    "source,permission",
++    [("nulls", "view-table"), ("nulls/1", "view-table"), ("-/query", "execute-sql")],
++)
++async def test_csv_null_marker_permissions(nulls_ds, source, permission):
++    nulls_ds.config["permissions"] = {permission: False}
++    params = {"_null": "NULL", "_stream": "1"}
++    if source == "-/query":
++        params["sql"] = "select * from nulls"
++    response = await nulls_ds.client.get(f"/csv_nulls/{source}.csv", params=params)
++    assert response.status_code == 403
++
++
++@pytest.mark.asyncio
++@pytest.mark.parametrize(
++    "allow_stream,extra_params,error",
++    [
++        (False, {}, "CSV streaming is disabled"),
++        (True, {"_next": "1"}, "_next not allowed for CSV streaming"),
++    ],
++)
++async def test_csv_null_marker_stream_restrictions(
++    nulls_ds, monkeypatch, allow_stream, extra_params, error
++):
++    monkeypatch.setitem(nulls_ds._settings, "allow_csv_stream", allow_stream)
++    response = await nulls_ds.client.get(
++        "/csv_nulls/nulls.csv",
++        params={"_null": "NULL", "_stream": "1", **extra_params},
++    )
++    assert response.status_code == 400
++    assert error in response.text
++    # The streaming setting does not disable a single-page CSV export.
++    response = await nulls_ds.client.get("/csv_nulls/nulls.csv?_null=NULL")
++    assert response.status_code == 200
++    assert "1,NULL,,0,one\r\n" in response.text
++
++
++@pytest.mark.asyncio
++async def test_csv_null_marker_counts_towards_size_limit(nulls_ds, monkeypatch):
++    monkeypatch.setitem(nulls_ds._settings, "max_csv_mb", 1)
++    await nulls_ds.get_database("csv_nulls").execute_write("""
++        with recursive numbers(n) as (
++            select 8 union all select n + 1 from numbers where n < 40
++        )
++        insert into nulls select n, null, '', 0, 'word' from numbers
++    """)
++    marker = "x" * 32_000
++    response = await nulls_ds.client.get(
++        "/csv_nulls/nulls.csv", params={"_null": marker, "_stream": "1"}
++    )
++    assert response.status_code == 200
++    assert f"1,{marker},,0,one\r\n" in response.text
++    assert response.text.endswith("CSV contains more than 1048576 bytes")
++
++
+ @pytest.mark.asyncio
+ async def test_table_csv(ds_client):
+     response = await ds_client.get("/fixtures/simple_primary_key.csv?_oh=1")
+@@ -240,6 +524,32 @@ def test_csv_trace(app_client_with_trace):
+     assert "select id, content from simple_primary_key" in soup.find("pre").text
+ 
+ 
++@pytest.mark.parametrize(
++    "path,params",
++    [
++        ("/fixtures/binary_data.csv", {"rowid": "3"}),
++        ("/fixtures/-/query.csv", {"sql": "select 3 as id, null as content"}),
++    ],
++)
++def test_csv_null_marker_trace(app_client_with_trace, path, params):
++    marker = '</textarea><script>alert("NULL")</script>&缺失,\n下一行'
++    response = app_client_with_trace.get(
++        path
++        + "?"
++        + urllib.parse.urlencode(
++            {**params, "_null": marker, "_trace": "1", "_header": "off"}
++        )
++    )
++    assert response.status == 200
++    assert response.headers["content-type"] == "text/html; charset=utf-8"
++    assert "&lt;/textarea&gt;&lt;script&gt;" in response.text
++    soup = Soup(response.text, "html.parser")
++    assert soup.find("script") is None
++    assert list(csv.reader(io.StringIO(soup.find("textarea").text, newline=""))) == [
++        ["3", marker]
++    ]
++
++
+ def test_table_csv_stream_does_not_calculate_facets(app_client_with_trace):
+     response = app_client_with_trace.get("/fixtures/simple_primary_key.csv?_trace=1")
+     soup = Soup(response.text, "html.parser")

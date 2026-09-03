@@ -1,0 +1,28 @@
+{
+  "status": "completed",
+  "changed_files": [
+    "datasette/views/base.py",
+    "datasette/views/table.py",
+    "docs/csv_export.rst",
+    "tests/test_csv.py"
+  ],
+  "checks": [
+    {
+      "command": "<evaluation>/datasette-env/bin/python -m pytest -q tests/test_csv.py",
+      "exit_code": 0,
+      "outcome": "最终结果：84 passed, 1 xfailed。修改前基线为 15 passed, 1 xfailed；原有预期失败保持不变。"
+    },
+    {
+      "command": "git diff --check",
+      "exit_code": 0,
+      "outcome": "通过，最终差异无空白错误。"
+    },
+    {
+      "command": "<evaluation>/datasette-env/bin/python -m black tests/test_csv.py",
+      "exit_code": 1,
+      "outcome": "无法运行：指定虚拟环境未安装 Black。已手动整理格式，未安装依赖。"
+    }
+  ],
+  "questions": [],
+  "notes": "已在共享 CSV 导出路径实现 _null，仅替换 SQL NULL，覆盖表格、SQL 查询、流式分页、无表头和外键标签，并沿用 CSV 与 HTML 转义。修复显式主键信息缺失及标签展开后的 blob 列名错配，测试已下载链接并核对原始字节。默认和空标记输出、空字符串、0、权限、文件名、CORS、流限制及 JSON 数据均有回归覆盖。用户文档已更新，依赖配置和版本未改动。"
+}

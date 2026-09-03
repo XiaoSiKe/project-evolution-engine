@@ -1,0 +1,62 @@
+{
+  "canonical_owner": {
+    "path": "project-evolution-engine/scripts/serena_mcp.py",
+    "status": "confirmed"
+  },
+  "category": "bug",
+  "claim": "Reusing a managed state whose project directory is missing lets Serena fall back to and rewrite the target project's existing .serena configuration.",
+  "confidence": "confirmed",
+  "disposition": "direct-repair",
+  "evidence": [
+    {
+      "end_line": 45,
+      "kind": "file",
+      "path": "project-evolution-engine/scripts/serena_mcp.py",
+      "start_line": 33,
+      "summary": "The marker validates the requested root but the reuse branch returns without requiring state/project to exist or checking the effective metadata directory."
+    },
+    {
+      "end_line": 50,
+      "kind": "file",
+      "path": "project-evolution-engine/scripts/serena_mcp.py",
+      "start_line": 46,
+      "summary": "Only initial creation ensures the external project directory exists; that existence is required to prevent the upstream fallback."
+    },
+    {
+      "kind": "command",
+      "summary": "The provided official Serena source config/serena_config.py get_project_serena_folder (lines 1394-1412) falls back to <project>/.serena when the configured folder is absent; ProjectConfig.load (lines 698-733) re-saves incomplete existing project.yml files."
+    },
+    {
+      "kind": "reproduction",
+      "summary": "PYTHONDONTWRITEBYTECODE=1 <evaluation>/serena-env/bin/python <evaluation>/bridge-review/reproduce_bridge.py missing-state. Start with a fixture's original .serena/project.yml and an absent external state. First --describe exits 0 and preserves all project files. Move state/project to state/project.saved, retaining the marker and config, and run --describe again. It exits 0 and reports ok=true, rewrites .serena/project.yml and creates .serena/.gitignore. Evidence: <evaluation>/bridge-review/missing-state-evidence.json."
+    }
+  ],
+  "evidence_basis": {
+    "files": [
+      {
+        "path": "project-evolution-engine/scripts/change_evidence.py",
+        "role": "subject",
+        "sha256": "sha256:b601879a57a09a3da8ea076e3c4d4df4b2219a5177da6e75df1e24eca721dc6f",
+        "state": "present"
+      },
+      {
+        "path": "project-evolution-engine/scripts/serena_mcp.py",
+        "role": "canonical-owner",
+        "sha256": "sha256:77fce985d217b98fbb292a8930fd25633952c45e7e8e681c9065fd13bc09575a",
+        "state": "present"
+      },
+      {
+        "path": "tests/test_serena_mcp.py",
+        "role": "test",
+        "sha256": "sha256:4492d0e05657956e6c3bc193095adc058eb29db2621832e1564485bb51ce3514",
+        "state": "present"
+      }
+    ],
+    "method": "sha256-file-content-v1"
+  },
+  "freshness": "current",
+  "id": "F-bridge-state-002",
+  "impact": "A partial or cleaned external state directory silently loses the isolation guaranteed on first creation. A normal --describe restart can rewrite an existing project.yml and create .serena/.gitignore inside the target project, while the bridge returns ok=true and claims project-specific external state.",
+  "schema_version": 1,
+  "severity": "high"
+}

@@ -1,0 +1,51 @@
+{
+  "serena_source": {
+    "repository": "oraios/serena",
+    "commit": "813fd98f4fd32e0606cb52281467fc055e45a356",
+    "package_version": "1.7.1.dev0",
+    "mcp_sdk": "1.28.1"
+  },
+  "transport": "real stdio MCP",
+  "native_host_registration": false,
+  "languages": {
+    "python": {
+      "checks": 11,
+      "passed": true
+    },
+    "typescript": {
+      "checks": 11,
+      "passed": true
+    }
+  },
+  "codebase_convergence": {
+    "finding": "F-context-scope-001",
+    "status": "resolved",
+    "initial_context_tests": 25,
+    "final_context_tests": 27,
+    "review": "convergence/review.json",
+    "recheck": "convergence/recheck.json",
+    "bridge_review": {
+      "findings": [
+        "F-bridge-log-001",
+        "F-bridge-state-002",
+        "F-bridge-activation-003"
+      ],
+      "status": "resolved",
+      "review": "bridge-review/report.json",
+      "recheck": "bridge-review/recheck.json"
+    }
+  },
+  "notes": [
+    "Serena MCP serverInfo.version is emitted as 1.28.1; it is recorded separately from the installed Serena package version.",
+    "The first client integration required adding the projects configuration field and handling fixed-project servers that omit activation/configuration tools. These were corrected before the frozen coding trials and the final live checks.",
+    "The reviewer only asserted cleanliness of tracked files at its snapshot; new untracked implementation files were separately verified by content hashes.",
+    "Local paths are replaced by <repository>, <evaluation>, <codebase-convergence>, and python; no outcomes were rewritten.",
+    "After the initial 20 live checks, independent review found and verified fixes for log-link writes, state reuse fallback, and an extra activation call. The final 22 live checks include cleared-state reuse and preserve the initial results separately."
+  ],
+  "runtime_tools": {
+    "uv": "0.12.3",
+    "node": "24.16.0",
+    "python_language_server": "pyright 1.1.403",
+    "python_language_server_interpreter": "Python 3.13 managed by Serena/uvx"
+  }
+}

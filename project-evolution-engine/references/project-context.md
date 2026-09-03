@@ -37,6 +37,8 @@ Before relying on a previous map or plan:
 
 A change in another subsystem does not automatically invalidate every fact. A file fingerprint detects declared file changes but cannot discover a new undeclared caller, dynamic dependency, external consumer, or runtime state.
 
+For a maintained context record, the optional [incremental-context helper](incremental-context.md) also reruns declared reference searches and propagates invalidation through fact dependencies. It can discover new textual reference candidates within those searches. Read them as candidates, confirm semantic references with available tools and code, and update the affected statements before confirmation.
+
 The bundled collector supplies repository metadata and heuristics. Its limitations travel with its output. Neither a fingerprint nor a graph proves correct placement or complete impact coverage.
 
 ## After implementation

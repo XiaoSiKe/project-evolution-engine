@@ -1,0 +1,270 @@
+{
+  "id": 2,
+  "exit_code": 0,
+  "started_at": 1788420086.80194,
+  "finished_at": 1788420734.3062348,
+  "wall_seconds": 647.492,
+  "timed_out": false,
+  "configured_model": {
+    "model": "gpt-5.6-sol",
+    "model_provider": null,
+    "model_reasoning_effort": "max",
+    "profile": null
+  },
+  "usage": {
+    "input_tokens": 2860209,
+    "cached_input_tokens": 2710144,
+    "cache_write_input_tokens": 0,
+    "output_tokens": 30480,
+    "reasoning_output_tokens": 18679
+  },
+  "usage_events": 1,
+  "command_count": 43,
+  "tool_count": 0,
+  "other_tools": [],
+  "errors": [],
+  "commands": [
+    {
+      "command": "/bin/zsh -lc pwd",
+      "exit_code": 0,
+      "status": "completed"
+    },
+    {
+      "command": "/bin/zsh -lc 'cat <evaluation>/repeated-trials/fixed-skill/project-evolution-engine/SKILL.md'",
+      "exit_code": 0,
+      "status": "completed"
+    },
+    {
+      "command": "/bin/zsh -lc \"rg --files -g 'AGENTS.md' -g '\"'!node_modules'\"' -g '\"'!vendor'\"' -g '\"'!dist'\"' -g '\"'!build'\"' -g '\"'!venv'\"' -g '\"'!.venv'\"' -g '\"'!*.egg-info'\"' -g '\"'!__pycache__'\"' -g '\"'!.*'\"' -g '\"'!.git'\"'\"",
+      "exit_code": 1,
+      "status": "failed"
+    },
+    {
+      "command": "/bin/zsh -lc 'git status --short'",
+      "exit_code": 0,
+      "status": "completed"
+    },
+    {
+      "command": "/bin/zsh -lc 'cat <evaluation>/repeated-trials/fixed-skill/project-evolution-engine/references/execution-workflow.md <evaluation>/repeated-trials/fixed-skill/project-evolution-engine/references/project-context.md <evaluation>/repeated-trials/fixed-skill/project-evolution-engine/references/integration-analysis.md'",
+      "exit_code": 0,
+      "status": "completed"
+    },
+    {
+      "command": "/bin/zsh -lc 'cat <evaluation>/repeated-trials/fixed-skill/project-evolution-engine/references/change-evidence.md <evaluation>/repeated-trials/fixed-skill/project-evolution-engine/references/verification.md'",
+      "exit_code": 0,
+      "status": "completed"
+    },
+    {
+      "command": "/bin/zsh -lc \"rg --files --hidden -g '\"'!.git'\"' -g '\"'!__pycache__'\"' -g '\"'!node_modules'\"' -g '\"'!vendor'\"' -g '\"'!dist'\"' -g '\"'!build'\"' -g '\"'!.venv'\"' -g '\"'!venv'\"' -g '\"'!*.egg-info'\"' -g 'AGENTS.md' -g 'CLAUDE.md' -g '*CONTEXT*' -g 'pyproject.toml' -g 'pytest.ini' -g 'setup.cfg' -g 'setup.py' -g 'test_csv.py' -g '*csv*' -g 'base.py' -g 'table.py' -g 'database.py' -g 'query.py' -g 'conftest.py'\"",
+      "exit_code": 0,
+      "status": "completed",
+      "output_excerpt": "datasette/views/base.py\ndatasette/views/table.py\ndatasette/views/database.py\ndatasette/database.py\nsetup.cfg\npytest.ini\npyproject.toml\ntests/conftest.py\ntests/test_csv.py\ndocs/csv_export.rst\n",
+      "output_truncated": false
+    },
+    {
+      "command": "/bin/zsh -lc \"rg -n '(_stream|_header|_labels|_trace|csv\\\\.writer|as_csv|render_csv|blob_url|blob_link)' datasette/views tests/test_csv.py docs\"",
+      "exit_code": 0,
+      "status": "completed"
+    },
+    {
+      "command": "/bin/zsh -lc 'cat tests/test_csv.py docs/csv_export.rst pytest.ini pyproject.toml setup.cfg'",
+      "exit_code": 0,
+      "status": "completed",
+      "output_excerpt": "ace=1\")\n    soup = Soup(response.text, \"html.parser\")\n    assert \"select content, count(*) as n\" not in soup.find(\"pre\").text\n\n\ndef test_table_csv_stream_does_not_calculate_counts(app_client_with_trace):\n    response = app_client_with_trace.get(\"/fixtures/simple_primary_key.csv?_trace=1\")\n    soup = Soup(response.text, \"html.parser\")\n    assert \"select count(*)\" not in soup.find(\"pre\").text\n.. _csv_export:\n\nCSV export\n==========\n\nAny Datasette table, view or custom SQL query can be exported as CSV.\n\nTo obtain the CSV representation of the table you are looking, click the \"this\ndata as CSV\" link.\n\nYou can also use the advanced export form for more control over the resulting\nfile, which looks like this and has the following options:\n\n.. image:: https://github.com/simonw/datasette-screenshots/blob/0.62/advanced-export.png?raw=true\n   :alt: Advanced export form. You can get the data in different JSON shapes, and CSV options are download file, expand labels and stream all rows.\n\n* **download file** - instead of displaying CSV in your browser, this forces\n  your browser to download the CSV to your downloads directory.\n\n* **expand labels** - if your table has any foreign key references this option\n  will cause the CSV to gain additional ``COLUMN_NAME_label`` columns with a\n  label for each foreign key derived from the linked table. `In this example\n  <https://latest.datasette.io/fixtures/facetable.csv?_labels=on&_size=max>`_\n  the ``city_id`` column is accompanied by a ``city_id_label`` column.\n\n* **stream all rows** - by default CSV files only contain the first\n  :ref:`setting_max_returned_rows` records. This option will cause Datasette to\n  loop through every matching record and return them as a single CSV file.\n\nYou can try that out on https://latest.datasette.io/fixtures/facetable?_size=4\n\n.. _csv_export_url_parameters:\n\nURL parameters\n--------------\n\nThe following options can be used to customize the CSVs returned by Datasette.\n\n``?_header=off``\n    This removes the first row of the CSV file specifying the headings - only the row data will be returned.\n\n``?_stream=on``\n    Stream all matching records, not just the first page of results. See below.\n\n``?_dl=on``\n    Causes Datasette to return a ``content-disposition: attachment; filename=\"filename.csv\"`` header.\n\nStreaming all records\n---------------------\n\nThe *stream all rows* option is designed to be as efficient as possible -\nunder the hood it takes advantage of Python 3 asyncio capabilities and\nDatasette's efficient :ref:`pagination <pagination>` to stream back the full\nCSV file.\n\nSince databases can get pretty large, by default this option is capped at 100MB -\nif a table returns more than 100MB of data the last line of the CSV will be a\ntruncation error message.\n\nYou can increase or remove this limit using the :ref:`setting_max_csv_mb` config\nsetting. You can also disable the CSV export feature entirely using\n:ref:`setting_allow_csv_stream`.\n[pytest]\nfilterwarnings=\n    # https://github.com/pallets/jinja/issues/927\n    ignore:Using or importing the ABCs::jinja2\n    # https://bugs.launchpad.net/beautifulsoup/+bug/1778909\n    ignore:Using or importing the ABCs::bs4.element\nmarkers =\n    serial: tests to avoid using with pytest-xdist\n    playwright: browser automation tests, skipped unless --playwright is passed\nasyncio_mode = strict\n[project]\nname = \"datasette\"\ndynamic = [\"version\"]\ndescription = \"An open source multi-tool for exploring and publishing data\"\nreadme = { file = \"README.md\", content-type = \"text/markdown\" }\nauthors = [\n    { name = \"Simon Willison\" },\n]\nlicense = \"Apache-2.0\"\nrequires-python = \">=3.10\"\nclassifiers = [\n    \"Development Status :: 4 - Beta\",\n    \"Framework :: Datasette\",\n    \"Intended Audience :: Developers\",\n    \"Intended Audience :: Science/Research\",\n    \"Intended Audience :: End Users/Desktop\",\n    \"Topic :: Database\",\n    \"Programming Language :: Python :: 3.10\",\n    \"Programming Language :: Python :: 3.11\",\n    \"Programming Language :: Python :: 3.12\",\n    \"Programming Language :: Python :: 3.13\",\n    \"Programming Language :: Python :: 3.14\",\n]\n\ndependencies = [\n    \"asgiref>=3.2.10\",\n    \"click>=7.1.1\",\n    \"click-default-group>=1.2.3\",\n    \"Jinja2>=2.10.3\",\n    \"hupper>=1.9\",\n    \"httpx>=0.20,<1.0\",\n    \"pluggy>=1.0\",\n    \"uvicorn>=0.29\",\n    \"aiofiles>=0.4\",\n    \"PyYAML>=5.3\",\n    \"mergedeep>=1.1.1\",\n    \"itsdangerous>=1.1\",\n    \"sqlite-utils>=4.0\",\n    \"asyncinject>=0.7\",\n    \"setuptools\",\n    \"pip\",\n    \"pydantic>=2\",\n]\n\n[project.urls]\nHomepage = \"https://datasette.io/\"\nDocumentation = \"https://docs.datasette.io/en/stable/\"\nChangelog = \"https://docs.datasette.io/en/stable/changelog.html\"\n\"Live demo\" = \"https://latest.datasette.io/\"\n\"Source code\" = \"https://github.com/simonw/datasette\"\nIssues = \"https://github.com/simonw/datasette/issues\"\nCI = \"https://github.com/simonw/datasette/actions?query=workflow%3ATest\"\n\n[project.scripts]\ndatasette = \"datasette.cli:cli\"\n\n[project.entry-points.pytest11]\ndatasette = \"datasette._pytest_plugin\"\n\n[dependency-groups]\ndev = [\n    \"pytest>=9\",\n    \"pytest-xdist>=2.2.1\",\n    \"pytest-asyncio>=1.2.0\",\n    \"beautifulsoup4>=4.8.1\",\n    \"black==26.3.1\",\n    \"blacken-docs==1.20.0\",\n    \"pytest-timeout>=1.4.2\",\n    \"trustme>=0.7\",\n    \"cogapp>=3.3.0\",\n    \"multipart-form-data-conformance==0.1a0\",\n    \"ruff>=0.16.0\",\n    # docs\n    \"Sphinx==7.4.7\",\n    \"furo==2025.9.25\",\n    \"sphinx-autobuild\",\n    \"codespell>=2.2.5\",\n    \"sphinx-copybutton\",\n    \"sphinx-inline-tabs\",\n    \"myst-parser\",\n    \"sphinx-markdown-builder\",\n    \"ruamel.yaml\",\n    \"psutil>=5.9\",\n]\nplaywright = [\n    \"pytest-playwright>=0.8.0\",\n]\n\n[project.optional-dependencies]\nrich = [\"rich\"]\n\n[build-system]\nrequires = [\"setuptools\"]\nbuild-backend = \"setuptools.build_meta\"\n\n[tool.setuptools.packages.find]\ninclude = [\"datasette*\"]\n\n[tool.setuptools.package-data]\ndatasette = [\"templates/*.html\"]\n\n[tool.setuptools.dynamic]\nversion = {attr = \"datasette.version.__version__\"}\n\n[tool.uv]\npackage = true\n[aliases]\ntest=pytest\n",
+      "output_truncated": true
+    },
+    {
+      "command": "/bin/zsh -lc \"sed -n '1,365p' datasette/views/base.py\"",
+      "exit_code": 0,
+      "status": "completed"
+    },
+    {
+      "command": "/bin/zsh -lc \"rg -n '(csv_response|as_csv|\\\\.blob|blob-|primary_keys|class QueryView|async def data|async def table_view_data)' datasette/views/base.py datasette/views/table.py datasette/views/database.py datasette/views/row.py tests/test_blob.py tests/fixtures.py tests/utils.py\"",
+      "exit_code": 2,
+      "status": "failed"
+    },
+    {
+      "command": "/bin/zsh -lc \"sed -n '1,280p' tests/conftest.py\"",
+      "exit_code": 0,
+      "status": "completed"
+    },
+    {
+      "command": "/bin/zsh -lc \"sed -n '135,255p' tests/test_csv.py\nsed -n '1710,1805p' datasette/views/table.py\nsed -n '1920,2025p' datasette/views/table.py\nsed -n '2160,2335p' datasette/views/table.py\"",
+      "exit_code": 0,
+      "status": "completed"
+    },
+    {
+      "command": "/bin/zsh -lc \"sed -n '575,800p' datasette/views/database.py\nsed -n '1010,1160p' datasette/views/database.py\nsed -n '135,178p' datasette/views/row.py\nrg --files tests -g '*blob*' -g '*permissions*'\nrg -n '(def path_from_row_pks|def path_with_format|class LimitedWriter|class EscapeHtmlWriter|def row_blob|binary_data|primary_keys)' datasette/utils/__init__.py datasette/utils/urls.py datasette/fixtures.py datasette/views/table_extras.py tests/test_csv.py\"",
+      "exit_code": 2,
+      "status": "failed"
+    },
+    {
+      "command": "/bin/zsh -lc 'TMPDIR=<evaluation>/repeated-trials/trial-02/artifacts PYTHONDONTWRITEBYTECODE=1 <evaluation>/datasette-env/bin/python -m pytest -q tests/test_csv.py'",
+      "exit_code": 0,
+      "status": "completed",
+      "output_excerpt": "...........x....                                                         [100%]\n15 passed, 1 xfailed in 1.90s\n",
+      "output_truncated": false
+    },
+    {
+      "command": "/bin/zsh -lc \"sed -n '795,965p' datasette/views/database.py\nsed -n '335,365p' datasette/views/table_extras.py\nrg -n '(_next|_size)' datasette/views/table.py\nrg -n '(_null|_extra=rows|allow_csv_stream|view-table|execute-sql)' tests/test_permissions.py tests/test_csv.py tests/test_api.py tests/test_table.py tests/test_download.py\"",
+      "exit_code": 2,
+      "status": "failed"
+    },
+    {
+      "command": "/bin/zsh -lc \"rg -n '(stream_csv\\\\(|def row_blob|format_ == \\\"blob\\\"|_blob_hash|CSV streaming is disabled|_next not allowed)' datasette tests -g '*.py'\nsed -n '287,315p' datasette/utils/__init__.py\nsed -n '965,1075p' datasette/utils/__init__.py\nsed -n '2040,2165p' datasette/views/table.py\nsed -n '2320,2358p' datasette/views/table.py\"",
+      "exit_code": 0,
+      "status": "completed"
+    },
+    {
+      "command": "/bin/zsh -lc \"sed -n '2400,2475p' datasette/views/table.py\nsed -n '1,100p' datasette/blob_renderer.py\nsed -n '1,100p' datasette/url_builder.py\nsed -n '400,480p' datasette/views/row.py\nrg -n '(async def expand_foreign_keys|label_value|_labels=1|blank_label)' datasette/app.py tests/test_api.py tests/test_html.py datasette/fixtures.py\"",
+      "exit_code": 0,
+      "status": "completed"
+    },
+    {
+      "command": "/bin/zsh -lc \"sed -n '760,870p' tests/test_html.py\nsed -n '1,125p' tests/test_permissions.py\nsed -n '560,635p' tests/test_permissions.py\nsed -n '410,470p' tests/test_api.py\nrg -n '(default_page_size.*[123]|max_returned_rows.*[2345]|add_memory_database|with_trace|csv_max_mb_one|CORS)' tests/test_csv.py tests/fixtures.py tests/conftest.py tests/test_api.py\"",
+      "exit_code": 0,
+      "status": "completed"
+    },
+    {
+      "command": "/bin/zsh -lc \"rg --files --hidden -g '\"'!.git'\"' -g '*ruff*' -g '*black*' -g '*AGENTS*' -g 'Makefile' -g '*tox*'\nrg -n '(async def get|async def request|follow_redirects|class DatasetteClient)' datasette/utils/testing.py datasette/app.py\nrg -n '(test_.*pagination|test_.*csv|test_.*rowid|test_.*blob|test_.*labels)' tests/test_api.py tests/test_html.py tests/test_views.py\"",
+      "exit_code": 2,
+      "status": "failed"
+    },
+    {
+      "command": "/bin/zsh -lc \"sed -n '178,341p' datasette/views/base.py\nsed -n '1745,1785p' datasette/views/table.py\"",
+      "exit_code": 0,
+      "status": "completed"
+    },
+    {
+      "command": "/bin/zsh -lc \"sed -n '2080,2170p' datasette/app.py\nsed -n '3206,3335p' datasette/app.py\nsed -n '202,270p' tests/fixtures.py\ncat ruff.toml\"",
+      "exit_code": 0,
+      "status": "completed"
+    },
+    {
+      "command": "/bin/zsh -lc \"rg --files tests -g '*.py' -g '\"'!plugins/**'\"'\nrg -n '(simple_primary_key|CREATE.*labels|foreign_key_references|sortable_with_nulls)' datasette/fixtures.py\"",
+      "exit_code": 0,
+      "status": "completed"
+    },
+    {
+      "command": "/bin/zsh -lc \"sed -n '1,205p' tests/test_csv.py\nsed -n '575,615p' datasette/views/row.py\nsed -n '1,140p' tests/test_table_api.py\"",
+      "exit_code": 0,
+      "status": "completed"
+    },
+    {
+      "command": "/bin/zsh -lc \"cat datasette/json_renderer.py\nrg -n '(max_csv_mb|allow_csv_stream|_next not allowed|CSV streaming is disabled)' tests datasette/app.py -g '*.py'\nsed -n '1660,1715p' datasette/views/table.py\"",
+      "exit_code": 0,
+      "status": "completed"
+    },
+    {
+      "command": "/bin/zsh -lc \"sed -n '490,640p' tests/test_csv.py\nsed -n '205,324p' datasette/views/base.py\nsed -n '1750,1778p' datasette/views/table.py\nsed -n '2220,2245p' datasette/views/table.py\"",
+      "exit_code": 0,
+      "status": "completed"
+    },
+    {
+      "command": "/bin/zsh -lc 'TMPDIR=<evaluation>/repeated-trials/trial-02/artifacts PYTHONDONTWRITEBYTECODE=1 <evaluation>/datasette-env/bin/python -m pytest -q tests/test_csv.py --tb=short'",
+      "exit_code": 1,
+      "status": "failed",
+      "output_excerpt": "/evolution-v030-1vcy22jn/repeated-trials/trial-02/application/tests/test_csv.py:532: in test_csv_nulls_blob_links\n    assert rows[2] == {\"rowid\": \"3\", \"data\": \"NULL\"}\nE   AssertionError: assert {'rowid': '3', 'data': ''} == {'rowid': '3', 'data': 'NULL'}\nE     \nE     Omitting 1 identical items, use -vv to show\nE     Differing items:\nE     {'data': ''} != {'data': 'NULL'}\nE     Use -v to get more diff\n=========================== short test summary info ============================\nFAILED tests/test_csv.py::test_csv_nulls_respect_permissions[/private_csv/nullable_values.csv-params0-view-table]\nFAILED tests/test_csv.py::test_csv_nulls_respect_permissions[/private_csv/-/query.csv-params1-execute-sql]\nFAILED tests/test_csv.py::test_csv_nulls_blob_links[False] - AssertionError: ...\nFAILED tests/test_csv.py::test_csv_nulls_blob_links[True] - AssertionError: a...\nERROR tests/test_csv.py::test_csv_nulls[True-None-/csv_nulls/nullable_values.csv-None-2]\nERROR tests/test_csv.py::test_csv_nulls[True-None-/csv_nulls/-/query.csv-select * from nullable_values order by id-2]\nERROR tests/test_csv.py::test_csv_nulls[True-None-/csv_nulls/nullable_values/1.csv-None-1]\nERROR tests/test_csv.py::test_csv_nulls[True--/csv_nulls/nullable_values.csv-None-2]\nERROR tests/test_csv.py::test_csv_nulls[True--/csv_nulls/-/query.csv-select * from nullable_values order by id-2]\nERROR tests/test_csv.py::test_csv_nulls[True--/csv_nulls/nullable_values/1.csv-None-1]\nERROR tests/test_csv.py::test_csv_nulls[True-NULL-/csv_nulls/nullable_values.csv-None-2]\nERROR tests/test_csv.py::test_csv_nulls[True-NULL-/csv_nulls/-/query.csv-select * from nullable_values order by id-2]\nERROR tests/test_csv.py::test_csv_nulls[True-NULL-/csv_nulls/nullable_values/1.csv-None-1]\nERROR tests/test_csv.py::test_csv_nulls[True-\\u672a\\u8bbe\\u7f6e, \"\\u7a7a\"\\r\\n\\u4e0b\\u4e00\\u884c-/csv_nulls/nullable_values.csv-None-2]\nERROR tests/test_csv.py::test_csv_nulls[True-\\u672a\\u8bbe\\u7f6e, \"\\u7a7a\"\\r\\n\\u4e0b\\u4e00\\u884c-/csv_nulls/-/query.csv-select * from nullable_values order by id-2]\nERROR tests/test_csv.py::test_csv_nulls[True-\\u672a\\u8bbe\\u7f6e, \"\\u7a7a\"\\r\\n\\u4e0b\\u4e00\\u884c-/csv_nulls/nullable_values/1.csv-None-1]\nERROR tests/test_csv.py::test_csv_nulls[False-None-/csv_nulls/nullable_values.csv-None-2]\nERROR tests/test_csv.py::test_csv_nulls[False-None-/csv_nulls/-/query.csv-select * from nullable_values order by id-2]\nERROR tests/test_csv.py::test_csv_nulls[False-None-/csv_nulls/nullable_values/1.csv-None-1]\nERROR tests/test_csv.py::test_csv_nulls[False--/csv_nulls/nullable_values.csv-None-2]\nERROR tests/test_csv.py::test_csv_nulls[False--/csv_nulls/-/query.csv-select * from nullable_values order by id-2]\nERROR tests/test_csv.py::test_csv_nulls[False--/csv_nulls/nullable_values/1.csv-None-1]\nERROR tests/test_csv.py::test_csv_nulls[False-NULL-/csv_nulls/nullable_values.csv-None-2]\nERROR tests/test_csv.py::test_csv_nulls[False-NULL-/csv_nulls/-/query.csv-select * from nullable_values order by id-2]\nERROR tests/test_csv.py::test_csv_nulls[False-NULL-/csv_nulls/nullable_values/1.csv-None-1]\nERROR tests/test_csv.py::test_csv_nulls[False-\\u672a\\u8bbe\\u7f6e, \"\\u7a7a\"\\r\\n\\u4e0b\\u4e00\\u884c-/csv_nulls/nullable_values.csv-None-2]\nERROR tests/test_csv.py::test_csv_nulls[False-\\u672a\\u8bbe\\u7f6e, \"\\u7a7a\"\\r\\n\\u4e0b\\u4e00\\u884c-/csv_nulls/-/query.csv-select * from nullable_values order by id-2]\nERROR tests/test_csv.py::test_csv_nulls[False-\\u672a\\u8bbe\\u7f6e, \"\\u7a7a\"\\r\\n\\u4e0b\\u4e00\\u884c-/csv_nulls/nullable_values/1.csv-None-1]\nERROR tests/test_csv.py::test_csv_stream_nulls[True-/csv_nulls/nullable_values.csv-None-5]\nERROR tests/test_csv.py::test_csv_stream_nulls[True-/csv_nulls/nullable_view.csv-None-5]\nERROR tests/test_csv.py::test_csv_stream_nulls[True-/csv_nulls/-/query.csv-select * from nullable_values order by id limit 2-2]\nERROR tests/test_csv.py::test_csv_stream_nulls[False-/csv_nulls/nullable_values.csv-None-5]\nERROR tests/test_csv.py::test_csv_stream_nulls[False-/csv_nulls/nullable_view.csv-None-5]\nERROR tests/test_csv.py::test_csv_stream_nulls[False-/csv_nulls/-/query.csv-select * from nullable_values order by id limit 2-2]\nERROR tests/test_csv.py::test_csv_nulls_with_labels[True-None] - datasette.ut...\nERROR tests/test_csv.py::test_csv_nulls_with_labels[True-] - datasette.utils....\nERROR tests/test_csv.py::test_csv_nulls_with_labels[True-NULL] - datasette.ut...\nERROR tests/test_csv.py::test_csv_nulls_with_labels[True-\\u672a\\u8bbe\\u7f6e, \"\\u7a7a\"\\n\\u4e0b\\u4e00\\u884c]\nERROR tests/test_csv.py::test_csv_nulls_with_labels[False-None] - datasette.u...\nERROR tests/test_csv.py::test_csv_nulls_with_labels[False-] - datasette.utils...\nERROR tests/test_csv.py::test_csv_nulls_with_labels[False-NULL] - datasette.u...\nERROR tests/test_csv.py::test_csv_nulls_with_labels[False-\\u672a\\u8bbe\\u7f6e, \"\\u7a7a\"\\n\\u4e0b\\u4e00\\u884c]\nERROR tests/test_csv.py::test_csv_nulls_do_not_change_json[/csv_nulls/nullable_values.json-params0-null_value]\nERROR tests/test_csv.py::test_csv_nulls_do_not_change_json[/csv_nulls/-/query.json-params1-null_value]\nERROR tests/test_csv.py::test_csv_nulls_do_not_change_json[/csv_nulls/labelled_values.json-params2-label_id]\nERROR tests/test_csv.py::test_csv_nulls_download[/csv_nulls/nullable_values.csv-params0-nullable_values.csv]\nERROR tests/test_csv.py::test_csv_nulls_download[/csv_nulls/-/query.csv-params1-csv_nulls.csv]\nERROR tests/test_csv.py::test_csv_nulls_trace_escapes_html[/csv_nulls/nullable_values.csv-params0]\nERROR tests/test_csv.py::test_csv_nulls_trace_escapes_html[/csv_nulls/-/query.csv-params1]\nERROR tests/test_csv.py::test_csv_nulls_respect_size_limit - datasette.utils....\nERROR tests/test_csv.py::test_csv_nulls_blob_primary_keys[False-pk] - dataset...\nERROR tests/test_csv.py::test_csv_nulls_blob_primary_keys[False-pk, version]\nERROR tests/test_csv.py::test_csv_nulls_blob_primary_keys[True-pk] - datasett...\nERROR tests/test_csv.py::test_csv_nulls_blob_primary_keys[True-pk, version]\n4 failed, 17 passed, 1 xfailed, 50 errors in 2.98s\n",
+      "output_truncated": true
+    },
+    {
+      "command": "/bin/zsh -lc \"sed -n '1,180p' datasette/_pytest_plugin.py\nrg -n '(async def close|def close|invoke_shutdown|add_memory_database)' datasette/app.py datasette/database.py\nsed -n '1,125p' datasette/database.py\nsed -n '254,290p' tests/test_csv.py\nsed -n '451,472p' tests/test_csv.py\"",
+      "exit_code": 0,
+      "status": "completed",
+      "output_excerpt": "4:    def close(self):\nimport asyncio\nimport atexit\nimport inspect\nimport os\nimport queue\nimport sys\nimport tempfile\nimport threading\nimport uuid\nfrom collections import namedtuple\nfrom pathlib import Path\n\nimport sqlite_utils\n\nfrom .inspect import inspect_hash\nfrom .tracer import trace\nfrom .utils import (\n    call_with_supported_arguments,\n    detect_fts,\n    detect_primary_keys,\n    detect_spatialite,\n    escape_sqlite,\n    get_all_foreign_keys,\n    get_outbound_foreign_keys,\n    md5_not_usedforsecurity,\n    sqlite3,\n    sqlite_timelimit,\n    table_column_details,\n    table_columns,\n)\nfrom .utils.sql_analysis import SQLAnalysis, analyze_sql_tables\nfrom .utils.sqlite import sqlite_hidden_table_names\n\nconnections = threading.local()\n\nEXECUTE_WRITE_RETURNING_LIMIT = 10\n\nAttachedDatabase = namedtuple(\"AttachedDatabase\", (\"seq\", \"name\", \"file\"))\n\n\nclass DatasetteClosedError(RuntimeError):\n    \"\"\"Raised when using a Datasette or Database instance after close().\"\"\"\n\n\n_SHUTDOWN = object()\n\n\nclass Database:\n    # For table counts stop at this many rows:\n    count_limit = 10000\n    _thread_local_id_counter = 1\n\n    def __init__(\n        self,\n        ds,\n        path=None,\n        is_mutable=True,\n        is_memory=False,\n        memory_name=None,\n        mode=None,\n        is_temp_disk=False,\n    ):\n        self.name = None\n        self._thread_local_id = f\"x{self._thread_local_id_counter}\"\n        Database._thread_local_id_counter += 1\n        self.route = None\n        self.ds = ds\n        self.path = path\n        self.is_mutable = is_mutable\n        self.is_memory = is_memory\n        self.memory_name = memory_name\n        self.is_temp_disk = is_temp_disk\n        if memory_name is not None:\n            self.is_memory = True\n        if is_temp_disk:\n            fd, temp_path = tempfile.mkstemp(suffix=\".db\", prefix=\"datasette_temp_\")\n            os.close(fd)\n            self.path = temp_path\n            self.is_mutable = True\n            self.mode = \"rwc\"\n            self._wal_enabled = False\n            atexit.register(self._cleanup_temp_file)\n        else:\n            self._wal_enabled = False\n        self.cached_hash = None\n        self.cached_size = None\n        self._cached_table_counts = None\n        self._write_thread = None\n        self._write_queue = None\n        self._closed = False\n        self._pending_execute_futures = set()\n        self._pending_execute_futures_lock = threading.Lock()\n        # These are used when in non-threaded mode:\n        self._read_connection = None\n        self._write_connection = None\n        # This is used to track all file connections so they can be closed\n        self._all_file_connections = []\n        if not is_temp_disk:\n            self.mode = mode\n\n    def _check_not_closed(self):\n        if self._closed:\n            raise DatasetteClosedError(f\"Database {self.name!r} has been closed\")\n\n    def _remove_pending_execute_future(self, future):\n        with self._pending_execute_futures_lock:\n            self._pending_execute_futures.discard(future)\n\n    @property\n    def cached_table_counts(self):\n        if self._cached_table_counts is not None:\n            return self._cached_table_counts\n        # Maybe use self.ds.inspect_data to populate cached_table_counts\n        if self.ds.inspect_data and self.ds.inspect_data.get(self.name):\n            self._cached_table_counts = {\n                key: value[\"count\"]\n                for key, value in self.ds.inspect_data[self.name][\"tables\"].items()\n            }\n        return self._cached_table_counts\n\n    @property\n    def color(self):\n        if self.hash:\n            return self.hash[:6]\n        return md5_not_usedforsecurity(self.name)[:6]\n    soup = Soup(response.text, \"html.parser\")\n    assert \"select count(*)\" not in soup.find(\"pre\").text\n\n\n@pytest_asyncio.fixture\nasync def csv_nulls_ds():\n    ds = Datasette(\n        cors=True,\n        settings={\n            \"default_page_size\": 2,\n            \"max_returned_rows\": 2,\n            # Bound the response if a streaming pagination regression repeats a page.\n            \"max_csv_mb\": 0.002,\n            \"trace_debug\": True,\n        },\n    )\n    await ds.invoke_startup()\n    db = ds.add_memory_database(\"csv_nulls\")\n    await db.execute_write_script(\"\"\"\n        create table nullable_values (\n            id integer primary key, null_value, empty_value,\n            zero_value, float_value, text_value\n        );\n        insert into nullable_values values\n            (1, null, '', 0, 0.0, 'hello'),\n            (2, null, '', 0, 0.0, 'hello'),\n            (3, null, '', 0, 0.0, 'hello'),\n            (4, null, '', 0, 0.0, 'hello'),\n            (5, null, '', 0, 0.0, 'hello');\n        create view nullable_view as\n            select * from nullable_values order by id;\n        create table labels (id integer primary key, name);\n        insert into labels values (0, 0), (1, ''), (2, null), (3, 'hello');\n        create table labelled_values (\n            id integer primary key, label_id integer references labels(id), value\n        );\n        insert into labelled_values values\n        path, params={**params, \"_null\": marker, \"_trace\": \"1\"}\n    )\n    assert response.status_code == 200\n    assert response.headers[\"content-type\"] == \"text/html; charset=utf-8\"\n    assert \"&lt;/textarea&gt;\" in response.text\n    soup = Soup(response.text, \"html.parser\")\n    assert soup.find(\"script\") is None\n    assert len(soup.find_all(\"textarea\")) == 1\n    rows = list(csv.DictReader(io.StringIO(soup.find(\"textarea\").text, newline=\"\")))\n    assert rows\n    assert all(row[\"null_value\"] == marker for row in rows)\n\n\n@pytest.mark.asyncio\nasync def test_csv_nulls_respect_size_limit(csv_nulls_ds):\n    response = await csv_nulls_ds.client.get(\n        \"/csv_nulls/nullable_values.csv\",\n        params={\"_stream\": \"1\", \"_null\": \"x\" * 4000},\n    )\n    assert response.status_code == 200\n    assert response.text.splitlines()[-1].startswith(\"CSV contains more than \")\n    assert \"x\" * 4000 not in response.text\n",
+      "output_truncated": true
+    },
+    {
+      "command": "/bin/zsh -lc \"rg -n '(pytest\\\\.mark\\\\.timeout|asyncio\\\\.wait_for|timeout\\\\(10)' tests/test_csv.py tests/test_table_api.py tests/test_tracer.py tests/test_api.py\nrg -n '(memory_name=.*uuid|memory_name=.*token|Database\\\\(ds, memory_name)' tests -g '*.py'\"",
+      "exit_code": 0,
+      "status": "completed",
+      "output_excerpt": "tests/test_facets.py:413:    db = ds.add_database(Database(ds, memory_name=\"test_array_facet\"))\ntests/test_facets.py:519:    db = ds.add_database(Database(ds, memory_name=\"test_json_array\"))\ntests/test_facets.py:537:    db = ds.add_database(Database(ds, memory_name=\"test_facet_size\"))\ntests/conftest.py:100:    db = ds.add_database(Database(ds, memory_name=unique_memory_name), name=\"fixtures\")\ntests/test_debug_autocomplete.py:12:        Database(ds, memory_name=\"test_debug_autocomplete_for_table\"), name=\"data\"\ntests/test_debug_autocomplete.py:45:        Database(ds, memory_name=\"test_debug_autocomplete_suggests\"), name=\"data\"\ntests/test_debug_autocomplete.py:77:        Database(ds, memory_name=\"test_debug_autocomplete_scan_limit\"), name=\"data\"\ntests/test_internals_datasette.py:186:    db = ds.add_database(Database(ds, memory_name=\"test_num_sql_threads_zero\"))\ntests/test_label_column_for_table.py:90:    db = ds.add_database(Database(ds, memory_name=\"test_label_column_for_table\"))\ntests/test_config_permission_rules.py:11:        ds.add_database(Database(ds, memory_name=f\"{name}_memory\"), name=name)\ntests/test_internals_database.py:875:        db = ds.add_database(Database(ds, memory_name=\"test_num_sql_threads_zero\"))\ntests/test_internals_database.py:1027:    foo1 = ds.add_database(Database(ds, memory_name=\"foo\"))\ntests/test_internals_database.py:1029:    bar1 = ds.add_database(Database(ds, memory_name=\"bar\"))\ntests/test_internals_database.py:1045:    db = ds.add_database(Database(ds, memory_name=\"test\"))\ntests/test_table_html.py:922:            Database(ds, memory_name=\"test_row_delete_actions\"), name=\"data\"\ntests/test_table_html.py:1000:            Database(ds, memory_name=\"test_database_create_table_action\"), name=\"data\"\ntests/test_table_html.py:1072:            Database(ds, memory_name=\"test_database_create_table_insert_permission\"),\ntests/test_table_html.py:1106:            Database(ds, memory_name=\"test_database_create_table_custom_types\"),\ntests/test_table_html.py:1171:            Database(ds, memory_name=\"test_table_alter_action\"), name=\"data\"\ntests/test_table_html.py:1326:            Database(ds, memory_name=\"test_table_insert_action\"), name=\"data\"\ntests/test_table_html.py:1407:            Database(ds, memory_name=\"test_table_insert_compound_pk\"), name=\"data\"\ntests/test_table_html.py:1443:            Database(ds, memory_name=\"test_table_foreign_key_autocomplete\"), name=\"data\"\ntests/test_table_html.py:1544:            Database(ds, memory_name=\"test_row_page_edit_delete_actions\"), name=\"data\"\ntests/test_table_html.py:1617:            Database(ds, memory_name=\"test_row_delete_redirect\"), name=\"data\"\ntests/test_table_html.py:1655:            Database(ds, memory_name=\"test_row_update_message\"), name=\"data\"\n",
+      "output_truncated": false
+    },
+    {
+      "command": "/bin/zsh -lc \"cat docs/csv_export.rst\nrg -n '(def test_.*(next|pagination|view|row|blob|labels)|@pytest.mark.parametrize)' tests/test_table_api.py tests/test_html.py\"",
+      "exit_code": 0,
+      "status": "completed",
+      "output_excerpt": "the resulting\nfile, which looks like this and has the following options:\n\n.. image:: https://github.com/simonw/datasette-screenshots/blob/0.62/advanced-export.png?raw=true\n   :alt: Advanced export form. You can get the data in different JSON shapes, and CSV options are download file, expand labels and stream all rows.\n\n* **download file** - instead of displaying CSV in your browser, this forces\n  your browser to download the CSV to your downloads directory.\n\n* **expand labels** - if your table has any foreign key references this option\n  will cause the CSV to gain additional ``COLUMN_NAME_label`` columns with a\n  label for each foreign key derived from the linked table. `In this example\n  <https://latest.datasette.io/fixtures/facetable.csv?_labels=on&_size=max>`_\n  the ``city_id`` column is accompanied by a ``city_id_label`` column.\n\n* **stream all rows** - by default CSV files only contain the first\n  :ref:`setting_max_returned_rows` records. This option will cause Datasette to\n  loop through every matching record and return them as a single CSV file.\n\nYou can try that out on https://latest.datasette.io/fixtures/facetable?_size=4\n\n.. _csv_export_url_parameters:\n\nURL parameters\n--------------\n\nThe following options can be used to customize the CSVs returned by Datasette.\n\n``?_header=off``\n    This removes the first row of the CSV file specifying the headings - only the row data will be returned.\n\n``?_stream=on``\n    Stream all matching records, not just the first page of results. See below.\n\n``?_dl=on``\n    Causes Datasette to return a ``content-disposition: attachment; filename=\"filename.csv\"`` header.\n\nStreaming all records\n---------------------\n\nThe *stream all rows* option is designed to be as efficient as possible -\nunder the hood it takes advantage of Python 3 asyncio capabilities and\nDatasette's efficient :ref:`pagination <pagination>` to stream back the full\nCSV file.\n\nSince databases can get pretty large, by default this option is capped at 100MB -\nif a table returns more than 100MB of data the last line of the CSV will be a\ntruncation error message.\n\nYou can increase or remove this limit using the :ref:`setting_max_csv_mb` config\nsetting. You can also disable the CSV export feature entirely using\n:ref:`setting_allow_csv_stream`.\ntests/test_table_api.py:123:@pytest.mark.parametrize(\"extra\", [\"filters\", \"actions\", \"display_rows\"])\ntests/test_table_api.py:304:@pytest.mark.parametrize(\ntests/test_table_api.py:323:async def test_paginate_tables_and_views(\ntests/test_table_api.py:344:@pytest.mark.parametrize(\ntests/test_table_api.py:411:@pytest.mark.parametrize(\ntests/test_table_api.py:511:@pytest.mark.parametrize(\ntests/test_table_api.py:560:async def test_searchable(ds_client, path, expected_rows):\ntests/test_table_api.py:571:@pytest.mark.parametrize(\ntests/test_table_api.py:597:def test_searchmode(table_metadata, querystring, expected_rows):\ntests/test_table_api.py:606:@pytest.mark.parametrize(\ntests/test_table_api.py:627:async def test_searchable_views(ds_client, path, expected_rows):\ntests/test_table_api.py:645:@pytest.mark.parametrize(\ntests/test_table_api.py:675:async def test_table_filter_queries(ds_client, path, expected_rows):\ntests/test_table_api.py:853:async def test_max_returned_rows(ds_client):\ntests/test_table_api.py:863:async def test_view(ds_client):\ntests/test_table_api.py:876:def test_page_size_matching_max_returned_rows(\ntests/test_table_api.py:892:@pytest.mark.parametrize(\ntests/test_table_api.py:1164:@pytest.mark.parametrize(\"nofacet\", (True, False))\ntests/test_table_api.py:1179:@pytest.mark.parametrize(\"nosuggest\", (True, False))\ntests/test_table_api.py:1195:@pytest.mark.parametrize(\"nocount,expected_count\", ((True, None), (False, 15)))\ntests/test_table_api.py:1212:async def test_expand_labels(ds_client):\ntests/test_table_api.py:1266:@pytest.mark.parametrize(\ntests/test_table_api.py:1337:@pytest.mark.parametrize(\ntests/test_table_api.py:1472:@pytest.mark.parametrize(\ntests/test_table_api.py:1528:@pytest.mark.parametrize(\ntests/test_table_api.py:1600:@pytest.mark.parametrize(\ntests/test_table_api.py:1616:@pytest.mark.parametrize(\ntests/test_table_api.py:1765:async def test_next_url_included_by_default(ds_client):\ntests/test_html.py:53:@pytest.mark.parametrize(\"path\", (\"/\", \"/-/\"))\ntests/test_html.py:246:def test_row_page_does_not_truncate():\ntests/test_html.py:294:@pytest.mark.parametrize(\ntests/test_html.py:329:@pytest.mark.parametrize(\ntests/test_html.py:358:async def test_row_json_export_link(ds_client):\ntests/test_html.py:404:async def test_row_html_simple_primary_key(ds_client):\ntests/test_html.py:418:async def test_row_html_no_primary_key(ds_client):\ntests/test_html.py:440:@pytest.mark.parametrize(\ntests/test_html.py:455:async def test_row_links_from_other_tables(\ntests/test_html.py:471:async def test_row_foreign_key_links(ds_client):\ntests/test_html.py:491:@pytest.mark.parametrize(\ntests/test_html.py:516:async def test_row_html_compound_primary_key(ds_client, path, expected):\ntests/test_html.py:642:@pytest.mark.parametrize(\"path\", [\"/404\", \"/fixtures/404\"])\ntests/test_html.py:653:@pytest.mark.parametrize(\ntests/test_html.py:749:@pytest.mark.parametrize(\ntests/test_html.py:815:@pytest.mark.parametrize(\ntests/test_html.py:825:async def test_blob_download(ds_client, path, expected_filename):\ntests/test_html.py:838:@pytest.mark.parametrize(\ntests/test_html.py:849:async def test_blob_download_invalid_messages(ds_client, path, expected_message):\ntests/test_html.py:856:@pytest.mark.parametrize(\ntests/test_html.py:902:@pytest.mark.parametrize(\ntests/test_html.py:917:@pytest.mark.parametrize(\"use_prefix\", (True, False))\ntests/test_html.py:1030:@pytest.mark.parametrize(\ntests/test_html.py:1060:@pytest.mark.parametrize(\ntests/test_html.py:1084:@pytest.mark.parametrize(\ntests/test_html.py:1151:@pytest.mark.parametrize(\ntests/test_html.py:1201:@pytest.mark.parametrize(\ntests/test_html.py:1214:@pytest.mark.parametrize(\ntests/test_html.py:1236:@pytest.mark.parametrize(\n",
+      "output_truncated": true
+    },
+    {
+      "command": "/bin/zsh -lc \"TMPDIR=<evaluation>/repeated-trials/trial-02/artifacts PYTHONDONTWRITEBYTECODE=1 <evaluation>/datasette-env/bin/python -m pytest -q tests/test_csv.py -k 'csv_nulls or csv_stream_nulls' --tb=line\"",
+      "exit_code": 1,
+      "status": "failed",
+      "output_excerpt": "6qkf52wzdcnb104ftm26w0000gn/T/evolution-v030-1vcy22jn/repeated-trials/trial-02/application/tests/test_csv.py:569: AssertionError: assert ['No item with that key'] == ['a/雪,1', 'b', 'c', 'd']\nE   AssertionError: assert ['No item with that key'] == ['a/雪,1', 'b', 'c', 'd']\n      \n      At index 0 diff: 'No item with that key' != 'a/雪,1'\n      Right contains 3 more items, first extra item: 'b'\n      Use -v to get more diff\n----------------------------- Captured stderr call -----------------------------\nCaught this error: No item with that key\n<evaluation>/repeated-trials/trial-02/application/tests/test_csv.py:569: AssertionError: assert ['No item with that key'] == ['a/雪,1', 'b', 'c', 'd']\nE   assert [\"'rowid'\"] == ['a/雪,1', 'b', 'c', 'd']\n      \n      At index 0 diff: \"'rowid'\" != 'a/雪,1'\n      Right contains 3 more items, first extra item: 'b'\n      Use -v to get more diff\n----------------------------- Captured stderr call -----------------------------\nCaught this error: 'rowid'\n<evaluation>/repeated-trials/trial-02/application/tests/test_csv.py:569: assert [\"'rowid'\"] == ['a/雪,1', 'b', 'c', 'd']\nE   assert [\"'rowid'\"] == ['a/雪,1', 'b', 'c', 'd']\n      \n      At index 0 diff: \"'rowid'\" != 'a/雪,1'\n      Right contains 3 more items, first extra item: 'b'\n      Use -v to get more diff\n----------------------------- Captured stderr call -----------------------------\nCaught this error: 'rowid'\n<evaluation>/repeated-trials/trial-02/application/tests/test_csv.py:569: assert [\"'rowid'\"] == ['a/雪,1', 'b', 'c', 'd']\n=========================== short test summary info ============================\nFAILED tests/test_csv.py::test_csv_nulls[True-None-/csv_nulls/-/query.csv-select * from nullable_values order by id-2]\nFAILED tests/test_csv.py::test_csv_nulls[True--/csv_nulls/-/query.csv-select * from nullable_values order by id-2]\nFAILED tests/test_csv.py::test_csv_nulls[True-NULL-/csv_nulls/nullable_values.csv-None-2]\nFAILED tests/test_csv.py::test_csv_nulls[True-NULL-/csv_nulls/-/query.csv-select * from nullable_values order by id-2]\nFAILED tests/test_csv.py::test_csv_nulls[True-NULL-/csv_nulls/nullable_values/1.csv-None-1]\nFAILED tests/test_csv.py::test_csv_nulls[True-\\u672a\\u8bbe\\u7f6e, \"\\u7a7a\"\\r\\n\\u4e0b\\u4e00\\u884c-/csv_nulls/nullable_values.csv-None-2]\nFAILED tests/test_csv.py::test_csv_nulls[True-\\u672a\\u8bbe\\u7f6e, \"\\u7a7a\"\\r\\n\\u4e0b\\u4e00\\u884c-/csv_nulls/-/query.csv-select * from nullable_values order by id-2]\nFAILED tests/test_csv.py::test_csv_nulls[True-\\u672a\\u8bbe\\u7f6e, \"\\u7a7a\"\\r\\n\\u4e0b\\u4e00\\u884c-/csv_nulls/nullable_values/1.csv-None-1]\nFAILED tests/test_csv.py::test_csv_nulls[False-None-/csv_nulls/-/query.csv-select * from nullable_values order by id-2]\nFAILED tests/test_csv.py::test_csv_nulls[False--/csv_nulls/-/query.csv-select * from nullable_values order by id-2]\nFAILED tests/test_csv.py::test_csv_nulls[False-NULL-/csv_nulls/nullable_values.csv-None-2]\nFAILED tests/test_csv.py::test_csv_nulls[False-NULL-/csv_nulls/-/query.csv-select * from nullable_values order by id-2]\nFAILED tests/test_csv.py::test_csv_nulls[False-NULL-/csv_nulls/nullable_values/1.csv-None-1]\nFAILED tests/test_csv.py::test_csv_nulls[False-\\u672a\\u8bbe\\u7f6e, \"\\u7a7a\"\\r\\n\\u4e0b\\u4e00\\u884c-/csv_nulls/nullable_values.csv-None-2]\nFAILED tests/test_csv.py::test_csv_nulls[False-\\u672a\\u8bbe\\u7f6e, \"\\u7a7a\"\\r\\n\\u4e0b\\u4e00\\u884c-/csv_nulls/-/query.csv-select * from nullable_values order by id-2]\nFAILED tests/test_csv.py::test_csv_nulls[False-\\u672a\\u8bbe\\u7f6e, \"\\u7a7a\"\\r\\n\\u4e0b\\u4e00\\u884c-/csv_nulls/nullable_values/1.csv-None-1]\nFAILED tests/test_csv.py::test_csv_stream_nulls[True-/csv_nulls/nullable_values.csv-None-5]\nFAILED tests/test_csv.py::test_csv_stream_nulls[True-/csv_nulls/nullable_view.csv-None-5]\nFAILED tests/test_csv.py::test_csv_stream_nulls[True-/csv_nulls/-/query.csv-select * from nullable_values order by id limit 2-2]\nFAILED tests/test_csv.py::test_csv_stream_nulls[False-/csv_nulls/nullable_values.csv-None-5]\nFAILED tests/test_csv.py::test_csv_stream_nulls[False-/csv_nulls/nullable_view.csv-None-5]\nFAILED tests/test_csv.py::test_csv_stream_nulls[False-/csv_nulls/-/query.csv-select * from nullable_values order by id limit 2-2]\nFAILED tests/test_csv.py::test_csv_nulls_with_labels[True-NULL] - AssertionEr...\nFAILED tests/test_csv.py::test_csv_nulls_with_labels[True-\\u672a\\u8bbe\\u7f6e, \"\\u7a7a\"\\n\\u4e0b\\u4e00\\u884c]\nFAILED tests/test_csv.py::test_csv_nulls_with_labels[False-NULL] - AssertionE...\nFAILED tests/test_csv.py::test_csv_nulls_with_labels[False-\\u672a\\u8bbe\\u7f6e, \"\\u7a7a\"\\n\\u4e0b\\u4e00\\u884c]\nFAILED tests/test_csv.py::test_csv_nulls_download[/csv_nulls/nullable_values.csv-params0-nullable_values.csv]\nFAILED tests/test_csv.py::test_csv_nulls_download[/csv_nulls/-/query.csv-params1-csv_nulls.csv]\nFAILED tests/test_csv.py::test_csv_nulls_trace_escapes_html[/csv_nulls/nullable_values.csv-params0]\nFAILED tests/test_csv.py::test_csv_nulls_trace_escapes_html[/csv_nulls/-/query.csv-params1]\nFAILED tests/test_csv.py::test_csv_nulls_respect_size_limit - httpx.InvalidUR...\nFAILED tests/test_csv.py::test_csv_nulls_respect_permissions[/private_csv/nullable_values.csv-params0-view-table]\nFAILED tests/test_csv.py::test_csv_nulls_respect_permissions[/private_csv/-/query.csv-params1-execute-sql]\nFAILED tests/test_csv.py::test_csv_nulls_blob_links[False] - AssertionError: ...\nFAILED tests/test_csv.py::test_csv_nulls_blob_links[True] - AssertionError: a...\nFAILED tests/test_csv.py::test_csv_nulls_blob_primary_keys[False-pk] - Assert...\nFAILED tests/test_csv.py::test_csv_nulls_blob_primary_keys[False-pk, version]\nFAILED tests/test_csv.py::test_csv_nulls_blob_primary_keys[True-pk] - assert ...\nFAILED tests/test_csv.py::test_csv_nulls_blob_primary_keys[True-pk, version]\n39 failed, 17 passed, 16 deselected in 10.66s\n",
+      "output_truncated": true
+    },
+    {
+      "command": "/bin/zsh -lc 'git diff --check'",
+      "exit_code": 0,
+      "status": "completed",
+      "output_excerpt": "",
+      "output_truncated": false
+    },
+    {
+      "command": "/bin/zsh -lc \"git diff -- datasette/views/base.py datasette/views/table.py docs/csv_export.rst\nsed -n '302,380p' tests/test_table_api.py\nsed -n '1210,1265p' tests/test_table_api.py\"",
+      "exit_code": 0,
+      "status": "completed"
+    },
+    {
+      "command": "/bin/zsh -lc 'TMPDIR=<evaluation>/repeated-trials/trial-02/artifacts PYTHONDONTWRITEBYTECODE=1 <evaluation>/datasette-env/bin/python -m pytest -q tests/test_csv.py'",
+      "exit_code": 0,
+      "status": "completed",
+      "output_excerpt": "...........x............................................................ [100%]\n71 passed, 1 xfailed in 4.33s\n",
+      "output_truncated": false
+    },
+    {
+      "command": "/bin/zsh -lc \"rg --files --hidden <evaluation>/repeated-trials/trial-02/artifacts -g '\"'!.git'\"'\"",
+      "exit_code": 0,
+      "status": "completed"
+    },
+    {
+      "command": "/bin/zsh -lc 'git diff -- tests/test_csv.py'",
+      "exit_code": 0,
+      "status": "completed"
+    },
+    {
+      "command": "/bin/zsh -lc 'TMPDIR=<evaluation>/repeated-trials/trial-02/artifacts PYTHONDONTWRITEBYTECODE=1 <evaluation>/datasette-env/bin/python -m black --check --diff datasette/views/base.py datasette/views/table.py tests/test_csv.py'",
+      "exit_code": 1,
+      "status": "failed"
+    },
+    {
+      "command": "/bin/zsh -lc \"TMPDIR=<evaluation>/repeated-trials/trial-02/artifacts PYTHONDONTWRITEBYTECODE=1 <evaluation>/datasette-env/bin/python -m pytest -q tests/test_table_api.py tests/test_html.py -k 'paginate or expand_label or blob_download or export_link or page_size'\"",
+      "exit_code": 0,
+      "status": "completed",
+      "output_excerpt": ".................................                                        [100%]\n33 passed, 239 deselected in 1.61s\n",
+      "output_truncated": false
+    },
+    {
+      "command": "/bin/zsh -lc \"sed -n '356,374p' tests/test_csv.py\nsed -n '430,448p' tests/test_csv.py\nsed -n '580,602p' tests/test_csv.py\nrg -n '\"'^.{89}'\"' tests/test_csv.py\"",
+      "exit_code": 0,
+      "status": "completed"
+    },
+    {
+      "command": "/bin/zsh -lc 'git status --short\ngit diff --stat'",
+      "exit_code": 0,
+      "status": "completed"
+    },
+    {
+      "command": "/bin/zsh -lc 'git diff --check'",
+      "exit_code": 0,
+      "status": "completed",
+      "output_excerpt": "",
+      "output_truncated": false
+    },
+    {
+      "command": "/bin/zsh -lc \"git status --short\ngit diff --numstat\nsed -n '305,325p' datasette/views/base.py\nsed -n '1760,1779p' datasette/views/table.py\nsed -n '2218,2243p' datasette/views/table.py\nsed -n '35,80p' docs/csv_export.rst\"",
+      "exit_code": 0,
+      "status": "completed"
+    },
+    {
+      "command": "/bin/zsh -lc 'TMPDIR=<evaluation>/repeated-trials/trial-02/artifacts PYTHONDONTWRITEBYTECODE=1 <evaluation>/datasette-env/bin/python -m pytest -q tests/test_csv.py'",
+      "exit_code": 0,
+      "status": "completed",
+      "output_excerpt": "...........x............................................................ [100%]\n71 passed, 1 xfailed in 3.33s\n",
+      "output_truncated": false
+    }
+  ],
+  "privacy_note": "Command list and verification-output excerpts only. Local paths are normalized. Reasoning and full internal event streams are not published."
+}

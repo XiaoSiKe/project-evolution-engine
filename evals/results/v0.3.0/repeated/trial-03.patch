@@ -1,0 +1,455 @@
+diff --git a/docs/api.md b/docs/api.md
+index f1bd50c993f417119bb9ae14fe60e6856a1a7f2a..c6f130aa944c7a39fdf9c96e5cdc3a33a954e4ab 100644
+--- a/docs/api.md
++++ b/docs/api.md
+@@ -76,17 +76,21 @@
+ * `def .iter_raw([chunk_size])` - **bytes iterator**
+ * `def .iter_bytes([chunk_size])` - **bytes iterator**
+ * `def .iter_text([chunk_size])` - **text iterator**
+-* `def .iter_lines()` - **text iterator**
++* `def .iter_lines(keepends=False)` - **text iterator**
+ * `def .close()` - **None**
+ * `def .next()` - **Response**
+ * `def .aread()` - **bytes**
+ * `def .aiter_raw([chunk_size])` - **async bytes iterator**
+ * `def .aiter_bytes([chunk_size])` - **async bytes iterator**
+ * `def .aiter_text([chunk_size])` - **async text iterator**
+-* `def .aiter_lines()` - **async text iterator**
++* `def .aiter_lines(keepends=False)` - **async text iterator**
+ * `def .aclose()` - **None**
+ * `def .anext()` - **Response**
+ 
++`iter_lines()` and `aiter_lines()` omit line endings by default. Pass
++`keepends=True` to preserve the original endings, with results equivalent to
++calling `str.splitlines(keepends=True)` on the decoded response text.
++
+ ## `Request`
+ 
+ *An HTTP request. Can be constructed explicitly for more control over exactly
+diff --git a/docs/async.md b/docs/async.md
+index f01715d84f6a0c4b8d74bde21b07001cf90d674c..7bda5476c65663e3c865f1a75b126d18dc131e2a 100644
+--- a/docs/async.md
++++ b/docs/async.md
+@@ -80,7 +80,7 @@ The async response streaming methods are:
+ * `Response.aread()` - For conditionally reading a response inside a stream block.
+ * `Response.aiter_bytes()` - For streaming the response content as bytes.
+ * `Response.aiter_text()` - For streaming the response content as text.
+-* `Response.aiter_lines()` - For streaming the response content as lines of text.
++* `Response.aiter_lines(keepends=False)` - For streaming the response content as lines of text. Pass `keepends=True` to retain the original line endings, as with `str.splitlines(keepends=True)`.
+ * `Response.aiter_raw()` - For streaming the raw response bytes, without applying content decoding.
+ * `Response.aclose()` - For closing the response. You don't usually need this, since `.stream` block closes the response automatically on exit.
+ 
+diff --git a/docs/quickstart.md b/docs/quickstart.md
+index e140b53cd79583afd9425d8ace936b56a68c1fc4..18f9e54ed71f0785807c7b2bd685d7276f1e60e9 100644
+--- a/docs/quickstart.md
++++ b/docs/quickstart.md
+@@ -364,7 +364,24 @@ Or stream the text, on a line-by-line basis...
+ ...         print(line)
+ ```
+ 
+-HTTPX will use universal line endings, normalising all cases to `\n`.
++By default, `iter_lines()` and `iter_lines(keepends=False)` remove line endings,
++just like `str.splitlines()`. Pass `keepends=True` to retain the original endings,
++including `\r\n`, `\r`, `\n`, and all other separators recognized by
++`str.splitlines(keepends=True)`.
++
++```pycon
++>>> r = httpx.Response(200, text="first\r\nsecond\rlast")
++>>> list(r.iter_lines())
++['first', 'second', 'last']
++>>> list(r.iter_lines(keepends=True))
++['first\r\n', 'second\r', 'last']
++```
++
++The same option is available on `aiter_lines()`. Both methods support cached and
++streaming responses, yielding lines incrementally. A trailing `\r` is held until
++more text arrives or the stream ends, so a split `\r\n` stays together.
++Empty responses yield no lines, and a final line without a line ending is returned
++unchanged.
+ 
+ In some cases you might want to access the raw bytes on the response without applying any HTTP content decoding. In this case any content encoding that the web server has applied such as `gzip`, `deflate`, `brotli`, or `zstd` will
+ not be automatically decoded.
+diff --git a/httpx/_decoders.py b/httpx/_decoders.py
+index 899dfada878e1181fca6d3c75a79526a076abb9e..84e833cf6a76a870650d887d4dbff78225464cd2 100644
+--- a/httpx/_decoders.py
++++ b/httpx/_decoders.py
+@@ -322,11 +322,12 @@ class LineDecoder:
+     """
+     Handles incrementally reading lines from text.
+ 
+-    Has the same behaviour as the stdllib splitlines,
+-    but handling the input iteratively.
++    Has the same behaviour as str.splitlines(keepends=keepends),
++    but handles the input iteratively.
+     """
+ 
+-    def __init__(self) -> None:
++    def __init__(self, keepends: bool = False) -> None:
++        self.keepends = keepends
+         self.buffer: list[str] = []
+         self.trailing_cr: bool = False
+ 
+@@ -343,12 +344,11 @@ class LineDecoder:
+             text = text[:-1]
+ 
+         if not text:
+-            # NOTE: the edge case input of empty text doesn't occur in practice,
+-            # because other httpx internals filter out this value
+-            return []  # pragma: no cover
++            # Empty chunks or a deferred CR do not produce a line yet.
++            return []
+ 
+         trailing_newline = text[-1] in NEWLINE_CHARS
+-        lines = text.splitlines()
++        lines = text.splitlines(keepends=self.keepends)
+ 
+         if len(lines) == 1 and not trailing_newline:
+             # No new lines, buffer the input and continue.
+@@ -372,6 +372,8 @@ class LineDecoder:
+         if not self.buffer and not self.trailing_cr:
+             return []
+ 
++        if self.trailing_cr and self.keepends:
++            self.buffer.append("\r")
+         lines = ["".join(self.buffer)]
+         self.buffer = []
+         self.trailing_cr = False
+diff --git a/httpx/_models.py b/httpx/_models.py
+index 2cc86321a4bc0915bd5e3886b3a69d551bbfc8d0..dc82623d0921abedb8a09f07f8afc6d897c7e2e2 100644
+--- a/httpx/_models.py
++++ b/httpx/_models.py
+@@ -923,8 +923,12 @@ class Response:
+             for chunk in chunker.flush():
+                 yield chunk
+ 
+-    def iter_lines(self) -> typing.Iterator[str]:
+-        decoder = LineDecoder()
++    def iter_lines(self, keepends: bool = False) -> typing.Iterator[str]:
++        """
++        Iterate over lines of decoded response text.
++        Line endings are omitted unless `keepends` is True.
++        """
++        decoder = LineDecoder(keepends=keepends)
+         with request_context(request=self._request):
+             for text in self.iter_text():
+                 for line in decoder.decode(text):
+@@ -1025,8 +1029,12 @@ class Response:
+             for chunk in chunker.flush():
+                 yield chunk
+ 
+-    async def aiter_lines(self) -> typing.AsyncIterator[str]:
+-        decoder = LineDecoder()
++    async def aiter_lines(self, keepends: bool = False) -> typing.AsyncIterator[str]:
++        """
++        Asynchronously iterate over lines of decoded response text.
++        Line endings are omitted unless `keepends` is True.
++        """
++        decoder = LineDecoder(keepends=keepends)
+         with request_context(request=self._request):
+             async for text in self.aiter_text():
+                 for line in decoder.decode(text):
+diff --git a/tests/models/test_responses.py b/tests/models/test_responses.py
+index d2972da5bd2e7803cb7ebb789d120acc5f250f9a..f0dad657a801c41f473b7e5c85405ee617b08a78 100644
+--- a/tests/models/test_responses.py
++++ b/tests/models/test_responses.py
+@@ -681,6 +681,206 @@ async def test_aiter_lines():
+     assert content == ["Hello,", "world!"]
+ 
+ 
++@pytest.fixture(
++    params=[{}, {"keepends": False}, {"keepends": True}],
++    ids=["default", "discard-endings", "keep-endings"],
++)
++def line_options(request):
++    return request.param
++
++
++@pytest.fixture(
++    params=[
++        b"",
++        b"no line ending",
++        b"\n",
++        b"\r",
++        b"\r\n",
++        b"\r\r\n",
++        b"\n\r",
++        b"\r\n\r\r\nlast\r",
++        b"first\n\nsecond\r\nthird\rlast",
++        b"first\r\nsecond\r\n",
++        b"first\rsecond\r",
++        "雪\r\né\r\n\v\f\x1c\x1d\x1e\x85\u2028\u2029tail".encode("utf-8"),
++        "\v\f\x1c\x1d\x1e\x85\u2028\u2029".encode("utf-8"),
++        b"not\x00a\x1fline\tending",
++        b"incomplete UTF-8: \xe2\x82",
++    ]
++)
++def line_content(request):
++    return request.param
++
++
++def line_chunkings(content):
++    yield [content]
++    yield [content[index : index + 1] for index in range(len(content))]
++    # Split at every byte boundary, including within UTF-8 characters and CRLF.
++    for index in range(len(content) + 1):
++        yield [b"", content[:index], b"", content[index:], b""]
++
++
++@pytest.mark.anyio
++async def test_cached_iter_lines_keepends(line_content, line_options):
++    response = httpx.Response(200, content=line_content)
++    text = line_content.decode("utf-8", errors="replace")
++    expected = text.splitlines(**line_options)
++
++    assert list(response.iter_lines(**line_options)) == expected
++    assert [line async for line in response.aiter_lines(**line_options)] == expected
++    # Line iteration must not change cached content or the other text interfaces.
++    assert response.content == line_content
++    assert response.text == text
++    assert "".join(response.iter_text()) == text
++    assert "".join([part async for part in response.aiter_text()]) == text
++    assert list(response.iter_lines(**line_options)) == expected
++
++
++@pytest.mark.parametrize("preload", [False, True])
++def test_iter_lines_keepends_streaming(line_content, line_options, preload):
++    expected = line_content.decode("utf-8", errors="replace").splitlines(**line_options)
++    for chunks in line_chunkings(line_content):
++        response = httpx.Response(200, content=iter(chunks))
++        if preload:
++            response.read()
++
++        assert list(response.iter_lines(**line_options)) == expected, chunks
++        assert response.is_closed
++        assert response.is_stream_consumed
++        if preload:
++            assert response.content == line_content
++            assert list(response.iter_lines(**line_options)) == expected
++        else:
++            with pytest.raises(httpx.ResponseNotRead):
++                response.content  # noqa: B018
++            with pytest.raises(httpx.StreamConsumed):
++                list(response.iter_lines(**line_options))
++
++
++@pytest.mark.anyio
++@pytest.mark.parametrize("preload", [False, True])
++async def test_aiter_lines_keepends_streaming(line_content, line_options, preload):
++    expected = line_content.decode("utf-8", errors="replace").splitlines(**line_options)
++
++    async def stream(chunks):
++        for chunk in chunks:
++            yield chunk
++
++    for chunks in line_chunkings(line_content):
++        response = httpx.Response(200, content=stream(chunks))
++        if preload:
++            await response.aread()
++
++        assert [line async for line in response.aiter_lines(**line_options)] == expected
++        assert response.is_closed
++        assert response.is_stream_consumed
++        if preload:
++            assert response.content == line_content
++            lines = [line async for line in response.aiter_lines(**line_options)]
++            assert lines == expected
++        else:
++            with pytest.raises(httpx.ResponseNotRead):
++                response.content  # noqa: B018
++            with pytest.raises(httpx.StreamConsumed):
++                [line async for line in response.aiter_lines(**line_options)]
++
++
++@pytest.mark.parametrize("finish", [False, True])
++def test_iter_lines_keepends_incremental(line_options, finish):
++    closed = []
++
++    class Stream(httpx.SyncByteStream):
++        def __iter__(self):
++            yield b"first\n"
++            yield b"second\r"
++            yield b""
++            yield b"\nthird\r"
++            yield b"last"
++
++        def close(self):
++            closed.append(True)
++
++    response = httpx.Response(200, stream=Stream())
++    lines = response.iter_lines(**line_options)
++    assert not response.is_stream_consumed
++    assert next(lines) == "first\n".splitlines(**line_options)[0]
++    assert response.num_bytes_downloaded == len(b"first\n")
++    assert next(lines) == "second\r\n".splitlines(**line_options)[0]
++    assert response.num_bytes_downloaded == len(b"first\nsecond\r\nthird\r")
++    assert response.is_stream_consumed
++    assert not response.is_closed
++    assert closed == []
++
++    if finish:
++        assert list(lines) == "third\rlast".splitlines(**line_options)
++        assert response.is_closed
++        assert closed == [True]
++
++    response.close()
++    assert response.is_closed
++    assert closed == [True]
++
++
++@pytest.mark.anyio
++@pytest.mark.parametrize("finish", [False, True])
++async def test_aiter_lines_keepends_incremental(line_options, finish):
++    closed = []
++
++    class Stream(httpx.AsyncByteStream):
++        async def __aiter__(self):
++            for chunk in [b"first\n", b"second\r", b"", b"\nthird\r", b"last"]:
++                if closed:
++                    return
++                yield chunk
++
++        async def aclose(self):
++            closed.append(True)
++
++    response = httpx.Response(200, stream=Stream())
++    lines = response.aiter_lines(**line_options)
++    assert not response.is_stream_consumed
++    assert await lines.__anext__() == "first\n".splitlines(**line_options)[0]
++    assert response.num_bytes_downloaded == len(b"first\n")
++    assert await lines.__anext__() == "second\r\n".splitlines(**line_options)[0]
++    assert response.num_bytes_downloaded == len(b"first\nsecond\r\nthird\r")
++    assert response.is_stream_consumed
++    assert not response.is_closed
++    assert closed == []
++
++    if finish:
++        remaining = [line async for line in lines]
++        assert remaining == "third\rlast".splitlines(**line_options)
++        assert response.is_closed
++        assert closed == [True]
++
++    await response.aclose()
++    assert response.is_closed
++    assert closed == [True]
++
++    # Finish the iterator over the closed test stream, including buffered text,
++    # so no async generators are left for Trio's garbage collector to clean up.
++    async for _ in lines:
++        pass
++
++
++def test_iter_lines_keepends_closed(line_options):
++    response = httpx.Response(200, content=iter([b"line\n"]))
++    response.close()
++    with pytest.raises(httpx.StreamClosed):
++        list(response.iter_lines(**line_options))
++
++
++@pytest.mark.anyio
++async def test_aiter_lines_keepends_closed(line_options):
++    async def stream():
++        yield b"line\n"
++
++    response = httpx.Response(200, content=stream())
++    await response.aclose()
++    with pytest.raises(httpx.StreamClosed):
++        [line async for line in response.aiter_lines(**line_options)]
++
++
+ def test_sync_streaming_response():
+     response = httpx.Response(
+         200,
+diff --git a/tests/test_decoders.py b/tests/test_decoders.py
+index 9ffaba189d03052e88a77403bc5b1ebb07f32d3e..5c708a1e9903634a2c67a2369e1c0b47e7a36cc0 100644
+--- a/tests/test_decoders.py
++++ b/tests/test_decoders.py
+@@ -9,6 +9,7 @@ import pytest
+ import zstandard as zstd
+ 
+ import httpx
++from httpx._decoders import LineDecoder
+ 
+ 
+ def test_deflate():
+@@ -343,6 +344,81 @@ def test_line_decoder_crnl():
+     assert list(response.iter_lines()) == ["12345", "foo bar baz"]
+ 
+ 
++@pytest.mark.parametrize("keepends", [False, True])
++@pytest.mark.parametrize(
++    "text",
++    [
++        "",
++        "no line ending",
++        "\n",
++        "\r",
++        "\r\n",
++        "\r\r",
++        "\n\r",
++        "\r\n\r",
++        "\r\r\n",
++        "\r\n\r\n",
++        "first\r\nsecond\n\nthird\rlast\r",
++        "\n雪\r\né\r\v\f\x1c\x1d\x1e\x85\u2028\u2029tail",
++        "\v\f\x1c\x1d\x1e\x85\u2028\u2029",
++    ],
++)
++def test_line_decoder_keepends_chunk_boundaries(text, keepends):
++    expected = text.splitlines(keepends=keepends)
++    # Every partition into three chunks, including empty chunks between them.
++    for first in range(len(text) + 1):
++        for second in range(first, len(text) + 1):
++            chunks = [text[:first], "", text[first:second], "", text[second:], ""]
++            decoder = LineDecoder(keepends=keepends)
++            lines = [line for chunk in chunks for line in decoder.decode(chunk)]
++            assert lines + decoder.flush() == expected, chunks
++            assert decoder.flush() == []
++
++
++@pytest.mark.parametrize("keepends", [False, True])
++def test_line_decoder_keepends_incremental(keepends):
++    decoder = LineDecoder(keepends=keepends)
++    assert decoder.decode("") == []
++    assert decoder.decode("first\npar") == "first\n".splitlines(keepends)
++    assert decoder.decode("tial\r") == []
++    assert decoder.decode("") == []
++    assert decoder.decode("\n\nthird\r") == "partial\r\n\n".splitlines(keepends)
++    assert decoder.decode("last") == "third\r".splitlines(keepends)
++    assert decoder.flush() == ["last"]
++    assert decoder.flush() == []
++
++    # Flushing a final CR must preserve it only when requested, then reset state.
++    assert decoder.decode("\r") == []
++    assert decoder.decode("") == []
++    assert decoder.flush() == "\r".splitlines(keepends)
++    assert decoder.flush() == []
++
++
++@pytest.mark.anyio
++@pytest.mark.parametrize("keepends", [False, True])
++@pytest.mark.parametrize("encoding", ["utf-8", "utf-16", "iso-8859-1"])
++async def test_line_decoder_keepends_content_encoding(keepends, encoding):
++    text = "café\r\n\r\nolé\rlast\x85end"
++    compressor = zlib.compressobj(wbits=zlib.MAX_WBITS | 16)
++    compressed = compressor.compress(text.encode(encoding)) + compressor.flush()
++    chunks = [compressed[index : index + 1] for index in range(len(compressed))]
++    headers = {
++        "Content-Encoding": "gzip",
++        "Content-Type": f"text/plain; charset={encoding}",
++    }
++    expected = text.splitlines(keepends=keepends)
++
++    response = httpx.Response(200, headers=headers, content=iter(chunks))
++    assert list(response.iter_lines(keepends=keepends)) == expected
++
++    async def stream():
++        for chunk in chunks:
++            yield chunk
++
++    response = httpx.Response(200, headers=headers, content=stream())
++    assert [line async for line in response.aiter_lines(keepends=keepends)] == expected
++
++
+ def test_invalid_content_encoding_header():
+     headers = [(b"Content-Encoding", b"invalid-header")]
+     body = b"test 123"

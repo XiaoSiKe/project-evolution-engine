@@ -1,0 +1,737 @@
+{
+  "schema_version": 1,
+  "status": "completed_with_findings",
+  "mode": "read-only audit",
+  "summary": "已实际使用 codebase-convergence Skill 审核 MCP 桥接器，并运行提供的官方 Serena 的真实 stdio 服务。7 项现有测试通过，正常文本查询和工具错误传播通过；确认 2 项高严重度文件/状态保护缺陷，以及 1 项中等严重度内部调用绕过只读白名单的问题。",
+  "skill": {
+    "name": "codebase-convergence",
+    "path": "<codebase-convergence>/SKILL.md",
+    "references": [
+      "<codebase-convergence>/references/execution-workflow.md",
+      "<codebase-convergence>/references/architecture-deepening.md",
+      "<codebase-convergence>/references/finding-contract.md",
+      "<codebase-convergence>/references/finding.schema.json"
+    ],
+    "executed_validator": "<codebase-convergence>/scripts/finding_contract.py",
+    "usage": "沿用本会话已读取的 Skill 和必读参考资料，实际执行限定范围审核、官方配置加载链核对、真实 stdio 复现、Evidence ledger、Architecture lens 与三份机器可读 Finding 的 stamp/check。"
+  },
+  "scope": {
+    "repository": "<repository>",
+    "primary_files": [
+      "project-evolution-engine/scripts/serena_mcp.py",
+      "tests/test_serena_mcp.py"
+    ],
+    "dependency": "project-evolution-engine/scripts/change_evidence.py",
+    "official_source_reads": [
+      "<evaluation>/serena/src/serena/config/serena_config.py",
+      "<evaluation>/serena/src/serena/config/context_mode.py",
+      "<evaluation>/serena/src/serena/agent.py",
+      "<evaluation>/serena/src/serena/project.py",
+      "<evaluation>/serena/src/serena/cli.py"
+    ],
+    "authority": "本次最新授权：真实 stdio、指定项目、发现实际工具和参数、禁止修改与切换项目工具、外部独立状态在首次及复用时保持绑定、保护既有文件及原有 Serena 配置、不满足条件则明确失败。",
+    "excluded": [
+      "原生宿主工具注册",
+      "repeated-trials",
+      "其他实现结果",
+      "评测答案",
+      "其他代理输出",
+      "其他未授权仓库模块"
+    ],
+    "repository_instructions": "本会话此前已检查相同仓库祖先目录和 scripts/tests 目录的 AGENTS.md，没有适用文件；本次不扩展读取其他项目文档。"
+  },
+  "runtime": {
+    "python": "<evaluation>/serena-env/bin/python",
+    "serena": "<evaluation>/serena-env/bin/serena",
+    "transport": "real stdio MCP through the bridge",
+    "live_read_tool_names": [
+      "find_declaration",
+      "find_implementations",
+      "find_referencing_symbols",
+      "find_symbol",
+      "get_diagnostics_for_file",
+      "get_symbols_overview",
+      "search_for_pattern"
+    ],
+    "discovery_evidence": "<evaluation>/bridge-review/baseline-describe.json",
+    "query_tool": "search_for_pattern",
+    "query_parameters_discovered": [
+      "substring_pattern",
+      "relative_path"
+    ],
+    "configuration_isolation": "每个复现场景使用自建临时项目和独立 state-dir；桥接器为子进程明确设置 SERENA_HOME 到该 state-dir。没有使用用户真实 Serena 状态。",
+    "installations_performed": false
+  },
+  "coverage_manifest": [
+    {
+      "area": "首次创建与再次使用外部状态",
+      "evidence": "7 项单元测试，实际首次 --describe 与再次 --requests",
+      "outcome": "正常场景成功，首次项目文件哈希不变；不完整复用状态触发 F-bridge-state-002。"
+    },
+    {
+      "area": "项目绑定和用户请求白名单",
+      "evidence": "同名不同 root 的标记拒绝测试，读工具允许/修改或切换工具拒绝测试，实际查询返回本场景专有 token",
+      "outcome": "公开请求验证通过；内部握手未使用该限制，触发 F-bridge-activation-003。"
+    },
+    {
+      "area": "文件路径保护",
+      "evidence": "相对路径越界/绝对路径/直接符号链接请求拒绝测试；真实链接日志复现",
+      "outcome": "查询参数中的直接路径检查通过；日志写入路径触发 F-bridge-log-001。"
+    },
+    {
+      "area": "真实 MCP 和动态参数",
+      "evidence": "从实际 list_tools 返回值取得 search_for_pattern 的字段，再执行读取请求",
+      "outcome": "查询命中本临时项目 facts.mcpfixture 的 bridge_review_token。"
+    },
+    {
+      "area": "失败传播",
+      "evidence": "实际 search_for_pattern 查询不存在路径；缺失可选 runtime 测试",
+      "outcome": "查询返回 isError=true、connected=true、ok=false、CLI=1；运行时缺失 CLI=2。未将这一候选作为缺陷。"
+    },
+    {
+      "area": "原有配置保护",
+      "evidence": "临时项目预置 .serena/project.yml，比较首次连接与外部 project 状态缺失后连接的文件哈希",
+      "outcome": "首次不变；复用时发生 project.yml 改写及 .gitignore 新增。"
+    }
+  ],
+  "baseline": {
+    "initial_files": {
+      "project-evolution-engine/scripts/serena_mcp.py": {
+        "sha256": "77fce985d217b98fbb292a8930fd25633952c45e7e8e681c9065fd13bc09575a",
+        "size": 10004
+      },
+      "tests/test_serena_mcp.py": {
+        "sha256": "4492d0e05657956e6c3bc193095adc058eb29db2621832e1564485bb51ce3514",
+        "size": 4595
+      },
+      "project-evolution-engine/scripts/change_evidence.py": {
+        "sha256": "b601879a57a09a3da8ea076e3c4d4df4b2219a5177da6e75df1e24eca721dc6f",
+        "size": 10474
+      }
+    },
+    "final_files": {
+      "project-evolution-engine/scripts/serena_mcp.py": "77fce985d217b98fbb292a8930fd25633952c45e7e8e681c9065fd13bc09575a",
+      "tests/test_serena_mcp.py": "4492d0e05657956e6c3bc193095adc058eb29db2621832e1564485bb51ce3514",
+      "project-evolution-engine/scripts/change_evidence.py": "b601879a57a09a3da8ea076e3c4d4df4b2219a5177da6e75df1e24eca721dc6f"
+    },
+    "repository_files_unchanged": true,
+    "external_config_source_hashes": {
+      "<evaluation>/serena/src/serena/config/serena_config.py": "5aaf6ead9be17c4d3113ffb7c741632dcbe9e4a3187b04e11505e6d2947afe72",
+      "<evaluation>/serena/src/serena/config/context_mode.py": "a733108d7f98ed859cecf8532bdbfc77d999012aa93e6d365f177f1b9dfc09e9"
+    },
+    "whole_worktree_fingerprint": null,
+    "reason": "限定范围且禁止读取其他评测/代理结果，因此未运行全仓 collector。新鲜度以三个声明相关文件的 SHA-256 为依据；外部官方配置源码指纹单独记录。"
+  },
+  "verification": {
+    "unit_tests": {
+      "command": "PYTHONDONTWRITEBYTECODE=1 <evaluation>/serena-env/bin/python -m unittest discover -s tests -p test_serena_mcp.py -v",
+      "exit_code": 0,
+      "tests_run": 7,
+      "passed": 7,
+      "output_path": "<evaluation>/bridge-review/unit-tests.txt"
+    },
+    "first_stdio_describe": {
+      "outer_command": "PYTHONDONTWRITEBYTECODE=1 <evaluation>/serena-env/bin/python - <<'PY'\nfrom pathlib import Path\nimport hashlib,json,subprocess,tempfile\nbase=Path('<evaluation>/bridge-review')\nbase.mkdir(exist_ok=True)\nfixture=Path(tempfile.mkdtemp(prefix='protocol-',dir=base)).resolve()\nroot=fixture/'project'\nroot.mkdir()\n(root/'facts.mcpfixture').write_text('bridge_review_token = unchanged\\n')\nstate=fixture/'state'\ncommand=['<evaluation>/serena-env/bin/python','-B','<repository>/project-evolution-engine/scripts/serena_mcp.py','--root',str(root),'--state-dir',str(state),'--serena','<evaluation>/serena-env/bin/serena','--describe','--timeout','15']\nresult=subprocess.run(command,capture_output=True,text=True,timeout=45)\ntry:\n    payload=json.loads(result.stdout)\nexcept json.JSONDecodeError:\n    payload={'raw_stdout':result.stdout}\nrecord={'fixture':str(fixture),'root':str(root),'state':str(state),'command':command,'exit_code':result.returncode,'stdout':payload,'stderr':result.stderr,'root_files':sorted(str(path.relative_to(root)) for path in root.rglob('*'))}\n(base/'baseline-describe.json').write_text(json.dumps(record,ensure_ascii=False,indent=2)+'\\n')\nprint(json.dumps({'fixture':str(fixture),'exit_code':result.returncode,'connected':payload.get('connected'),'ok':payload.get('ok'),'error':payload.get('error'),'tools':payload.get('connection',{}).get('tools',[]),'root_files':record['root_files']},ensure_ascii=False,indent=2))\nPY",
+      "outer_exit_code": 0,
+      "bridge_exit_code": 0,
+      "result": "connected=true, ok=true; 7 live read-tool schemas returned"
+    },
+    "valid_and_failed_query": {
+      "command": "PYTHONDONTWRITEBYTECODE=1 <evaluation>/serena-env/bin/python <evaluation>/bridge-review/reproduce_bridge.py query-error",
+      "outer_exit_code": 0,
+      "bridge_exit_code": 1,
+      "connected": true,
+      "ok": false,
+      "evidence": "<evaluation>/bridge-review/query-error-evidence.json"
+    },
+    "finding_validation": [
+      {
+        "id": "F-bridge-log-001",
+        "stamp_exit_code": 0,
+        "check_exit_code": 0,
+        "freshness": "current",
+        "path": "<evaluation>/bridge-review/F-bridge-log-001.json",
+        "check_result": "<evaluation>/bridge-review/F-bridge-log-001.check.json"
+      },
+      {
+        "id": "F-bridge-state-002",
+        "stamp_exit_code": 0,
+        "check_exit_code": 0,
+        "freshness": "current",
+        "path": "<evaluation>/bridge-review/F-bridge-state-002.json",
+        "check_result": "<evaluation>/bridge-review/F-bridge-state-002.check.json"
+      },
+      {
+        "id": "F-bridge-activation-003",
+        "stamp_exit_code": 0,
+        "check_exit_code": 0,
+        "freshness": "current",
+        "path": "<evaluation>/bridge-review/F-bridge-activation-003.json",
+        "check_result": "<evaluation>/bridge-review/F-bridge-activation-003.check.json"
+      }
+    ],
+    "probe_exit_code_semantics": "复现脚本自身退出 0 表示场景与证据已成功记录，并不表示桥接器满足保护要求。每次真实桥接 CLI 的独立退出码保存在场景证据及 findings 的 reproduction.result 中。"
+  },
+  "findings": [
+    {
+      "canonical_owner": {
+        "path": "project-evolution-engine/scripts/serena_mcp.py",
+        "status": "confirmed"
+      },
+      "category": "bug",
+      "claim": "A managed state's last-server.log symlink is followed and truncated, allowing --describe to overwrite an existing project file while reporting success.",
+      "confidence": "confirmed",
+      "disposition": "direct-repair",
+      "evidence": [
+        {
+          "end_line": 96,
+          "kind": "file",
+          "path": "project-evolution-engine/scripts/serena_mcp.py",
+          "start_line": 95,
+          "summary": "connect opens last-server.log in write mode and passes the stream to the real server without rejecting a linked log file."
+        },
+        {
+          "end_line": 45,
+          "kind": "file",
+          "path": "project-evolution-engine/scripts/serena_mcp.py",
+          "start_line": 37,
+          "summary": "The reused state is admitted using its marker; symlink checks cover serena_config.yml and project, but not the log that is immediately opened for writing."
+        },
+        {
+          "kind": "reproduction",
+          "summary": "PYTHONDONTWRITEBYTECODE=1 <evaluation>/serena-env/bin/python <evaluation>/bridge-review/reproduce_bridge.py symlink-log. The first real stdio --describe succeeds without changing the fixture project. Replace state/last-server.log with a symlink to fixture project/protected.mcpfixture and run --describe again. It exits 0 and reports ok=true; the original 45-byte file is replaced by 9803 bytes of server log, and its original contents are absent. Evidence: <evaluation>/bridge-review/symlink-log-evidence.json."
+        }
+      ],
+      "evidence_basis": {
+        "files": [
+          {
+            "path": "project-evolution-engine/scripts/change_evidence.py",
+            "role": "subject",
+            "sha256": "sha256:b601879a57a09a3da8ea076e3c4d4df4b2219a5177da6e75df1e24eca721dc6f",
+            "state": "present"
+          },
+          {
+            "path": "project-evolution-engine/scripts/serena_mcp.py",
+            "role": "canonical-owner",
+            "sha256": "sha256:77fce985d217b98fbb292a8930fd25633952c45e7e8e681c9065fd13bc09575a",
+            "state": "present"
+          },
+          {
+            "path": "tests/test_serena_mcp.py",
+            "role": "test",
+            "sha256": "sha256:4492d0e05657956e6c3bc193095adc058eb29db2621832e1564485bb51ce3514",
+            "state": "present"
+          }
+        ],
+        "method": "sha256-file-content-v1"
+      },
+      "freshness": "current",
+      "id": "F-bridge-log-001",
+      "impact": "Reusing a managed state directory containing a linked log can destroy the linked file's existing contents, including files inside the requested project or other writable user files. The bridge reports connected=true/ok=true despite violating its file protection boundary.",
+      "schema_version": 1,
+      "severity": "high",
+      "priority": "P1",
+      "location": {
+        "path": "project-evolution-engine/scripts/serena_mcp.py",
+        "start_line": 95,
+        "end_line": 96
+      },
+      "reproduction": {
+        "case": "symlink-log",
+        "command": "PYTHONDONTWRITEBYTECODE=1 <evaluation>/serena-env/bin/python <evaluation>/bridge-review/reproduce_bridge.py symlink-log",
+        "evidence": "<evaluation>/bridge-review/symlink-log-evidence.json",
+        "result": {
+          "case": "symlink-log",
+          "fixture": "<evaluation>/bridge-review/symlink-log-7dnknitn",
+          "root": "<evaluation>/bridge-review/symlink-log-7dnknitn/project",
+          "state": "<evaluation>/bridge-review/symlink-log-7dnknitn/state",
+          "first_describe_exit_code": 0,
+          "first_project_unchanged": true,
+          "live_tool_names": [
+            "find_declaration",
+            "find_implementations",
+            "find_referencing_symbols",
+            "find_symbol",
+            "get_diagnostics_for_file",
+            "get_symbols_overview",
+            "search_for_pattern"
+          ],
+          "baseline_command": [
+            "<evaluation>/serena-env/bin/python",
+            "-B",
+            "<repository>/project-evolution-engine/scripts/serena_mcp.py",
+            "--root",
+            "<evaluation>/bridge-review/symlink-log-7dnknitn/project",
+            "--state-dir",
+            "<evaluation>/bridge-review/symlink-log-7dnknitn/state",
+            "--serena",
+            "<evaluation>/serena-env/bin/serena",
+            "--timeout",
+            "15",
+            "--describe"
+          ],
+          "retry_command": [
+            "<evaluation>/serena-env/bin/python",
+            "-B",
+            "<repository>/project-evolution-engine/scripts/serena_mcp.py",
+            "--root",
+            "<evaluation>/bridge-review/symlink-log-7dnknitn/project",
+            "--state-dir",
+            "<evaluation>/bridge-review/symlink-log-7dnknitn/state",
+            "--serena",
+            "<evaluation>/serena-env/bin/serena",
+            "--timeout",
+            "15",
+            "--describe"
+          ],
+          "retry_exit_code": 0,
+          "reported_ok": true,
+          "victim": "<evaluation>/bridge-review/symlink-log-7dnknitn/project/protected.mcpfixture",
+          "victim_before_sha256": "0e6d5b969ba39e6f6a63d3b53c93eb27e64b9b1ef8200cf6080fb635a8e76ab1",
+          "victim_after_sha256": "46afe2e0fcf3455329c75e3cdfaaf28d5b20f9bfe233d5006ea1f0a65d01caf1",
+          "victim_before_bytes": 45,
+          "victim_after_bytes": 9803,
+          "victim_changed": true,
+          "original_content_preserved": false
+        }
+      },
+      "expected": "启动前拒绝链接日志或安全地创建自己的日志文件；项目已有文件保持原样。",
+      "recommendation": "将日志路径纳入每次连接的受控状态检查，拒绝符号链接；用不会跟随链接的文件打开方式创建日志，避免先以 w 模式截断未知目标。保持合法的普通日志文件工作流。",
+      "remedy_status": "未修改源码，仅给出契约保持的修复方向；Finding 新鲜度/可修复性不等于本只读审核拥有编辑授权。"
+    },
+    {
+      "canonical_owner": {
+        "path": "project-evolution-engine/scripts/serena_mcp.py",
+        "status": "confirmed"
+      },
+      "category": "bug",
+      "claim": "Reusing a managed state whose project directory is missing lets Serena fall back to and rewrite the target project's existing .serena configuration.",
+      "confidence": "confirmed",
+      "disposition": "direct-repair",
+      "evidence": [
+        {
+          "end_line": 45,
+          "kind": "file",
+          "path": "project-evolution-engine/scripts/serena_mcp.py",
+          "start_line": 33,
+          "summary": "The marker validates the requested root but the reuse branch returns without requiring state/project to exist or checking the effective metadata directory."
+        },
+        {
+          "end_line": 50,
+          "kind": "file",
+          "path": "project-evolution-engine/scripts/serena_mcp.py",
+          "start_line": 46,
+          "summary": "Only initial creation ensures the external project directory exists; that existence is required to prevent the upstream fallback."
+        },
+        {
+          "kind": "command",
+          "summary": "The provided official Serena source config/serena_config.py get_project_serena_folder (lines 1394-1412) falls back to <project>/.serena when the configured folder is absent; ProjectConfig.load (lines 698-733) re-saves incomplete existing project.yml files."
+        },
+        {
+          "kind": "reproduction",
+          "summary": "PYTHONDONTWRITEBYTECODE=1 <evaluation>/serena-env/bin/python <evaluation>/bridge-review/reproduce_bridge.py missing-state. Start with a fixture's original .serena/project.yml and an absent external state. First --describe exits 0 and preserves all project files. Move state/project to state/project.saved, retaining the marker and config, and run --describe again. It exits 0 and reports ok=true, rewrites .serena/project.yml and creates .serena/.gitignore. Evidence: <evaluation>/bridge-review/missing-state-evidence.json."
+        }
+      ],
+      "evidence_basis": {
+        "files": [
+          {
+            "path": "project-evolution-engine/scripts/change_evidence.py",
+            "role": "subject",
+            "sha256": "sha256:b601879a57a09a3da8ea076e3c4d4df4b2219a5177da6e75df1e24eca721dc6f",
+            "state": "present"
+          },
+          {
+            "path": "project-evolution-engine/scripts/serena_mcp.py",
+            "role": "canonical-owner",
+            "sha256": "sha256:77fce985d217b98fbb292a8930fd25633952c45e7e8e681c9065fd13bc09575a",
+            "state": "present"
+          },
+          {
+            "path": "tests/test_serena_mcp.py",
+            "role": "test",
+            "sha256": "sha256:4492d0e05657956e6c3bc193095adc058eb29db2621832e1564485bb51ce3514",
+            "state": "present"
+          }
+        ],
+        "method": "sha256-file-content-v1"
+      },
+      "freshness": "current",
+      "id": "F-bridge-state-002",
+      "impact": "A partial or cleaned external state directory silently loses the isolation guaranteed on first creation. A normal --describe restart can rewrite an existing project.yml and create .serena/.gitignore inside the target project, while the bridge returns ok=true and claims project-specific external state.",
+      "schema_version": 1,
+      "severity": "high",
+      "priority": "P1",
+      "location": {
+        "path": "project-evolution-engine/scripts/serena_mcp.py",
+        "start_line": 33,
+        "end_line": 45
+      },
+      "reproduction": {
+        "case": "missing-state",
+        "command": "PYTHONDONTWRITEBYTECODE=1 <evaluation>/serena-env/bin/python <evaluation>/bridge-review/reproduce_bridge.py missing-state",
+        "evidence": "<evaluation>/bridge-review/missing-state-evidence.json",
+        "result": {
+          "case": "missing-state",
+          "fixture": "<evaluation>/bridge-review/missing-state-y0vtp7uf",
+          "root": "<evaluation>/bridge-review/missing-state-y0vtp7uf/project",
+          "state": "<evaluation>/bridge-review/missing-state-y0vtp7uf/state",
+          "first_describe_exit_code": 0,
+          "first_project_unchanged": true,
+          "live_tool_names": [
+            "find_declaration",
+            "find_implementations",
+            "find_referencing_symbols",
+            "find_symbol",
+            "get_diagnostics_for_file",
+            "get_symbols_overview",
+            "search_for_pattern"
+          ],
+          "baseline_command": [
+            "<evaluation>/serena-env/bin/python",
+            "-B",
+            "<repository>/project-evolution-engine/scripts/serena_mcp.py",
+            "--root",
+            "<evaluation>/bridge-review/missing-state-y0vtp7uf/project",
+            "--state-dir",
+            "<evaluation>/bridge-review/missing-state-y0vtp7uf/state",
+            "--serena",
+            "<evaluation>/serena-env/bin/serena",
+            "--timeout",
+            "15",
+            "--describe"
+          ],
+          "retry_command": [
+            "<evaluation>/serena-env/bin/python",
+            "-B",
+            "<repository>/project-evolution-engine/scripts/serena_mcp.py",
+            "--root",
+            "<evaluation>/bridge-review/missing-state-y0vtp7uf/project",
+            "--state-dir",
+            "<evaluation>/bridge-review/missing-state-y0vtp7uf/state",
+            "--serena",
+            "<evaluation>/serena-env/bin/serena",
+            "--timeout",
+            "15",
+            "--describe"
+          ],
+          "retry_exit_code": 0,
+          "reported_ok": true,
+          "local_config_changed": true,
+          "project_files_before": {
+            ".serena/project.yml": "19b5fdd0c44d607fb0398fb525f90816f2480d93427d0f6f7d7fd7bd0be8d77b",
+            "facts.mcpfixture": "97d76124faa8ed6f40d94322c360fb6c217b8f71ab80563f9b395eed36956e75"
+          },
+          "project_files_after": {
+            ".serena/.gitignore": "21d5dcb497df8b257d94919bdadcfe75b75d085d0f7b77ac2d8a813a9ca6e758",
+            ".serena/project.yml": "4e589931713c3ead6b3ccdfc39380ea8d3d40f35e75f622432239c74b6bc32e0",
+            "facts.mcpfixture": "97d76124faa8ed6f40d94322c360fb6c217b8f71ab80563f9b395eed36956e75"
+          },
+          "changed_project_paths": [
+            ".serena/.gitignore",
+            ".serena/project.yml"
+          ],
+          "external_project_state_recreated": false,
+          "reported_binding": "explicit --project argument with a project-specific state directory"
+        }
+      },
+      "expected": "复用时应继续保证项目数据目录在 state-dir 内；必要状态缺失而无法保持隔离时应明确失败，不让 Serena 回退到目标项目。",
+      "recommendation": "每次复用都检查必要配置和 project 目录完整、属于该 state-dir，并确认有效的 project_serena_folder_location 绑定。对不完整状态在启动服务前明确失败，或先在受控外部目录中完成有证据支持的恢复。不要依赖 marker 单独证明外部状态条件仍成立。",
+      "remedy_status": "未修改源码，仅给出契约保持的修复方向；Finding 新鲜度/可修复性不等于本只读审核拥有编辑授权。"
+    },
+    {
+      "canonical_owner": {
+        "path": "project-evolution-engine/scripts/serena_mcp.py",
+        "status": "confirmed"
+      },
+      "category": "bug",
+      "claim": "The connection handshake calls activate_project when the server offers it, bypassing the bridge's explicit prohibition on project-switching tools.",
+      "confidence": "confirmed",
+      "disposition": "direct-repair",
+      "evidence": [
+        {
+          "end_line": 114,
+          "kind": "file",
+          "path": "project-evolution-engine/scripts/serena_mcp.py",
+          "start_line": 111,
+          "summary": "connect calls activate_project directly whenever the live tool list contains it; this path bypasses validate_request."
+        },
+        {
+          "end_line": 63,
+          "kind": "file",
+          "path": "project-evolution-engine/scripts/serena_mcp.py",
+          "start_line": 56,
+          "summary": "The public request validator rejects tools outside READ_TOOLS, which does not contain activate_project."
+        },
+        {
+          "end_line": 69,
+          "kind": "test",
+          "path": "tests/test_serena_mcp.py",
+          "start_line": 66,
+          "summary": "The explicit bridge test treats activate_project as a prohibited tool, but only covers user requests, not the connection handshake."
+        },
+        {
+          "kind": "command",
+          "summary": "The provided official Serena config/context_mode.py (get_path, lines 209-237) loads state/contexts/ide.yml in preference to the built-in ide context. Its single_project field controls whether activate_project is disabled."
+        },
+        {
+          "kind": "reproduction",
+          "summary": "PYTHONDONTWRITEBYTECODE=1 <evaluation>/serena-env/bin/python <evaluation>/bridge-review/reproduce_bridge.py context-override. After a successful first --describe, add state/contexts/ide.yml with prompt 'An isolated read-only query session.' and single_project: false. The next real --describe exits 0 and returns a non-null connection.activation containing the successful activate_project response. The initial activation was null. Evidence: <evaluation>/bridge-review/context-override-evidence.json."
+        }
+      ],
+      "evidence_basis": {
+        "files": [
+          {
+            "path": "project-evolution-engine/scripts/change_evidence.py",
+            "role": "subject",
+            "sha256": "sha256:b601879a57a09a3da8ea076e3c4d4df4b2219a5177da6e75df1e24eca721dc6f",
+            "state": "present"
+          },
+          {
+            "path": "project-evolution-engine/scripts/serena_mcp.py",
+            "role": "canonical-owner",
+            "sha256": "sha256:77fce985d217b98fbb292a8930fd25633952c45e7e8e681c9065fd13bc09575a",
+            "state": "present"
+          },
+          {
+            "path": "tests/test_serena_mcp.py",
+            "role": "test",
+            "sha256": "sha256:4492d0e05657956e6c3bc193095adc058eb29db2621832e1564485bb51ce3514",
+            "state": "present"
+          }
+        ],
+        "method": "sha256-file-content-v1"
+      },
+      "freshness": "current",
+      "id": "F-bridge-activation-003",
+      "impact": "Even --describe can dispatch a tool outside READ_TOOLS. A supported custom context in the reused state makes this branch reachable with the official runtime, so the advertised query-only interface is not enforced for internal handshake calls. In the reproduction it activated the same fixture project; the confirmed violation is the forbidden tool dispatch.",
+      "schema_version": 1,
+      "severity": "medium",
+      "priority": "P2",
+      "location": {
+        "path": "project-evolution-engine/scripts/serena_mcp.py",
+        "start_line": 111,
+        "end_line": 114
+      },
+      "reproduction": {
+        "case": "context-override",
+        "command": "PYTHONDONTWRITEBYTECODE=1 <evaluation>/serena-env/bin/python <evaluation>/bridge-review/reproduce_bridge.py context-override",
+        "evidence": "<evaluation>/bridge-review/context-override-evidence.json",
+        "result": {
+          "case": "context-override",
+          "fixture": "<evaluation>/bridge-review/context-override-0vzcup3h",
+          "root": "<evaluation>/bridge-review/context-override-0vzcup3h/project",
+          "state": "<evaluation>/bridge-review/context-override-0vzcup3h/state",
+          "first_describe_exit_code": 0,
+          "first_project_unchanged": true,
+          "live_tool_names": [
+            "find_declaration",
+            "find_implementations",
+            "find_referencing_symbols",
+            "find_symbol",
+            "get_diagnostics_for_file",
+            "get_symbols_overview",
+            "search_for_pattern"
+          ],
+          "baseline_command": [
+            "<evaluation>/serena-env/bin/python",
+            "-B",
+            "<repository>/project-evolution-engine/scripts/serena_mcp.py",
+            "--root",
+            "<evaluation>/bridge-review/context-override-0vzcup3h/project",
+            "--state-dir",
+            "<evaluation>/bridge-review/context-override-0vzcup3h/state",
+            "--serena",
+            "<evaluation>/serena-env/bin/serena",
+            "--timeout",
+            "15",
+            "--describe"
+          ],
+          "retry_command": [
+            "<evaluation>/serena-env/bin/python",
+            "-B",
+            "<repository>/project-evolution-engine/scripts/serena_mcp.py",
+            "--root",
+            "<evaluation>/bridge-review/context-override-0vzcup3h/project",
+            "--state-dir",
+            "<evaluation>/bridge-review/context-override-0vzcup3h/state",
+            "--serena",
+            "<evaluation>/serena-env/bin/serena",
+            "--timeout",
+            "15",
+            "--describe"
+          ],
+          "retry_exit_code": 0,
+          "reported_ok": true,
+          "initial_activation": null,
+          "activation_during_describe": {
+            "meta": null,
+            "content": [
+              {
+                "type": "text",
+                "text": "The project with name 'project' at <evaluation>/bridge-review/context-override-0vzcup3h/project is activated.\nActive language servers: .\nFile encoding: utf-8.\nOnboarding has not been performed yet. Ask the user whether to perform onboarding via the `onboarding` tool.\n\nIMPORTANT: If you have not yet read the 'Serena Instructions Manual', do it now before continuing!",
+                "annotations": null,
+                "meta": null
+              }
+            ],
+            "structuredContent": {
+              "result": "The project with name 'project' at <evaluation>/bridge-review/context-override-0vzcup3h/project is activated.\nActive language servers: .\nFile encoding: utf-8.\nOnboarding has not been performed yet. Ask the user whether to perform onboarding via the `onboarding` tool.\n\nIMPORTANT: If you have not yet read the 'Serena Instructions Manual', do it now before continuing!"
+            },
+            "isError": false
+          },
+          "project_unchanged": true
+        }
+      },
+      "expected": "包括 --describe 的内部握手在内，均不调用修改或切换项目工具。",
+      "recommendation": "去掉握手中的 activate_project 调用；继续使用显式 --project 启动与只读的配置/绑定核实。无法证实固定项目条件时明确失败，不通过被禁止的切换工具补救。",
+      "remedy_status": "未修改源码，仅给出契约保持的修复方向；Finding 新鲜度/可修复性不等于本只读审核拥有编辑授权。"
+    }
+  ],
+  "rejected_candidates": [
+    {
+      "claim": "真实工具执行错误可能被报告为 ok=true",
+      "disposition": "rejected",
+      "evidence": "实际不存在路径查询的 isError=true，桥接 CLI=1，connected=true/ok=false；有效查询的 isError=false，文本命中正确。"
+    }
+  ],
+  "architecture_lens": {
+    "module_and_interface": "桥接器的 Interface 是 --describe/--requests 与外部 state-dir；Implementation 包括状态准备、真实会话、参数验证与结果归一化。",
+    "failure_integrity": "已确认的两项文件边界失败仍报告 ok=true，说明状态标记不是每次连接时所需全部条件的证明。",
+    "locality": "应由 prepare_state/连接入口集中维护完整状态与写入路径条件；由统一调用边界落实 READ_TOOLS，覆盖内部握手。",
+    "depth": "实际协议、配置和结果处理封装在单个桥接 Module 内；现有问题可以局部修复，不需要改变公共接口或增加新的 Adapter。",
+    "architecture_candidates": []
+  },
+  "commands": [
+    {
+      "label": "bridge-source",
+      "command": "nl -ba project-evolution-engine/scripts/serena_mcp.py",
+      "exit_code": 0
+    },
+    {
+      "label": "bridge-tests",
+      "command": "nl -ba tests/test_serena_mcp.py",
+      "exit_code": 0
+    },
+    {
+      "label": "bridge-review-baseline",
+      "command": "python3 - <<'PY'\nfrom pathlib import Path\nimport hashlib,json\nroot=Path('<repository>')\nfiles=['project-evolution-engine/scripts/serena_mcp.py','tests/test_serena_mcp.py','project-evolution-engine/scripts/change_evidence.py']\nprint(json.dumps({'files':{name:{'sha256':hashlib.sha256((root/name).read_bytes()).hexdigest(),'size':(root/name).stat().st_size} for name in files}},ensure_ascii=False,indent=2))\nPY",
+      "exit_code": 0
+    },
+    {
+      "label": "bridge-focused-unit-tests",
+      "command": "PYTHONDONTWRITEBYTECODE=1 <evaluation>/serena-env/bin/python -m unittest discover -s tests -p test_serena_mcp.py -v",
+      "exit_code": 0
+    },
+    {
+      "label": "serena-config-routing-search",
+      "command": "rg -n --glob '*.py' 'SERENA_HOME|project_serena_folder_location|def load|def save|class SerenaConfig|fixed_project|activate_project' <evaluation>/serena/src/serena/config <evaluation>/serena/src/serena/cli.py <evaluation>/serena/src/serena/agent.py",
+      "exit_code": 0
+    },
+    {
+      "label": "serena-config-load-and-save",
+      "command": "rg -n 'def |project_serena_folder_location|projects|yaml|save|persist' <evaluation>/serena/src/serena/config/serena_config.py",
+      "exit_code": 0
+    },
+    {
+      "label": "serena-fixed-project-contract",
+      "command": "sed -n '155,215p' <evaluation>/serena/src/serena/config/context_mode.py",
+      "exit_code": 0
+    },
+    {
+      "label": "serena-config-path-precedence",
+      "command": "sed -n '40,105p' <evaluation>/serena/src/serena/config/serena_config.py\nsed -n '865,1035p' <evaluation>/serena/src/serena/config/serena_config.py\nsed -n '1310,1470p' <evaluation>/serena/src/serena/config/serena_config.py",
+      "exit_code": 0
+    },
+    {
+      "label": "serena-project-config-load",
+      "command": "sed -n '300,355p' <evaluation>/serena/src/serena/config/serena_config.py\nsed -n '410,495p' <evaluation>/serena/src/serena/config/serena_config.py\nsed -n '575,740p' <evaluation>/serena/src/serena/config/serena_config.py",
+      "exit_code": 0
+    },
+    {
+      "label": "serena-activation-initialization",
+      "command": "sed -n '1215,1365p' <evaluation>/serena/src/serena/agent.py\nrg -n 'start_language|LanguageServer|language_server|__init__|start\\(' <evaluation>/serena/src/serena/project.py",
+      "exit_code": 0
+    },
+    {
+      "label": "actual-first-stdio-describe",
+      "command": "PYTHONDONTWRITEBYTECODE=1 <evaluation>/serena-env/bin/python - <<'PY'\nfrom pathlib import Path\nimport hashlib,json,subprocess,tempfile\nbase=Path('<evaluation>/bridge-review')\nbase.mkdir(exist_ok=True)\nfixture=Path(tempfile.mkdtemp(prefix='protocol-',dir=base)).resolve()\nroot=fixture/'project'\nroot.mkdir()\n(root/'facts.mcpfixture').write_text('bridge_review_token = unchanged\\n')\nstate=fixture/'state'\ncommand=['<evaluation>/serena-env/bin/python','-B','<repository>/project-evolution-engine/scripts/serena_mcp.py','--root',str(root),'--state-dir',str(state),'--serena','<evaluation>/serena-env/bin/serena','--describe','--timeout','15']\nresult=subprocess.run(command,capture_output=True,text=True,timeout=45)\ntry:\n    payload=json.loads(result.stdout)\nexcept json.JSONDecodeError:\n    payload={'raw_stdout':result.stdout}\nrecord={'fixture':str(fixture),'root':str(root),'state':str(state),'command':command,'exit_code':result.returncode,'stdout':payload,'stderr':result.stderr,'root_files':sorted(str(path.relative_to(root)) for path in root.rglob('*'))}\n(base/'baseline-describe.json').write_text(json.dumps(record,ensure_ascii=False,indent=2)+'\\n')\nprint(json.dumps({'fixture':str(fixture),'exit_code':result.returncode,'connected':payload.get('connected'),'ok':payload.get('ok'),'error':payload.get('error'),'tools':payload.get('connection',{}).get('tools',[]),'root_files':record['root_files']},ensure_ascii=False,indent=2))\nPY",
+      "exit_code": 0
+    },
+    {
+      "label": "real-stdio-query-error-probe",
+      "command": "PYTHONDONTWRITEBYTECODE=1 <evaluation>/serena-env/bin/python <evaluation>/bridge-review/reproduce_bridge.py query-error",
+      "exit_code": 0
+    },
+    {
+      "label": "real-stdio-symlink-log-probe",
+      "command": "PYTHONDONTWRITEBYTECODE=1 <evaluation>/serena-env/bin/python <evaluation>/bridge-review/reproduce_bridge.py symlink-log",
+      "exit_code": 0
+    },
+    {
+      "label": "real-stdio-missing-project-state-probe",
+      "command": "PYTHONDONTWRITEBYTECODE=1 <evaluation>/serena-env/bin/python <evaluation>/bridge-review/reproduce_bridge.py missing-state",
+      "exit_code": 0
+    },
+    {
+      "label": "serena-custom-context-precedence",
+      "command": "sed -n '200,285p' <evaluation>/serena/src/serena/config/context_mode.py",
+      "exit_code": 0
+    },
+    {
+      "label": "real-stdio-context-override-probe",
+      "command": "PYTHONDONTWRITEBYTECODE=1 <evaluation>/serena-env/bin/python <evaluation>/bridge-review/reproduce_bridge.py context-override",
+      "exit_code": 0
+    },
+    {
+      "label": "bridge-final-file-fingerprints",
+      "command": "python3 - <<'PY'\nfrom pathlib import Path\nimport hashlib,json\nroot=Path('<repository>')\nfiles=['project-evolution-engine/scripts/serena_mcp.py','tests/test_serena_mcp.py','project-evolution-engine/scripts/change_evidence.py']\nexternal=Path('<evaluation>/serena/src/serena/config')\nprint(json.dumps({'files':{name:hashlib.sha256((root/name).read_bytes()).hexdigest() for name in files},'external_config_sources':{str(external/name):hashlib.sha256((external/name).read_bytes()).hexdigest() for name in ['serena_config.py','context_mode.py']}},ensure_ascii=False,indent=2))\nPY",
+      "exit_code": 0
+    },
+    {
+      "label": "stamp-F-bridge-log-001",
+      "command": "PYTHONDONTWRITEBYTECODE=1 python3 <codebase-convergence>/scripts/finding_contract.py stamp --root '<repository>' --finding <evaluation>/bridge-review/F-bridge-log-001.draft.json",
+      "exit_code": 0
+    },
+    {
+      "label": "stamp-F-bridge-state-002",
+      "command": "PYTHONDONTWRITEBYTECODE=1 python3 <codebase-convergence>/scripts/finding_contract.py stamp --root '<repository>' --finding <evaluation>/bridge-review/F-bridge-state-002.draft.json",
+      "exit_code": 0
+    },
+    {
+      "label": "stamp-F-bridge-activation-003",
+      "command": "PYTHONDONTWRITEBYTECODE=1 python3 <codebase-convergence>/scripts/finding_contract.py stamp --root '<repository>' --finding <evaluation>/bridge-review/F-bridge-activation-003.draft.json",
+      "exit_code": 0
+    },
+    {
+      "label": "check-F-bridge-log-001",
+      "command": "PYTHONDONTWRITEBYTECODE=1 python3 <codebase-convergence>/scripts/finding_contract.py check --root '<repository>' --finding <evaluation>/bridge-review/F-bridge-log-001.json",
+      "exit_code": 0
+    },
+    {
+      "label": "check-F-bridge-state-002",
+      "command": "PYTHONDONTWRITEBYTECODE=1 python3 <codebase-convergence>/scripts/finding_contract.py check --root '<repository>' --finding <evaluation>/bridge-review/F-bridge-state-002.json",
+      "exit_code": 0
+    },
+    {
+      "label": "check-F-bridge-activation-003",
+      "command": "PYTHONDONTWRITEBYTECODE=1 python3 <codebase-convergence>/scripts/finding_contract.py check --root '<repository>' --finding <evaluation>/bridge-review/F-bridge-activation-003.json",
+      "exit_code": 0
+    }
+  ],
+  "repairs": [],
+  "decisions_required": [],
+  "preservation": {
+    "repository_modified": false,
+    "real_user_configuration_modified": false,
+    "statement": "没有修改被审核仓库源码、测试、配置或 Git 状态，也没有修改用户真实 Serena 配置。漏洞触发中的文件改写全部发生在本审核自建的 bridge-review 临时项目里。",
+    "artifacts_directory": "<evaluation>/bridge-review",
+    "agents_spawned": 0,
+    "tools_installed": 0
+  },
+  "uncovered": [
+    "未测试所有语言服务的语义引用或诊断质量；真实执行使用无需语言服务安装的文本查询。",
+    "未审核原生宿主注册。",
+    "未做跨进程并发创建状态、硬链接或完整文件系统竞态压力测试。",
+    "未实施修复，因此没有修复后结果。",
+    "最后确认的是同一临时项目的 activate_project 调用越过白名单；没有声称该复现切换到了另一个项目。"
+  ]
+}

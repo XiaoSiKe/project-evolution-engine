@@ -1,0 +1,51 @@
+{
+  "status": "completed",
+  "changed_files": [
+    "docs/api.md",
+    "docs/async.md",
+    "docs/quickstart.md",
+    "httpx/_decoders.py",
+    "httpx/_models.py",
+    "tests/models/test_responses.py",
+    "tests/test_decoders.py"
+  ],
+  "checks": [
+    {
+      "command": "<evaluation>/eval-env/bin/python -m pytest -q tests/test_decoders.py tests/models/test_responses.py",
+      "exit_code": 0,
+      "outcome": "修改前基线：146 项通过。"
+    },
+    {
+      "command": "<evaluation>/eval-env/bin/python -m pytest -q tests/test_decoders.py tests/models/test_responses.py -k keepends -x",
+      "exit_code": 1,
+      "outcome": "实现前预期失败：确认旧接口不接受 keepends 参数。"
+    },
+    {
+      "command": "<evaluation>/eval-env/bin/python -m pytest -q tests/test_decoders.py tests/models/test_responses.py",
+      "exit_code": 1,
+      "outcome": "中间回归：570 项通过、3 项因新增异步测试未收尾生成器而失败；已修正测试资源收尾。"
+    },
+    {
+      "command": "<evaluation>/eval-env/bin/python -m pytest -q tests/test_decoders.py tests/models/test_responses.py",
+      "exit_code": 0,
+      "outcome": "最终回归：573 项全部通过，覆盖默认/False/True、分块 UTF-8/CRLF、全部分隔符、缓存与真实流、增量产出、生命周期及压缩/字符解码。"
+    },
+    {
+      "command": "<evaluation>/eval-env/bin/python -m pytest -q tests/test_content.py tests/models/test_requests.py",
+      "exit_code": 0,
+      "outcome": "相邻内容和请求模型回归：67 项通过。"
+    },
+    {
+      "command": "sed -n '373,377p' docs/quickstart.md | <evaluation>/eval-env/bin/python -c 'import doctest, sys, httpx; runner = doctest.DocTestRunner(); test = doctest.DocTestParser().get_doctest(sys.stdin.read(), {\"httpx\": httpx}, \"keepends\", \"docs/quickstart.md\", 372); runner.run(test); result = runner.summarize(verbose=True); assert result.attempted == 3; sys.exit(bool(result.failed))'",
+      "exit_code": 0,
+      "outcome": "新增文档示例的 3 项 doctest 全部通过。"
+    },
+    {
+      "command": "git diff --check",
+      "exit_code": 0,
+      "outcome": "通过；最终差异仅涉及列出的 7 个文件。"
+    }
+  ],
+  "questions": [],
+  "notes": "已为两个接口增加 keepends=False。按指定固定 Skill 的职责归属原则，分行规则统一扩展于 LineDecoder，同步和异步入口仅透传参数。默认及显式 False 保持原行为；True 保留原始行尾，沿用现有增量解码、流消费和关闭流程。已更新 API、同步及异步文档。未联网、安装依赖、创建代理、修改依赖或版本配置，也未提交或发布。虚拟环境未预装 Ruff、Mypy、MkDocs，未运行对应检查。"
+}

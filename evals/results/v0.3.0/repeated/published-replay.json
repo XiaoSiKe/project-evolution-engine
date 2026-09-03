@@ -1,0 +1,61 @@
+{
+  "method": "Reconstructed all candidates from the public patch and original pinned source; checked exact file hashes, then reran original regression and independent behavior checks.",
+  "trials": [
+    {
+      "trial": 1,
+      "patch_reconstructs_exact_files": true,
+      "passed": true,
+      "checks_passed": 8,
+      "upstream_test_output": "........................................................................ [ 49%]\n........................................................................ [ 98%]\n..                                                                       [100%]\n146 passed in 0.11s\n"
+    },
+    {
+      "trial": 2,
+      "patch_reconstructs_exact_files": true,
+      "passed": true,
+      "checks_passed": 8,
+      "upstream_test_output": "...........x....                                                         [100%]\n15 passed, 1 xfailed in 2.04s\n"
+    },
+    {
+      "trial": 3,
+      "patch_reconstructs_exact_files": true,
+      "passed": true,
+      "checks_passed": 8,
+      "upstream_test_output": "........................................................................ [ 49%]\n........................................................................ [ 98%]\n..                                                                       [100%]\n146 passed in 0.11s\n"
+    },
+    {
+      "trial": 4,
+      "patch_reconstructs_exact_files": true,
+      "passed": true,
+      "checks_passed": 8,
+      "upstream_test_output": "...........x....                                                         [100%]\n15 passed, 1 xfailed in 1.80s\n"
+    },
+    {
+      "trial": 5,
+      "patch_reconstructs_exact_files": true,
+      "passed": true,
+      "checks_passed": 8,
+      "upstream_test_output": "........................................................................ [ 49%]\n........................................................................ [ 98%]\n..                                                                       [100%]\n146 passed in 0.11s\n"
+    },
+    {
+      "trial": 6,
+      "patch_reconstructs_exact_files": true,
+      "passed": true,
+      "checks_passed": 8,
+      "upstream_test_output": "...........x....                                                         [100%]\n15 passed, 1 xfailed in 1.73s\n"
+    },
+    {
+      "trial": 7,
+      "patch_reconstructs_exact_files": true,
+      "passed": true,
+      "checks_passed": 8,
+      "upstream_test_output": "........................................................................ [ 49%]\n........................................................................ [ 98%]\n..                                                                       [100%]\n146 passed in 0.11s\n"
+    },
+    {
+      "trial": 8,
+      "patch_reconstructs_exact_files": true,
+      "passed": true,
+      "checks_passed": 8,
+      "upstream_test_output": "...........x....                                                         [100%]\n15 passed, 1 xfailed in 2.02s\n"
+    }
+  ]
+}

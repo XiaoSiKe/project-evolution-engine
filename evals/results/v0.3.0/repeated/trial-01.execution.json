@@ -1,0 +1,205 @@
+{
+  "id": 1,
+  "exit_code": 0,
+  "started_at": 1788420086.801963,
+  "finished_at": 1788420459.92155,
+  "wall_seconds": 373.113,
+  "timed_out": false,
+  "configured_model": {
+    "model": "gpt-5.6-sol",
+    "model_provider": null,
+    "model_reasoning_effort": "max",
+    "profile": null
+  },
+  "usage": {
+    "input_tokens": 795871,
+    "cached_input_tokens": 723840,
+    "cache_write_input_tokens": 0,
+    "output_tokens": 18899,
+    "reasoning_output_tokens": 10404
+  },
+  "usage_events": 1,
+  "command_count": 32,
+  "tool_count": 0,
+  "other_tools": [],
+  "errors": [],
+  "commands": [
+    {
+      "command": "/bin/zsh -lc pwd",
+      "exit_code": 0,
+      "status": "completed"
+    },
+    {
+      "command": "/bin/zsh -lc \"rg -n 'class LineDecoder|def iter_lines|def aiter_lines|iter_lines\\\\(|aiter_lines\\\\(' httpx tests docs -g '*.py' -g '*.md' -g '\"'!SKILL.md'\"'\"",
+      "exit_code": 0,
+      "status": "completed"
+    },
+    {
+      "command": "/bin/zsh -lc \"rg --files -g AGENTS.md -g '\"'!SKILL.md'\"' -g '\"'!**/SKILL.md'\"' -g '\"'!**/.git/**'\"' -g '\"'!**/.agents/**'\"' -g '\"'!**/.codex/**'\"' -g '\"'!**/node_modules/**'\"' -g '\"'!**/.venv/**'\"' -g '\"'!**/venv/**'\"'\"",
+      "exit_code": 1,
+      "status": "failed"
+    },
+    {
+      "command": "/bin/zsh -lc 'git status --short'",
+      "exit_code": 0,
+      "status": "completed"
+    },
+    {
+      "command": "/bin/zsh -lc \"sed -n '1,400p' tests/test_decoders.py\"",
+      "exit_code": 0,
+      "status": "completed"
+    },
+    {
+      "command": "/bin/zsh -lc \"rg --files --hidden -g '\"'!SKILL.md'\"' -g '\"'!**/SKILL.md'\"' -g '\"'!**/.git/**'\"' -g '\"'!**/.agents/**'\"' -g '\"'!**/.codex/**'\"' -g '\"'!**/.venv/**'\"' -g '\"'!**/venv/**'\"' -g '\"'!**/node_modules/**'\"' -g '\"'!**/__pycache__/**'\"' -g '\"'!**/.pytest_cache/**'\"'\"",
+      "exit_code": 0,
+      "status": "completed",
+      "output_excerpt": ".github/dependabot.yml\n.github/ISSUE_TEMPLATE/1-issue.md\n.github/ISSUE_TEMPLATE/config.yml\n.github/CONTRIBUTING.md\n.github/PULL_REQUEST_TEMPLATE.md\n.github/workflows/test-suite.yml\n.github/workflows/publish.yml\n.github/FUNDING.yml\nscripts/coverage\nscripts/sync-version\nscripts/check\nscripts/build\nscripts/publish\nscripts/clean\nscripts/docs\nscripts/test\nscripts/install\nscripts/lint\n.gitignore\nhttpx/_utils.py\nhttpx/_auth.py\nhttpx/_exceptions.py\nhttpx/_status_codes.py\nhttpx/_config.py\nhttpx/_models.py\nhttpx/_urlparse.py\nhttpx/py.typed\nhttpx/_client.py\nhttpx/_content.py\nhttpx/__version__.py\nhttpx/__init__.py\nhttpx/_multipart.py\nhttpx/_api.py\nhttpx/_transports/wsgi.py\nhttpx/_transports/mock.py\nhttpx/_transports/base.py\nhttpx/_transports/default.py\nhttpx/_transports/__init__.py\nhttpx/_transports/asgi.py\nhttpx/_urls.py\nhttpx/_main.py\nhttpx/_types.py\nhttpx/_decoders.py\nREADME.md\ndocs/environment_variables.md\ndocs/http2.md\ndocs/compatibility.md\ndocs/contributing.md\ndocs/logging.md\ndocs/index.md\ndocs/img/tqdm-progress.gif\ndocs/img/gh-actions-fail-check.png\ndocs/img/rich-progress.gif\ndocs/img/gh-actions-fail.png\ndocs/img/logo.jpg\ndocs/img/httpx-request.png\ndocs/img/butterfly.png\ndocs/img/gh-actions-fail-test.png\ndocs/img/speakeasy.png\ndocs/img/httpx-help.png\ndocs/third_party_packages.md\ndocs/async.md\ndocs/quickstart.md\ndocs/CNAME\ndocs/troubleshooting.md\ndocs/css/custom.css\ndocs/api.md\ndocs/exceptions.md\ndocs/advanced/timeouts.md\ndocs/advanced/event-hooks.md\ndocs/advanced/resource-limits.md\ndocs/advanced/ssl.md\ndocs/advanced/text-encodings.md\ndocs/advanced/transports.md\ndocs/advanced/extensions.md\ndocs/advanced/proxies.md\ndocs/advanced/clients.md\ndocs/advanced/authentication.md\ndocs/code_of_conduct.md\ndocs/overrides/partials/nav.html\ntests/client/test_headers.py\ntests/client/test_properties.py\ntests/client/test_event_hooks.py\ntests/client/test_client.py\ntests/client/test_proxies.py\ntests/client/test_async_client.py\ntests/client/__init__.py\ntests/client/test_queryparams.py\ntests/client/test_auth.py\ntests/client/test_cookies.py\ntests/client/test_redirects.py\ntests/test_main.py\ntests/test_api.py\ntests/test_wsgi.py\ntests/concurrency.py\ntests/test_exported_members.py\ntests/test_timeouts.py\ntests/test_auth.py\ntests/conftest.py\ntests/test_utils.py\npyproject.toml\nCHANGELOG.md\nrequirements.txt\nmkdocs.yml\nLICENSE.md\ntests/test_decoders.py\ntests/test_content.py\ntests/test_config.py\ntests/common.py\ntests/test_status_codes.py\ntests/test_multipart.py\ntests/test_exceptions.py\ntests/test_asgi.py\ntests/__init__.py\ntests/fixtures/.netrc-nopassword\ntests/fixtures/.netrc\ntests/models/test_headers.py\ntests/models/whatwg.json\ntests/models/test_url.py\ntests/models/test_responses.py\ntests/models/test_requests.py\ntests/models/__init__.py\ntests/models/test_whatwg.py\ntests/models/test_queryparams.py\ntests/models/test_cookies.py\n",
+      "output_truncated": false
+    },
+    {
+      "command": "/bin/zsh -lc \"sed -n '790,1090p' httpx/_models.py\"",
+      "exit_code": 0,
+      "status": "completed"
+    },
+    {
+      "command": "/bin/zsh -lc \"sed -n '460,850p' tests/models/test_responses.py\"",
+      "exit_code": 0,
+      "status": "completed"
+    },
+    {
+      "command": "/bin/zsh -lc \"sed -n '1,460p' httpx/_decoders.py\"",
+      "exit_code": 0,
+      "status": "completed"
+    },
+    {
+      "command": "/bin/zsh -lc \"sed -n '1,85p' tests/test_decoders.py\"",
+      "exit_code": 0,
+      "status": "completed"
+    },
+    {
+      "command": "/bin/zsh -lc \"sed -n '1,175p' tests/models/test_responses.py\"",
+      "exit_code": 0,
+      "status": "completed"
+    },
+    {
+      "command": "/bin/zsh -lc 'cat pyproject.toml\ncat scripts/check\ncat tests/conftest.py'",
+      "exit_code": 0,
+      "status": "completed"
+    },
+    {
+      "command": "/bin/zsh -lc \"sed -n '975,1085p' httpx/_models.py\"",
+      "exit_code": 0,
+      "status": "completed"
+    },
+    {
+      "command": "/bin/zsh -lc \"sed -n '45,100p' docs/api.md\nsed -n '340,385p' docs/quickstart.md\nsed -n '58,104p' docs/async.md\"",
+      "exit_code": 0,
+      "status": "completed"
+    },
+    {
+      "command": "/bin/zsh -lc '<evaluation>/eval-env/bin/python -m pytest -q tests/test_decoders.py tests/models/test_responses.py'",
+      "exit_code": 0,
+      "status": "completed",
+      "output_excerpt": "........................................................................ [ 49%]\n........................................................................ [ 98%]\n..                                                                       [100%]\n146 passed in 0.18s\n",
+      "output_truncated": false
+    },
+    {
+      "command": "/bin/zsh -lc \"sed -n '390,455p' tests/models/test_responses.py\nsed -n '20,105p' httpx/_content.py\nsed -n '380,465p' httpx/_models.py\"",
+      "exit_code": 0,
+      "status": "completed"
+    },
+    {
+      "command": "/bin/zsh -lc \"rg -n 'SyncByteStream|AsyncByteStream|close_called|aclose_called|is_stream_consumed|ResponseNotRead|ReadError' tests/models/test_responses.py tests/test_decoders.py httpx/_content.py httpx/_types.py\"",
+      "exit_code": 0,
+      "status": "completed"
+    },
+    {
+      "command": "/bin/zsh -lc \"<evaluation>/eval-env/bin/python -c 'import importlib.util; print({name: importlib.util.find_spec(name) is not None for name in (\\\"ruff\\\", \\\"mypy\\\")})'\"",
+      "exit_code": 0,
+      "status": "completed"
+    },
+    {
+      "command": "/bin/zsh -lc 'git diff --check\ngit diff --stat'",
+      "exit_code": 0,
+      "status": "completed",
+      "output_excerpt": " docs/api.md                    |  11 ++-\n docs/async.md                  |   9 ++-\n docs/quickstart.md             |  16 +++-\n httpx/_decoders.py             |  16 ++--\n httpx/_models.py               |  16 +++-\n tests/models/test_responses.py | 165 +++++++++++++++++++++++++++++++++++++++++\n tests/test_decoders.py         |  41 ++++++++++\n 7 files changed, 258 insertions(+), 16 deletions(-)\n",
+      "output_truncated": false
+    },
+    {
+      "command": "/bin/zsh -lc '<evaluation>/eval-env/bin/python -m pytest -q tests/test_decoders.py tests/models/test_responses.py'",
+      "exit_code": 0,
+      "status": "completed",
+      "output_excerpt": "........................................................................ [ 17%]\n........................................................................ [ 34%]\n........................................................................ [ 51%]\n........................................................................ [ 68%]\n........................................................................ [ 85%]\n...........................................................              [100%]\n419 passed in 0.31s\n",
+      "output_truncated": false
+    },
+    {
+      "command": "/bin/zsh -lc 'git diff -- tests/test_decoders.py tests/models/test_responses.py'",
+      "exit_code": 0,
+      "status": "completed"
+    },
+    {
+      "command": "/bin/zsh -lc 'git diff -- httpx/_decoders.py httpx/_models.py docs/api.md docs/async.md docs/quickstart.md'",
+      "exit_code": 0,
+      "status": "completed"
+    },
+    {
+      "command": "/bin/zsh -lc \"<evaluation>/eval-env/bin/python - <<'PY'\nfrom pathlib import Path\n\nfor filename in (\\\"httpx/_decoders.py\\\", \\\"httpx/_models.py\\\", \\\"tests/test_decoders.py\\\", \\\"tests/models/test_responses.py\\\"):\n    for number, line in enumerate(Path(filename).read_text().splitlines(), 1):\n        if len(line) > 88:\n            print(f\\\"{filename}:{number}: {len(line)} characters\\\")\nPY\"",
+      "exit_code": 0,
+      "status": "completed"
+    },
+    {
+      "command": "/bin/zsh -lc \"<evaluation>/eval-env/bin/python - <<'PY'\nfrom pathlib import Path\n\npath = Path(\\\"docs/async.md\\\")\ncontent = path.read_bytes()\nassert content.endswith(b\\\".\\\\n\\\")\npath.write_bytes(content[:-1])\nPY\"",
+      "exit_code": 0,
+      "status": "completed"
+    },
+    {
+      "command": "/bin/zsh -lc 'git diff --check'",
+      "exit_code": 0,
+      "status": "completed",
+      "output_excerpt": "",
+      "output_truncated": false
+    },
+    {
+      "command": "/bin/zsh -lc 'git status --short\ngit diff --stat'",
+      "exit_code": 0,
+      "status": "completed"
+    },
+    {
+      "command": "/bin/zsh -lc \"<evaluation>/eval-env/bin/python - <<'PY'\nimport ast\nimport subprocess\nfrom pathlib import Path\n\npaths = (\n    \\\"httpx/_decoders.py\\\",\n    \\\"httpx/_models.py\\\",\n    \\\"tests/test_decoders.py\\\",\n    \\\"tests/models/test_responses.py\\\",\n)\nfor filename in paths:\n    ast.parse(Path(filename).read_text(), filename=filename, feature_version=(3, 9))\ndiff = subprocess.run(\n    [\\\"git\\\", \\\"diff\\\", \\\"--unified=0\\\", \\\"--\\\", *paths],\n    check=True,\n    capture_output=True,\n    text=True,\n).stdout\nlong_lines = [\n    line[1:]\n    for line in diff.splitlines()\n    if line.startswith(\\\"+\\\") and not line.startswith(\\\"+++\\\") and len(line[1:]) > 88\n]\nassert not long_lines, long_lines\nprint(\\\"Changed Python files parse as Python 3.9; added lines fit 88 columns.\\\")\nPY\"",
+      "exit_code": 1,
+      "status": "failed"
+    },
+    {
+      "command": "/bin/zsh -lc '<evaluation>/eval-env/bin/python -m pytest -q tests/test_decoders.py tests/models/test_responses.py'",
+      "exit_code": 0,
+      "status": "completed",
+      "output_excerpt": "........................................................................ [ 17%]\n........................................................................ [ 34%]\n........................................................................ [ 51%]\n........................................................................ [ 68%]\n........................................................................ [ 85%]\n...........................................................              [100%]\n419 passed in 0.27s\n",
+      "output_truncated": false
+    },
+    {
+      "command": "/bin/zsh -lc 'git diff --name-only'",
+      "exit_code": 0,
+      "status": "completed"
+    },
+    {
+      "command": "/bin/zsh -lc 'git diff --check'",
+      "exit_code": 0,
+      "status": "completed",
+      "output_excerpt": "",
+      "output_truncated": false
+    },
+    {
+      "command": "/bin/zsh -lc \"<evaluation>/eval-env/bin/python - <<'PY'\nimport ast\nimport subprocess\nfrom pathlib import Path\n\npaths = (\n    \\\"httpx/_decoders.py\\\",\n    \\\"httpx/_models.py\\\",\n    \\\"tests/test_decoders.py\\\",\n    \\\"tests/models/test_responses.py\\\",\n)\nfor filename in paths:\n    ast.parse(Path(filename).read_text(), filename=filename, feature_version=(3, 9))\ndiff = subprocess.run(\n    [\\\"git\\\", \\\"diff\\\", \\\"--unified=0\\\", \\\"--\\\", *paths],\n    check=True,\n    capture_output=True,\n    text=True,\n).stdout\nlong_lines = [\n    line[1:]\n    for line in diff.splitlines()\n    if line.startswith(\\\"+\\\") and not line.startswith(\\\"+++\\\") and len(line[1:]) > 88\n]\nassert not long_lines, long_lines\nprint(\\\"Changed Python files parse as Python 3.9; added lines fit 88 columns.\\\")\nPY\"",
+      "exit_code": 0,
+      "status": "completed"
+    },
+    {
+      "command": "/bin/zsh -lc '<evaluation>/eval-env/bin/python -m pytest -q tests/test_decoders.py tests/models/test_responses.py'",
+      "exit_code": 0,
+      "status": "completed",
+      "output_excerpt": "........................................................................ [ 17%]\n........................................................................ [ 34%]\n........................................................................ [ 51%]\n........................................................................ [ 68%]\n........................................................................ [ 85%]\n...........................................................              [100%]\n419 passed in 0.28s\n",
+      "output_truncated": false
+    }
+  ],
+  "privacy_note": "Command list and verification-output excerpts only. Local paths are normalized. Reasoning and full internal event streams are not published."
+}

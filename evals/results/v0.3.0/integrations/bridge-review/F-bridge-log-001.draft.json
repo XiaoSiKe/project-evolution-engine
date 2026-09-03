@@ -1,0 +1,50 @@
+{
+  "schema_version": 1,
+  "category": "bug",
+  "confidence": "confirmed",
+  "evidence_basis": {
+    "files": [
+      {
+        "path": "project-evolution-engine/scripts/serena_mcp.py",
+        "role": "canonical-owner"
+      },
+      {
+        "path": "tests/test_serena_mcp.py",
+        "role": "test"
+      },
+      {
+        "path": "project-evolution-engine/scripts/change_evidence.py",
+        "role": "subject"
+      }
+    ]
+  },
+  "canonical_owner": {
+    "status": "confirmed",
+    "path": "project-evolution-engine/scripts/serena_mcp.py"
+  },
+  "disposition": "direct-repair",
+  "id": "F-bridge-log-001",
+  "severity": "high",
+  "claim": "A managed state's last-server.log symlink is followed and truncated, allowing --describe to overwrite an existing project file while reporting success.",
+  "impact": "Reusing a managed state directory containing a linked log can destroy the linked file's existing contents, including files inside the requested project or other writable user files. The bridge reports connected=true/ok=true despite violating its file protection boundary.",
+  "evidence": [
+    {
+      "kind": "file",
+      "path": "project-evolution-engine/scripts/serena_mcp.py",
+      "start_line": 95,
+      "end_line": 96,
+      "summary": "connect opens last-server.log in write mode and passes the stream to the real server without rejecting a linked log file."
+    },
+    {
+      "kind": "file",
+      "path": "project-evolution-engine/scripts/serena_mcp.py",
+      "start_line": 37,
+      "end_line": 45,
+      "summary": "The reused state is admitted using its marker; symlink checks cover serena_config.yml and project, but not the log that is immediately opened for writing."
+    },
+    {
+      "kind": "reproduction",
+      "summary": "PYTHONDONTWRITEBYTECODE=1 <evaluation>/serena-env/bin/python <evaluation>/bridge-review/reproduce_bridge.py symlink-log. The first real stdio --describe succeeds without changing the fixture project. Replace state/last-server.log with a symlink to fixture project/protected.mcpfixture and run --describe again. It exits 0 and reports ok=true; the original 45-byte file is replaced by 9803 bytes of server log, and its original contents are absent. Evidence: <evaluation>/bridge-review/symlink-log-evidence.json."
+    }
+  ]
+}

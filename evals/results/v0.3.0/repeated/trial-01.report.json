@@ -1,0 +1,36 @@
+{
+  "status": "completed",
+  "changed_files": [
+    "docs/api.md",
+    "docs/async.md",
+    "docs/quickstart.md",
+    "httpx/_decoders.py",
+    "httpx/_models.py",
+    "tests/models/test_responses.py",
+    "tests/test_decoders.py"
+  ],
+  "checks": [
+    {
+      "command": "<evaluation>/eval-env/bin/python -m pytest -q tests/test_decoders.py tests/models/test_responses.py",
+      "exit_code": 0,
+      "outcome": "基线 146 项通过；最终 419 项通过。"
+    },
+    {
+      "command": "git diff --check",
+      "exit_code": 0,
+      "outcome": "通过，无空白格式错误。"
+    },
+    {
+      "command": "<evaluation>/eval-env/bin/python -",
+      "exit_code": 1,
+      "outcome": "首次内联语法和行宽检查发现一行新增测试超过 88 列，随后已修正。"
+    },
+    {
+      "command": "<evaluation>/eval-env/bin/python -",
+      "exit_code": 0,
+      "outcome": "复检通过：修改的 Python 文件符合 Python 3.9 语法，新增代码行宽符合限制。"
+    }
+  ],
+  "questions": [],
+  "notes": "两个接口已新增 keepends=False，通过共享 LineDecoder 实现原始行尾保留。测试覆盖全部分隔符、跨块 UTF-8/CRLF、空输入、缓存与真实流、增量产出及消费和关闭行为。已补齐文档，依赖和版本配置保持原样。环境未安装 Ruff/Mypy，未运行相应检查。"
+}

@@ -1,0 +1,61 @@
+{
+  "schema_version": 1,
+  "category": "bug",
+  "confidence": "confirmed",
+  "evidence_basis": {
+    "files": [
+      {
+        "path": "project-evolution-engine/scripts/serena_mcp.py",
+        "role": "canonical-owner"
+      },
+      {
+        "path": "tests/test_serena_mcp.py",
+        "role": "test"
+      },
+      {
+        "path": "project-evolution-engine/scripts/change_evidence.py",
+        "role": "subject"
+      }
+    ]
+  },
+  "canonical_owner": {
+    "status": "confirmed",
+    "path": "project-evolution-engine/scripts/serena_mcp.py"
+  },
+  "disposition": "direct-repair",
+  "id": "F-bridge-activation-003",
+  "severity": "medium",
+  "claim": "The connection handshake calls activate_project when the server offers it, bypassing the bridge's explicit prohibition on project-switching tools.",
+  "impact": "Even --describe can dispatch a tool outside READ_TOOLS. A supported custom context in the reused state makes this branch reachable with the official runtime, so the advertised query-only interface is not enforced for internal handshake calls. In the reproduction it activated the same fixture project; the confirmed violation is the forbidden tool dispatch.",
+  "evidence": [
+    {
+      "kind": "file",
+      "path": "project-evolution-engine/scripts/serena_mcp.py",
+      "start_line": 111,
+      "end_line": 114,
+      "summary": "connect calls activate_project directly whenever the live tool list contains it; this path bypasses validate_request."
+    },
+    {
+      "kind": "file",
+      "path": "project-evolution-engine/scripts/serena_mcp.py",
+      "start_line": 56,
+      "end_line": 63,
+      "summary": "The public request validator rejects tools outside READ_TOOLS, which does not contain activate_project."
+    },
+    {
+      "kind": "test",
+      "path": "tests/test_serena_mcp.py",
+      "start_line": 66,
+      "end_line": 69,
+      "summary": "The explicit bridge test treats activate_project as a prohibited tool, but only covers user requests, not the connection handshake."
+    },
+    {
+      "kind": "command",
+      "summary": "The provided official Serena config/context_mode.py (get_path, lines 209-237) loads state/contexts/ide.yml in preference to the built-in ide context. Its single_project field controls whether activate_project is disabled."
+    },
+    {
+      "kind": "reproduction",
+      "summary": "PYTHONDONTWRITEBYTECODE=1 <evaluation>/serena-env/bin/python <evaluation>/bridge-review/reproduce_bridge.py context-override. After a successful first --describe, add state/contexts/ide.yml with prompt 'An isolated read-only query session.' and single_project: false. The next real --describe exits 0 and returns a non-null connection.activation containing the successful activate_project response. The initial activation was null. Evidence: <evaluation>/bridge-review/context-override-evidence.json."
+    }
+  ]
+}

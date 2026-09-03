@@ -1,0 +1,430 @@
+{
+  "schema_version": 1,
+  "status": "completed_with_findings",
+  "mode": "read-only",
+  "summary": "已完成限定范围的独立审核；现有 25 个测试全部通过，另通过真实 CLI 复现 1 项中等严重度的扫描范围隔离缺陷。未修改仓库源码、测试、配置或 Git 状态。",
+  "skill": {
+    "name": "codebase-convergence",
+    "path": "<codebase-convergence>/SKILL.md",
+    "required_references": [
+      "<codebase-convergence>/references/execution-workflow.md",
+      "<codebase-convergence>/references/architecture-deepening.md"
+    ],
+    "finding_references": [
+      "<codebase-convergence>/references/finding-contract.md",
+      "<codebase-convergence>/references/finding.schema.json"
+    ],
+    "executed_validator": "<codebase-convergence>/scripts/finding_contract.py",
+    "application": "实际按 Start contract、baseline、独立复现、Evidence ledger、Deep-Module lens 和机器可读 Finding 的 stamp/check 流程执行；没有以 Skill 名称代替审核。"
+  },
+  "scope": {
+    "repository": "<repository>",
+    "reviewed_files": [
+      {
+        "path": "project-evolution-engine/scripts/refresh_context.py",
+        "coverage": "完整读取；审核 validate、search、snapshot、incomplete、capture、refresh、confirm、CLI 的调用路径。"
+      },
+      {
+        "path": "tests/test_refresh_context.py",
+        "coverage": "完整读取并执行全部 25 个测试。"
+      },
+      {
+        "path": "project-evolution-engine/scripts/change_evidence.py",
+        "coverage": "完整读取；重点核对复用的 safe_path、observe、nonempty、strings。"
+      }
+    ],
+    "behavioral_authority": "本次任务中明确授权的最新行为：声明事实/证据/查询/事实依赖；指定范围内发现引用候选；相关变化与依赖传播需要核实；无关变化保留有效事实；重复刷新不自动确认；确认绑定当前证据；不改目标项目或业务结论。未按旧版缺少 capture/refresh/confirm 的状态提出回退。",
+    "excluded": [
+      "evals/results",
+      "其他评测工作区",
+      "其他代理结果",
+      "未列入审核范围的仓库源码、配置与业务文档"
+    ],
+    "instructions": "检查了祖先目录与审核目录的 AGENTS.md，没有发现适用文件；未读取范围外的 glossary/ADR，以本次明确授权为行为依据。"
+  },
+  "coverage_manifest": [
+    {
+      "area": "首次 capture、refresh 与输入/目标项目只读",
+      "method": "现有测试 + 完整代码路径审核",
+      "result": "通过现有测试；模拟项目在额外 CLI 复现中的文件哈希也保持一致。"
+    },
+    {
+      "area": "新增引用、已有文件成为引用、引用修改与删除、文件更名",
+      "method": "现有测试",
+      "result": "通过。"
+    },
+    {
+      "area": "文件或声明变化、直接和传递依赖失效、保留不受影响事实",
+      "method": "现有测试 + 额外范围隔离复现",
+      "result": "基础行为通过；范围外符号链接存在 F-context-scope-001。"
+    },
+    {
+      "area": "重复刷新、回退原始文件内容仍保留 pending",
+      "method": "现有测试 + 额外复现",
+      "result": "通过；但范围隔离误报会因此形成持续的不必要 pending。"
+    },
+    {
+      "area": "confirm 选择性确认、拒绝未核实依赖、绑定证据与声明快照",
+      "method": "现有测试 + 代码路径审核",
+      "result": "通过。"
+    },
+    {
+      "area": "标识符、literal、glob、文件大小/数量限制、非文本与符号链接",
+      "method": "现有测试 + 范围外符号链接 CLI 复现",
+      "result": "现有测试通过；全局 walk_gaps 未保持查询之间的隔离。"
+    },
+    {
+      "area": "不把文本命中视为语义调用图、不自动改写结论",
+      "method": "LIMITATIONS 与所有写入位置审核",
+      "result": "报告明确说明文本候选边界；脚本仅构造输出记录，不生成或改写事实 statement。"
+    }
+  ],
+  "baseline": {
+    "git_head": "6755a800e6c3c336c898c919b91f64c5d3749ff2",
+    "initial_tracked_worktree_clean": true,
+    "final_tracked_worktree_clean": true,
+    "scoped_files_unchanged": true,
+    "final_scoped_file_hashes": {
+      "project-evolution-engine/scripts/refresh_context.py": "293ae260705ca527c24f2c1024f8e432e0b9e8df3a340848b9b3bb1822cd73ea",
+      "tests/test_refresh_context.py": "34ca5eb0b4e234b1be557ad1a0eaadd1ccd7d9cc9f417cbf88f160b1d404a03c",
+      "project-evolution-engine/scripts/change_evidence.py": "b601879a57a09a3da8ea076e3c4d4df4b2219a5177da6e75df1e24eca721dc6f"
+    },
+    "unrelated_preexisting_tracked_changes": [],
+    "whole_worktree_fingerprint": null,
+    "whole_worktree_fingerprint_reason": "未运行会读取整个仓库的 collector，以遵守禁止读取评测结果和范围外文件的要求；保留了 Git 状态、提交 ID 与三个相关文件的 SHA-256。"
+  },
+  "commands": [
+    {
+      "label": "read-codebase-convergence-skill",
+      "command": "cat <codebase-convergence>/SKILL.md",
+      "exit_code": 0
+    },
+    {
+      "label": "read-applicable-repository-instructions",
+      "command": "python3 - <<'PY'\nfrom pathlib import Path\nroot=Path('<repository>')\nfor folder in [*reversed(root.parents),root,root/'project-evolution-engine',root/'project-evolution-engine/scripts',root/'tests']:\n    path=folder/'AGENTS.md'\n    if path.is_file():\n        print(f'INSTRUCTIONS {path}\\n{path.read_text()}')\nPY",
+      "exit_code": 0,
+      "result": "No applicable AGENTS.md found at the checked ancestor or scoped directories."
+    },
+    {
+      "label": "read-execution-workflow.md",
+      "command": "cat '<codebase-convergence>/references/execution-workflow.md'",
+      "exit_code": 0
+    },
+    {
+      "label": "read-architecture-deepening.md",
+      "command": "cat '<codebase-convergence>/references/architecture-deepening.md'",
+      "exit_code": 0
+    },
+    {
+      "label": "read-finding-contract.md",
+      "command": "cat '<codebase-convergence>/references/finding-contract.md'",
+      "exit_code": 0
+    },
+    {
+      "label": "scoped-baseline",
+      "command": "python3 - <<'PY'\nfrom pathlib import Path\nimport hashlib,json,subprocess\nroot=Path('<repository>')\nfiles=['project-evolution-engine/scripts/refresh_context.py','tests/test_refresh_context.py','project-evolution-engine/scripts/change_evidence.py']\nprint(json.dumps({'files':{name:{'sha256':hashlib.sha256((root/name).read_bytes()).hexdigest(),'size':(root/name).stat().st_size} for name in files}},ensure_ascii=False,indent=2))\nresult=subprocess.run(['git','--no-optional-locks','status','--porcelain=v1','--untracked-files=no'],cwd=root,text=True,capture_output=True)\nprint(json.dumps({'git_status_exit_code':result.returncode,'git_status':result.stdout,'git_status_stderr':result.stderr},ensure_ascii=False))\nPY",
+      "exit_code": 0
+    },
+    {
+      "label": "refresh-context-source",
+      "command": "nl -ba project-evolution-engine/scripts/refresh_context.py",
+      "exit_code": 0
+    },
+    {
+      "label": "refresh-context-tests",
+      "command": "nl -ba tests/test_refresh_context.py",
+      "exit_code": 0
+    },
+    {
+      "label": "change-evidence-source",
+      "command": "nl -ba project-evolution-engine/scripts/change_evidence.py",
+      "exit_code": 0
+    },
+    {
+      "label": "focused-unit-tests",
+      "command": "PYTHONDONTWRITEBYTECODE=1 uv run --python 3.12 --with-requirements requirements-dev.txt python -m unittest discover -s tests -p test_refresh_context.py -v",
+      "exit_code": 0
+    },
+    {
+      "label": "finding-schema",
+      "command": "cat <codebase-convergence>/references/finding.schema.json",
+      "exit_code": 0
+    },
+    {
+      "label": "finding-validator-imports",
+      "command": "sed -n '1,180p' <codebase-convergence>/scripts/finding_contract.py",
+      "exit_code": 0
+    },
+    {
+      "label": "out-of-scope-symlink-reproduction",
+      "command": "PYTHONDONTWRITEBYTECODE=1 uv run --python 3.12 --with-requirements requirements-dev.txt python <evaluation>/convergence-review/reproduce_scope_gap.py",
+      "exit_code": 0
+    },
+    {
+      "label": "finding-stamp",
+      "command": "PYTHONDONTWRITEBYTECODE=1 python3 <codebase-convergence>/scripts/finding_contract.py stamp --root '<repository>' --finding <evaluation>/convergence-review/F-context-scope-001.draft.json",
+      "exit_code": 0
+    },
+    {
+      "label": "out-of-scope-symlink-and-confirm-reproduction",
+      "command": "PYTHONDONTWRITEBYTECODE=1 uv run --python 3.12 --with-requirements requirements-dev.txt python <evaluation>/convergence-review/reproduce_scope_gap.py",
+      "exit_code": 0
+    },
+    {
+      "label": "finding-freshness-check",
+      "command": "PYTHONDONTWRITEBYTECODE=1 python3 <codebase-convergence>/scripts/finding_contract.py check --root '<repository>' --finding <evaluation>/convergence-review/F-context-scope-001.json",
+      "exit_code": 0
+    },
+    {
+      "label": "final-read-only-baseline-check",
+      "command": "python3 - <<'PY'\nfrom pathlib import Path\nimport hashlib,json,subprocess\nroot=Path('<repository>')\nexpected={'project-evolution-engine/scripts/refresh_context.py':'293ae260705ca527c24f2c1024f8e432e0b9e8df3a340848b9b3bb1822cd73ea','tests/test_refresh_context.py':'34ca5eb0b4e234b1be557ad1a0eaadd1a0eaadd1ccd7d9cc9f417cbf88f160b1d404a03c'}\nexpected={'project-evolution-engine/scripts/refresh_context.py':'293ae260705ca527c24f2c1024f8e432e0b9e8df3a340848b9b3bb1822cd73ea','tests/test_refresh_context.py':'34ca5eb0b4e234b1be557ad1a0eaadd1ccd7d9cc9f417cbf88f160b1d404a03c','project-evolution-engine/scripts/change_evidence.py':'b601879a57a09a3da8ea076e3c4d4df4b2219a5177da6e75df1e24eca721dc6f'}\nactual={name:hashlib.sha256((root/name).read_bytes()).hexdigest() for name in expected}\nstatus=subprocess.run(['git','--no-optional-locks','status','--porcelain=v1','--untracked-files=no'],cwd=root,text=True,capture_output=True)\nhead=subprocess.run(['git','rev-parse','HEAD'],cwd=root,text=True,capture_output=True)\nresult={'scoped_file_hashes':actual,'scoped_files_unchanged':actual==expected,'git_status_exit_code':status.returncode,'git_status':status.stdout,'git_head_exit_code':head.returncode,'git_head':head.stdout.strip()}\nprint(json.dumps(result,ensure_ascii=False,indent=2))\nassert result['scoped_files_unchanged']\nPY",
+      "exit_code": 0
+    },
+    {
+      "label": "read-own-reproduction-evidence",
+      "command": "cat <evaluation>/convergence-review/scope-gap-evidence.json",
+      "exit_code": 0
+    }
+  ],
+  "reproduction_cli_commands": [
+    {
+      "command": [
+        "python",
+        "-B",
+        "<repository>/project-evolution-engine/scripts/refresh_context.py",
+        "capture",
+        "--root",
+        "<evaluation>/convergence-review/scope-krardjxw",
+        "--record",
+        "-"
+      ],
+      "exit_code": 0,
+      "stderr": ""
+    },
+    {
+      "command": [
+        "python",
+        "-B",
+        "<repository>/project-evolution-engine/scripts/refresh_context.py",
+        "refresh",
+        "--root",
+        "<evaluation>/convergence-review/scope-krardjxw",
+        "--record",
+        "-"
+      ],
+      "exit_code": 1,
+      "stderr": ""
+    },
+    {
+      "command": [
+        "python",
+        "-B",
+        "<repository>/project-evolution-engine/scripts/refresh_context.py",
+        "confirm",
+        "--root",
+        "<evaluation>/convergence-review/scope-krardjxw",
+        "--record",
+        "-",
+        "--facts",
+        "quote",
+        "port",
+        "--against",
+        "6d3b151d25b1a78805e09da9bcaf796cf3cd7535b179aa7ad1ef3db1da288389",
+        "--note",
+        "Read declared evidence and reference scopes; the files are unchanged."
+      ],
+      "exit_code": 2,
+      "stderr": ""
+    },
+    {
+      "command": [
+        "python",
+        "-B",
+        "<repository>/project-evolution-engine/scripts/refresh_context.py",
+        "refresh",
+        "--root",
+        "<evaluation>/convergence-review/scope-krardjxw",
+        "--record",
+        "-"
+      ],
+      "exit_code": 1,
+      "stderr": ""
+    },
+    {
+      "command": [
+        "python",
+        "-B",
+        "<repository>/project-evolution-engine/scripts/refresh_context.py",
+        "refresh",
+        "--root",
+        "<evaluation>/convergence-review/scope-krardjxw",
+        "--record",
+        "-"
+      ],
+      "exit_code": 1,
+      "stderr": ""
+    }
+  ],
+  "verification": {
+    "focused_unit_tests": {
+      "command": "PYTHONDONTWRITEBYTECODE=1 uv run --python 3.12 --with-requirements requirements-dev.txt python -m unittest discover -s tests -p test_refresh_context.py -v",
+      "exit_code": 0,
+      "tests_run": 25,
+      "result": "all passed",
+      "output_path": "<evaluation>/convergence-review/focused-unit-tests.txt"
+    },
+    "finding_stamp": {
+      "exit_code": 0,
+      "output_path": "<evaluation>/convergence-review/F-context-scope-001.json"
+    },
+    "finding_check": {
+      "exit_code": 0,
+      "freshness": "current",
+      "output_path": "<evaluation>/convergence-review/F-context-scope-001.check.json"
+    },
+    "reproduction": {
+      "command": "PYTHONDONTWRITEBYTECODE=1 uv run --python 3.12 --with-requirements requirements-dev.txt python <evaluation>/convergence-review/reproduce_scope_gap.py",
+      "exit_code": 0,
+      "interpretation": "复现程序退出 0 表示确认当前缺陷，不表示目标行为正确。capture CLI=0；受无关链接影响的 refresh CLI=1；confirm CLI=2。",
+      "evidence_path": "<evaluation>/convergence-review/scope-gap-evidence.json"
+    }
+  },
+  "findings": [
+    {
+      "canonical_owner": {
+        "path": "project-evolution-engine/scripts/refresh_context.py",
+        "status": "confirmed"
+      },
+      "category": "bug",
+      "claim": "An unrelated symlink directory outside every declared include is propagated as a coverage gap to all queries, invalidating otherwise unchanged independent facts.",
+      "confidence": "confirmed",
+      "disposition": "direct-repair",
+      "evidence": [
+        {
+          "end_line": 139,
+          "kind": "file",
+          "path": "project-evolution-engine/scripts/refresh_context.py",
+          "start_line": 129,
+          "summary": "The root-wide traversal records every non-built-in-excluded directory symlink in the shared walk_gaps list before checking any query include or exclude."
+        },
+        {
+          "end_line": 171,
+          "kind": "file",
+          "path": "project-evolution-engine/scripts/refresh_context.py",
+          "start_line": 170,
+          "summary": "Every shared traversal gap is appended to every query outcome, regardless of which declared scope could reach the path."
+        },
+        {
+          "end_line": 224,
+          "kind": "file",
+          "path": "project-evolution-engine/scripts/refresh_context.py",
+          "start_line": 219,
+          "summary": "A query gap changes the captured observation and incomplete(current) marks the associated fact pending."
+        },
+        {
+          "end_line": 94,
+          "kind": "test",
+          "path": "tests/test_refresh_context.py",
+          "start_line": 92,
+          "summary": "The existing contract preserves facts for unrelated changes, but this test only covers an ordinary out-of-scope file, not an unrelated symlink directory."
+        },
+        {
+          "kind": "reproduction",
+          "summary": "Run PYTHONDONTWRITEBYTECODE=1 uv run --python 3.12 --with-requirements requirements-dev.txt python <evaluation>/convergence-review/reproduce_scope_gap.py from the repository. It captures independent src/**/*.py and config/**/*.py facts, adds unrelated-link -> src outside both scopes, and observes both facts become unknown with gap 'symlink directory not scanned: unrelated-link'. The capture CLI exits 0; refresh exits 1. Their source hashes are unchanged; deleting the link leaves both pending. Full JSON evidence is in scope-gap-evidence.json."
+        }
+      ],
+      "evidence_basis": {
+        "files": [
+          {
+            "path": "project-evolution-engine/scripts/change_evidence.py",
+            "role": "subject",
+            "sha256": "sha256:b601879a57a09a3da8ea076e3c4d4df4b2219a5177da6e75df1e24eca721dc6f",
+            "state": "present"
+          },
+          {
+            "path": "project-evolution-engine/scripts/refresh_context.py",
+            "role": "canonical-owner",
+            "sha256": "sha256:293ae260705ca527c24f2c1024f8e432e0b9e8df3a340848b9b3bb1822cd73ea",
+            "state": "present"
+          },
+          {
+            "path": "tests/test_refresh_context.py",
+            "role": "test",
+            "sha256": "sha256:34ca5eb0b4e234b1be557ad1a0eaadd1ccd7d9cc9f417cbf88f160b1d404a03c",
+            "state": "present"
+          }
+        ],
+        "method": "sha256-file-content-v1"
+      },
+      "freshness": "current",
+      "id": "F-context-scope-001",
+      "impact": "Adding an unrelated directory symlink makes every query-backed fact unknown and creates persistent pending review even though no declared evidence or in-scope reference changed. The affected facts cannot be confirmed while the unrelated link exists, and removing it still leaves unnecessary review work.",
+      "schema_version": 1,
+      "severity": "medium",
+      "priority": "P2",
+      "locations": [
+        {
+          "path": "project-evolution-engine/scripts/refresh_context.py",
+          "start_line": 135,
+          "end_line": 136
+        },
+        {
+          "path": "project-evolution-engine/scripts/refresh_context.py",
+          "start_line": 170,
+          "end_line": 171
+        }
+      ],
+      "reproduction": {
+        "script": "<evaluation>/convergence-review/reproduce_scope_gap.py",
+        "steps": [
+          "建立一个临时项目，分别用 src/**/*.py 查询 quote、用 config/**/*.py 查询 DEFAULT_PORT；声明两个互不依赖的事实，再加入一个无查询的 notes 事实。",
+          "capture 后三个事实全部 current。",
+          "只新增不属于任一 include 的 unrelated-link -> src 目录符号链接，所有原有文件内容保持不变。",
+          "refresh；再用其 snapshot_id 尝试确认两个原始事实；删除链接后再次 refresh。"
+        ],
+        "expected": "两个查询范围和证据均未变化，三个事实应继续 current，引用查询不应出现范围外路径的覆盖缺口。",
+        "actual": {
+          "statuses": {
+            "quote": "unknown",
+            "port": "unknown",
+            "notes": "current"
+          },
+          "coverage_gaps": [
+            "symlink directory not scanned: unrelated-link"
+          ],
+          "confirm_error": {
+            "error": "cannot confirm incomplete evidence: port"
+          },
+          "pending_after_removal": [
+            "port",
+            "quote"
+          ]
+        }
+      },
+      "recommendation": "在 search 内按 include/exclude 能覆盖的目录子树，把目录符号链接或 walk error 缺口归属到实际可能受影响的查询；不要把 root-wide walk_gaps 无差别追加给所有查询。继续拒绝跟随符号链接，并保留真正位于查询范围内的未知状态。用范围外链接、显式排除目录与范围内链接三类公共接口用例验证。该修复可以保持 capture/refresh/confirm 接口不变。",
+      "remedy_status": "仅提出修复方向，未实施或验证修复；direct-repair 表示契约保持的修复候选，不构成本只读子任务的编辑授权。"
+    }
+  ],
+  "architecture_lens": {
+    "modules": "search 负责发现范围内的文本引用及覆盖缺口；snapshot 组合单事实证据；refresh 负责失效与依赖传播；confirm 负责带快照的核实状态更新。",
+    "interface_and_depth": "三个操作隐藏了较多证据采集与状态传播细节，现有测试跨越与调用者相同的函数/CLI 接口；没有凭代码长度提出拆分。",
+    "locality_and_leverage": "唯一确证的问题是 search 的全局缺口传播把不同查询的有效性耦合。可在这一现有 Module 内修复缺口归属，避免让 refresh 或调用者重写筛选规则。",
+    "adapter_reality": "没有出现需要新增 Adapter 或公开 Seam 的实证。",
+    "architecture_candidates": []
+  },
+  "decisions_required": [],
+  "repairs": [],
+  "repository_changes": {
+    "modified": false,
+    "statement": "本审核没有修改仓库源码、测试、配置或 Git 状态，没有执行 stage、commit、reset、clean 或格式化。所有人工生成的复现、证据和报告只写在指定 convergence-review 临时目录。",
+    "artifacts_directory": "<evaluation>/convergence-review",
+    "bytecode_policy": "运行审核测试与复现时设置 PYTHONDONTWRITEBYTECODE=1，真实 CLI 复现也使用 -B。"
+  },
+  "uncovered": [
+    "未审核其他仓库文件、其他评测输出或其他代理结果。",
+    "未验证未声明的范围、动态或外部调用关系；脚本本身也只承诺文本候选。",
+    "未做真实权限拒绝、超大仓库性能或文件系统并发修改的压力测试。",
+    "未实施修复，所以没有修复后的验证结果。",
+    "未对恶意手工篡改内部 _state 的完整性作安全认证；本审核针对已授权的正常 capture/refresh/confirm 工作流。"
+  ]
+}

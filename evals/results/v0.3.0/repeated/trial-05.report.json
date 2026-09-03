@@ -1,0 +1,36 @@
+{
+  "status": "completed",
+  "changed_files": [
+    "docs/api.md",
+    "docs/async.md",
+    "docs/quickstart.md",
+    "httpx/_decoders.py",
+    "httpx/_models.py",
+    "tests/models/test_responses.py",
+    "tests/test_decoders.py"
+  ],
+  "checks": [
+    {
+      "command": "<evaluation>/eval-env/bin/python -m pytest -q tests/test_decoders.py tests/models/test_responses.py",
+      "exit_code": 0,
+      "outcome": "修改前基线：146 passed。"
+    },
+    {
+      "command": "<evaluation>/eval-env/bin/python -m pytest -q tests/test_decoders.py tests/models/test_responses.py",
+      "exit_code": 1,
+      "outcome": "首次扩展回归：349 passed，3 failed；均为新增 Trio 测试的生成器清理告警，已修正。"
+    },
+    {
+      "command": "<evaluation>/eval-env/bin/python -m pytest -q tests/test_decoders.py tests/models/test_responses.py",
+      "exit_code": 0,
+      "outcome": "修正后及最终复验均为 352 passed，包含 asyncio 和 Trio 后端。"
+    },
+    {
+      "command": "git diff --check",
+      "exit_code": 0,
+      "outcome": "通过，无空白错误。"
+    }
+  ],
+  "questions": [],
+  "notes": "已为两个接口增加 keepends=False，并由共享 LineDecoder 统一处理。True 保留原始行尾，匹配 str.splitlines(keepends=True)；默认和 False 保持原行为。测试覆盖所有分隔符、跨块 UTF-8/CRLF、空块、末行、缓存与真实流、增量产出、消费和关闭，以及 gzip/UTF-16 解码。相关文档已更新，依赖、配置和版本未变。"
+}

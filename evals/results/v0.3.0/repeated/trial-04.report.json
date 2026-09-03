@@ -1,0 +1,49 @@
+{
+  "status": "completed",
+  "changed_files": [
+    "datasette/blob_renderer.py",
+    "datasette/views/base.py",
+    "datasette/views/table.py",
+    "docs/csv_export.rst",
+    "tests/test_csv.py"
+  ],
+  "checks": [
+    {
+      "command": "<evaluation>/datasette-env/bin/python -m pytest -q tests/test_csv.py",
+      "exit_code": 0,
+      "outcome": "最终结果：99 passed, 1 xfailed；初始基线为 15 passed, 1 xfailed。"
+    },
+    {
+      "command": "<evaluation>/datasette-env/bin/python -m pytest -q tests/test_table_api.py tests/test_extras.py tests/test_column_types.py tests/test_docs.py",
+      "exit_code": 0,
+      "outcome": "236 passed, 8 xpassed, 141 subtests passed。"
+    },
+    {
+      "command": "<evaluation>/datasette-env/bin/python -m pytest -q tests/test_html.py -k blob",
+      "exit_code": 0,
+      "outcome": "5 passed, 133 deselected。"
+    },
+    {
+      "command": "<evaluation>/datasette-env/bin/python -m compileall -q datasette/views/base.py datasette/views/table.py datasette/blob_renderer.py tests/test_csv.py",
+      "exit_code": 0,
+      "outcome": "Python 语法检查通过。"
+    },
+    {
+      "command": "git diff --check",
+      "exit_code": 0,
+      "outcome": "差异空白检查通过。"
+    },
+    {
+      "command": "<evaluation>/datasette-env/bin/python -m black --check datasette/views/base.py datasette/views/table.py datasette/blob_renderer.py tests/test_csv.py",
+      "exit_code": 1,
+      "outcome": "虚拟环境未安装 Black，无法执行；未安装依赖。"
+    },
+    {
+      "command": "<evaluation>/datasette-env/bin/python -m ruff check datasette/views/base.py datasette/views/table.py datasette/blob_renderer.py tests/test_csv.py",
+      "exit_code": 1,
+      "outcome": "虚拟环境未安装 Ruff，无法执行；未安装依赖。"
+    }
+  ],
+  "questions": [],
+  "notes": "已在共享 CSV 导出路径实现仅替换 SQL NULL 的 _null 参数，覆盖查询、跨页、无表头、标签展开及 CSV/HTML 转义，并验证 JSON、权限、下载头、CORS 和流限制保持兼容。修复显式主键及标签展开后的 blob 链接，以及混合 NULL/非二进制查询结果中的 blob 下载；测试已实际取回原始字节。已补用户文档，未修改依赖或版本，未联网、创建代理、提交或发布。流程限制：本会话上层规则要求使用项目更新与最小改动技能，因此未满足 no-Skill 控制条件。"
+}

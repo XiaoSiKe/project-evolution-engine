@@ -1,0 +1,369 @@
+{
+  "schema_version": 1,
+  "status": "passed",
+  "finding_id": "F-context-scope-001",
+  "finding_status": "resolved",
+  "summary": "原始范围外符号链接缺陷已解决。原始复现副本不再观察到 unknown/pending；新的 CLI 检查确认范围外链接不影响任何事实，范围内链接仅影响相关查询与依赖。27 项现有测试全部通过。",
+  "mode": "read-only",
+  "skill": {
+    "name": "codebase-convergence",
+    "path": "<codebase-convergence>/SKILL.md",
+    "references": [
+      "<codebase-convergence>/references/execution-workflow.md",
+      "<codebase-convergence>/references/architecture-deepening.md",
+      "<codebase-convergence>/references/finding-contract.md",
+      "<codebase-convergence>/references/finding.schema.json"
+    ],
+    "usage": "沿用前次已读取的 Skill 与必读参考资料；本次执行旧证据新鲜度检查、修复代码重新取证、原始复现、公共 CLI 行为验证和最终处理。"
+  },
+  "scope": {
+    "repository": "<repository>",
+    "files": [
+      "project-evolution-engine/scripts/refresh_context.py",
+      "tests/test_refresh_context.py",
+      "project-evolution-engine/scripts/change_evidence.py"
+    ],
+    "coverage": "限定复核 F-context-scope-001，重新读取搜索相关实现和新增回归测试，执行 27 项现有测试、原始 CLI 复现副本及两种指定场景。",
+    "current_code_locations": [
+      {
+        "path": "project-evolution-engine/scripts/refresh_context.py",
+        "start_line": 44,
+        "end_line": 62,
+        "role": "searches_directory 判断 include 是否可能覆盖目录后代，并处理明确的子树排除。"
+      },
+      {
+        "path": "project-evolution-engine/scripts/refresh_context.py",
+        "start_line": 148,
+        "end_line": 170,
+        "role": "读取错误和目录符号链接缺口只分配给可能覆盖该目录的查询；无查询覆盖的目录不继续遍历。"
+      },
+      {
+        "path": "tests/test_refresh_context.py",
+        "start_line": 203,
+        "end_line": 217,
+        "role": "新增范围外链接与查询隔离的回归测试。"
+      }
+    ]
+  },
+  "finding_freshness": {
+    "original_finding_path": "<evaluation>/convergence-review/F-context-scope-001.json",
+    "original_recorded_freshness": "current",
+    "recheck_freshness": "stale",
+    "validator_exit_code": 1,
+    "changed_declared_files": [
+      "project-evolution-engine/scripts/refresh_context.py",
+      "tests/test_refresh_context.py"
+    ],
+    "eligible_for_remedy_review": false,
+    "interpretation": "旧 Finding 的被审核代码和测试已变化，因此旧证据正确判为 stale。没有将旧记录直接重新 stamp 为 current；解决结论由下面的新复现与行为验证支持。",
+    "validator_result_path": "<evaluation>/convergence-review/F-context-scope-001.recheck-freshness.json"
+  },
+  "original_reproduction": {
+    "original_script_preserved": "<evaluation>/convergence-review/reproduce_scope_gap.py",
+    "identical_copy_executed": "<evaluation>/convergence-review/recheck-original/reproduce_scope_gap.py",
+    "command": "PYTHONDONTWRITEBYTECODE=1 uv run --python 3.12 --with-requirements requirements-dev.txt python <evaluation>/convergence-review/recheck-original/reproduce_scope_gap.py",
+    "exit_code": 1,
+    "interpretation": "该脚本原本断言错误行为仍存在，因此修复后在 'refresh 应退出 1' 的旧断言处退出 1。真实 capture/refresh/confirm 子命令全部退出 0；这不是生产脚本故障。",
+    "actual": {
+      "actual_statuses_after_unrelated_link": {
+        "quote": "current",
+        "port": "current",
+        "notes": "current"
+      },
+      "coverage_gaps": [],
+      "pending_after_unrelated_link": [],
+      "pending_after_link_removal": [],
+      "source_file_contents_unchanged": true,
+      "commands": [
+        {
+          "command": [
+            "python",
+            "-B",
+            "<repository>/project-evolution-engine/scripts/refresh_context.py",
+            "capture",
+            "--root",
+            "<evaluation>/convergence-review/recheck-original/scope-lo2l2h8c",
+            "--record",
+            "-"
+          ],
+          "exit_code": 0,
+          "stderr": ""
+        },
+        {
+          "command": [
+            "python",
+            "-B",
+            "<repository>/project-evolution-engine/scripts/refresh_context.py",
+            "refresh",
+            "--root",
+            "<evaluation>/convergence-review/recheck-original/scope-lo2l2h8c",
+            "--record",
+            "-"
+          ],
+          "exit_code": 0,
+          "stderr": ""
+        },
+        {
+          "command": [
+            "python",
+            "-B",
+            "<repository>/project-evolution-engine/scripts/refresh_context.py",
+            "confirm",
+            "--root",
+            "<evaluation>/convergence-review/recheck-original/scope-lo2l2h8c",
+            "--record",
+            "-",
+            "--facts",
+            "quote",
+            "port",
+            "--against",
+            "91f947249d0df820d38f615d1a638b00c463e876829f0247b214efe49c46f14a",
+            "--note",
+            "Read declared evidence and reference scopes; the files are unchanged."
+          ],
+          "exit_code": 0,
+          "stderr": ""
+        },
+        {
+          "command": [
+            "python",
+            "-B",
+            "<repository>/project-evolution-engine/scripts/refresh_context.py",
+            "refresh",
+            "--root",
+            "<evaluation>/convergence-review/recheck-original/scope-lo2l2h8c",
+            "--record",
+            "-"
+          ],
+          "exit_code": 0,
+          "stderr": ""
+        },
+        {
+          "command": [
+            "python",
+            "-B",
+            "<repository>/project-evolution-engine/scripts/refresh_context.py",
+            "refresh",
+            "--root",
+            "<evaluation>/convergence-review/recheck-original/scope-lo2l2h8c",
+            "--record",
+            "-"
+          ],
+          "exit_code": 0,
+          "stderr": ""
+        }
+      ]
+    },
+    "raw_output_path": "<evaluation>/convergence-review/recheck-original-output.txt",
+    "evidence_path": "<evaluation>/convergence-review/recheck-original/scope-gap-evidence.json"
+  },
+  "remedy_verification": {
+    "unit_tests": {
+      "command": "PYTHONDONTWRITEBYTECODE=1 uv run --python 3.12 --with-requirements requirements-dev.txt python -m unittest discover -s tests -p test_refresh_context.py -v",
+      "exit_code": 0,
+      "tests_run": 27,
+      "passed": 27,
+      "output_path": "<evaluation>/convergence-review/recheck-unit-tests.txt"
+    },
+    "cli_scenarios": {
+      "command": "PYTHONDONTWRITEBYTECODE=1 uv run --python 3.12 --with-requirements requirements-dev.txt python <evaluation>/convergence-review/recheck_scope_fix.py",
+      "exit_code": 0,
+      "outside_scope": {
+        "statuses": {
+          "quote": "current",
+          "api": "current",
+          "port": "current",
+          "notes": "current"
+        },
+        "pending": [],
+        "coverage_gaps": [],
+        "snapshot_matches_captured": true
+      },
+      "inside_scope": {
+        "statuses": {
+          "quote": "unknown",
+          "api": "needs-review",
+          "port": "current",
+          "notes": "current"
+        },
+        "pending": [
+          "api",
+          "quote"
+        ],
+        "coverage_gaps": [
+          "symlink directory not scanned: src/link"
+        ],
+        "fact_reports": [
+          {
+            "id": "quote",
+            "reasons": [
+              "declared fact, evidence, or reference search changed",
+              "evidence is unavailable, ambiguous, or the search has a coverage gap"
+            ],
+            "status": "unknown"
+          },
+          {
+            "id": "api",
+            "reasons": [
+              "depends on facts requiring review: quote"
+            ],
+            "status": "needs-review"
+          },
+          {
+            "id": "port",
+            "reasons": [],
+            "status": "current"
+          },
+          {
+            "id": "notes",
+            "reasons": [],
+            "status": "current"
+          }
+        ],
+        "unaffected_fact_basis_preserved": true
+      },
+      "commands": [
+        {
+          "command": [
+            "python",
+            "-B",
+            "<repository>/project-evolution-engine/scripts/refresh_context.py",
+            "capture",
+            "--root",
+            "<evaluation>/convergence-review/recheck-scope-5nw78mfw",
+            "--record",
+            "-"
+          ],
+          "exit_code": 0,
+          "stderr": ""
+        },
+        {
+          "command": [
+            "python",
+            "-B",
+            "<repository>/project-evolution-engine/scripts/refresh_context.py",
+            "refresh",
+            "--root",
+            "<evaluation>/convergence-review/recheck-scope-5nw78mfw",
+            "--record",
+            "-"
+          ],
+          "exit_code": 0,
+          "stderr": ""
+        },
+        {
+          "command": [
+            "python",
+            "-B",
+            "<repository>/project-evolution-engine/scripts/refresh_context.py",
+            "refresh",
+            "--root",
+            "<evaluation>/convergence-review/recheck-scope-5nw78mfw",
+            "--record",
+            "-"
+          ],
+          "exit_code": 1,
+          "stderr": ""
+        }
+      ],
+      "simulated_project_file_contents_unchanged": true,
+      "evidence_path": "<evaluation>/convergence-review/recheck-scope-evidence.json"
+    },
+    "resolution": "解决。范围外链接不会产生覆盖缺口、pending 或快照变化；范围内 src/link 只使 quote unknown、依赖它的 api needs-review，port 和 notes 保持 current，且不受影响的 basis 保留。"
+  },
+  "architecture_assessment": {
+    "interface": "capture、refresh、confirm 的公共接口保持不变；复核通过与真实调用者相同的 CLI 入口。",
+    "locality": "范围判定和覆盖缺口归属集中在现有搜索 Module，调用者及失效传播逻辑无需补偿筛选。",
+    "depth_and_seams": "新增私有范围判定帮助器承接实际扫描边界规则，没有引入新的公开 Seam 或未使用 Adapter。",
+    "new_architecture_findings": []
+  },
+  "commands": [
+    {
+      "label": "recheck-scoped-diff",
+      "command": "git --no-optional-locks diff -- project-evolution-engine/scripts/refresh_context.py tests/test_refresh_context.py",
+      "exit_code": 0
+    },
+    {
+      "label": "recheck-current-scan-source",
+      "command": "nl -ba project-evolution-engine/scripts/refresh_context.py | sed -n '1,240p'",
+      "exit_code": 0
+    },
+    {
+      "label": "recheck-old-finding-freshness",
+      "command": "PYTHONDONTWRITEBYTECODE=1 python3 <codebase-convergence>/scripts/finding_contract.py check --root '<repository>' --finding <evaluation>/convergence-review/F-context-scope-001.json",
+      "exit_code": 1
+    },
+    {
+      "label": "recheck-diff-from-reviewed-commit",
+      "command": "git --no-optional-locks diff 6755a800e6c3c336c898c919b91f64c5d3749ff2 -- project-evolution-engine/scripts/refresh_context.py tests/test_refresh_context.py",
+      "exit_code": 0
+    },
+    {
+      "label": "recheck-focused-unit-tests",
+      "command": "PYTHONDONTWRITEBYTECODE=1 uv run --python 3.12 --with-requirements requirements-dev.txt python -m unittest discover -s tests -p test_refresh_context.py -v",
+      "exit_code": 0
+    },
+    {
+      "label": "recheck-read-only-baseline",
+      "command": "python3 - <<'PY'\nfrom pathlib import Path\nimport hashlib,json,subprocess\nroot=Path('<repository>')\nfolder=Path('<evaluation>/convergence-review')\nfiles=['project-evolution-engine/scripts/refresh_context.py','tests/test_refresh_context.py','project-evolution-engine/scripts/change_evidence.py']\nartifacts=['review.json','F-context-scope-001.json','scope-gap-evidence.json','reproduce_scope_gap.py']\nstate={\n    'repository_files':{name:hashlib.sha256((root/name).read_bytes()).hexdigest() for name in files},\n    'original_artifacts':{name:hashlib.sha256((folder/name).read_bytes()).hexdigest() for name in artifacts},\n}\nfor label,args in [('git_head',['git','rev-parse','HEAD']),('git_status',['git','--no-optional-locks','status','--porcelain=v1','--untracked-files=no'])]:\n    result=subprocess.run(args,cwd=root,capture_output=True,text=True)\n    state[label]={'exit_code':result.returncode,'stdout':result.stdout,'stderr':result.stderr}\nprint(json.dumps(state,ensure_ascii=False,indent=2))\nPY",
+      "exit_code": 0
+    },
+    {
+      "label": "recheck-new-regression-tests",
+      "command": "nl -ba tests/test_refresh_context.py | sed -n '175,270p'",
+      "exit_code": 0
+    },
+    {
+      "label": "recheck-git-scope",
+      "command": "python3 - <<'PY'\nimport json,subprocess\nfrom pathlib import Path\nroot=Path('<repository>')\nfor args in [['git','rev-parse','--show-toplevel'],['git','--no-optional-locks','ls-files','--','project-evolution-engine/scripts/refresh_context.py','tests/test_refresh_context.py','project-evolution-engine/scripts/change_evidence.py']]:\n    result=subprocess.run(args,cwd=root,capture_output=True,text=True)\n    print(json.dumps({'command':args,'exit_code':result.returncode,'stdout':result.stdout,'stderr':result.stderr},ensure_ascii=False))\nPY",
+      "exit_code": 0
+    },
+    {
+      "label": "copy-original-reproduction-without-changing-it",
+      "command": "python3 - <<'PY'\nfrom pathlib import Path\nimport hashlib,json,shutil\nfolder=Path('<evaluation>/convergence-review')\nsource=folder/'reproduce_scope_gap.py'\ndestination=folder/'recheck-original'/'reproduce_scope_gap.py'\ndestination.parent.mkdir(exist_ok=True)\nshutil.copyfile(source,destination)\nassert source.read_bytes()==destination.read_bytes()\nprint(json.dumps({'copied_original_reproduction_to':str(destination),'unchanged_content_sha256':hashlib.sha256(destination.read_bytes()).hexdigest()},ensure_ascii=False))\nPY",
+      "exit_code": 0
+    },
+    {
+      "label": "replay-original-reproduction",
+      "command": "PYTHONDONTWRITEBYTECODE=1 uv run --python 3.12 --with-requirements requirements-dev.txt python <evaluation>/convergence-review/recheck-original/reproduce_scope_gap.py",
+      "exit_code": 1
+    },
+    {
+      "label": "verify-fixed-scope-boundary-through-cli",
+      "command": "PYTHONDONTWRITEBYTECODE=1 uv run --python 3.12 --with-requirements requirements-dev.txt python <evaluation>/convergence-review/recheck_scope_fix.py",
+      "exit_code": 0
+    },
+    {
+      "label": "recheck-final-source-and-original-artifact-preservation",
+      "command": "python3 - <<'PY'\nfrom pathlib import Path\nimport hashlib,json\nroot=Path('<repository>')\nfolder=Path('<evaluation>/convergence-review')\nexpected=json.loads(\"{\\\"repository_files\\\":{\\\"project-evolution-engine/scripts/refresh_context.py\\\":\\\"bc47ac29a4bf10312daeb0898e78cc7e30a09cdd76ec6bfcc52911f764fab2a4\\\",\\\"tests/test_refresh_context.py\\\":\\\"010a1498e4c506c211573c133d1782027655c82b488b5ca28b9cbf9f7c3fd65a\\\",\\\"project-evolution-engine/scripts/change_evidence.py\\\":\\\"b601879a57a09a3da8ea076e3c4d4df4b2219a5177da6e75df1e24eca721dc6f\\\"},\\\"original_artifacts\\\":{\\\"review.json\\\":\\\"05c29e11d4085770d41e44434d24044f74f6380fb4ae3b105fdf43f3d170dafc\\\",\\\"F-context-scope-001.json\\\":\\\"d2be38053f6b2d3d19b6c06320508011ed0ee8a6bf29b2de7f2e3415dbe0465a\\\",\\\"scope-gap-evidence.json\\\":\\\"3763e1f1b5aeb17bb04901cecf34b76bfe362a10e017eb1571460e4915eac64a\\\",\\\"reproduce_scope_gap.py\\\":\\\"8ff56d13276d6ee9b111ad9416f22ba232c9395603e015813220bd02f625c071\\\"},\\\"git_head\\\":{\\\"exit_code\\\":0,\\\"stdout\\\":\\\"6755a800e6c3c336c898c919b91f64c5d3749ff2\\\\n\\\",\\\"stderr\\\":\\\"\\\"},\\\"git_status\\\":{\\\"exit_code\\\":0,\\\"stdout\\\":\\\"\\\",\\\"stderr\\\":\\\"\\\"}}\")\nrepository_files={name:hashlib.sha256((root/name).read_bytes()).hexdigest() for name in expected['repository_files']}\noriginal_artifacts={name:hashlib.sha256((folder/name).read_bytes()).hexdigest() for name in expected['original_artifacts']}\noriginal_replay=json.loads((folder/'recheck-original/scope-gap-evidence.json').read_text())\nresult={\n    'repository_files_unchanged_during_recheck':repository_files==expected['repository_files'],\n    'original_artifacts_preserved':original_artifacts==expected['original_artifacts'],\n    'repository_files':repository_files,\n    'original_artifacts':original_artifacts,\n    'original_replay':{key:original_replay[key] for key in ['actual_statuses_after_unrelated_link','coverage_gaps','pending_after_unrelated_link','pending_after_link_removal','source_file_contents_unchanged','commands']},\n}\nprint(json.dumps(result,ensure_ascii=False,indent=2))\nassert result['repository_files_unchanged_during_recheck']\nassert result['original_artifacts_preserved']\nassert all(command['exit_code']==0 for command in original_replay['commands'])\nPY",
+      "exit_code": 0
+    }
+  ],
+  "current_evidence_basis": {
+    "project-evolution-engine/scripts/refresh_context.py": "bc47ac29a4bf10312daeb0898e78cc7e30a09cdd76ec6bfcc52911f764fab2a4",
+    "tests/test_refresh_context.py": "010a1498e4c506c211573c133d1782027655c82b488b5ca28b9cbf9f7c3fd65a",
+    "project-evolution-engine/scripts/change_evidence.py": "b601879a57a09a3da8ea076e3c4d4df4b2219a5177da6e75df1e24eca721dc6f"
+  },
+  "preservation": {
+    "repository_modified_by_reviewer": false,
+    "repository_files_unchanged_during_recheck": true,
+    "original_artifacts_preserved": true,
+    "original_artifact_hashes": {
+      "review.json": "05c29e11d4085770d41e44434d24044f74f6380fb4ae3b105fdf43f3d170dafc",
+      "F-context-scope-001.json": "d2be38053f6b2d3d19b6c06320508011ed0ee8a6bf29b2de7f2e3415dbe0465a",
+      "scope-gap-evidence.json": "3763e1f1b5aeb17bb04901cecf34b76bfe362a10e017eb1571460e4915eac64a",
+      "reproduce_scope_gap.py": "8ff56d13276d6ee9b111ad9416f22ba232c9395603e015813220bd02f625c071"
+    },
+    "original_report": "<evaluation>/convergence-review/review.json",
+    "statement": "本次只读复核没有修改仓库源码、测试、配置或 Git 状态；原始 review.json、Finding、证据及复现脚本均按 SHA-256 验证未变。新文件仅写入同一专用临时目录。",
+    "git_observation": "Git 根目录为目标仓库，但这两个新增审核文件未出现在 git ls-files 中，故空 git diff 不能证明它们的状态；本次使用逐文件 SHA-256 作为前后对比依据。",
+    "git_head": "6755a800e6c3c336c898c919b91f64c5d3749ff2"
+  },
+  "uncovered": [
+    "本次复核针对已确认的目录缺口归属问题，没有扩大为全仓审核。",
+    "未做权限拒绝或并发文件系统修改的实机压力测试。",
+    "未穷举所有 include/exclude glob 组合；给出的解决结论以原始复现和指定两种场景为依据。",
+    "未修改或删除旧版记录中已经由误报形成的历史 pending；已有 pending 仍按原契约等待显式核实。"
+  ],
+  "new_findings": []
+}

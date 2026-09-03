@@ -1,0 +1,669 @@
+{
+  "scenario": "A new symlink directory outside every declared include invalidates both independent queried facts.",
+  "captured_statuses": {
+    "quote": "current",
+    "port": "current",
+    "notes": "current"
+  },
+  "expected_statuses_after_unrelated_link": {
+    "quote": "current",
+    "port": "current",
+    "notes": "current"
+  },
+  "actual_statuses_after_unrelated_link": {
+    "quote": "unknown",
+    "port": "unknown",
+    "notes": "current"
+  },
+  "coverage_gaps": [
+    "symlink directory not scanned: unrelated-link"
+  ],
+  "pending_after_unrelated_link": [
+    "port",
+    "quote"
+  ],
+  "confirm_while_unrelated_link_exists": {
+    "error": "cannot confirm incomplete evidence: port"
+  },
+  "pending_after_link_removal": [
+    "port",
+    "quote"
+  ],
+  "source_file_contents_unchanged": true,
+  "input_draft": {
+    "schema_version": 1,
+    "queries": [
+      {
+        "id": "quote-refs",
+        "include": [
+          "src/**/*.py"
+        ],
+        "terms": [
+          "quote"
+        ]
+      },
+      {
+        "id": "port-refs",
+        "include": [
+          "config/**/*.py"
+        ],
+        "terms": [
+          "DEFAULT_PORT"
+        ]
+      }
+    ],
+    "facts": [
+      {
+        "id": "quote",
+        "kind": "implementation",
+        "statement": "quote doubles its input",
+        "evidence": [
+          {
+            "path": "src/owner.py"
+          }
+        ],
+        "queries": [
+          "quote-refs"
+        ],
+        "depends_on": []
+      },
+      {
+        "id": "port",
+        "kind": "implementation",
+        "statement": "The default port is 8000",
+        "evidence": [
+          {
+            "path": "config/settings.py"
+          }
+        ],
+        "queries": [
+          "port-refs"
+        ],
+        "depends_on": []
+      },
+      {
+        "id": "notes",
+        "kind": "decision",
+        "statement": "Conventions are in notes.md",
+        "evidence": [
+          {
+            "path": "notes.md"
+          }
+        ],
+        "queries": [],
+        "depends_on": []
+      }
+    ]
+  },
+  "captured": {
+    "_state": {
+      "basis": {
+        "notes": {
+          "definition": "ad872c612b0c0ba88ae5caf7164935c5f1a44fdef89be460fb2a20e9aad3ada4",
+          "evidence": {
+            "notes.md": {
+              "sha256": "9894eb751bb9d6af8edcc9372a3ae6d43318c9d67735c6127f2f1a544ed64a1b",
+              "state": "present"
+            }
+          },
+          "queries": {}
+        },
+        "port": {
+          "definition": "af8ba4d56845c81da3c856d95dc9caca74cd729cec517024c2aae35ba37f7fe8",
+          "evidence": {
+            "config/settings.py": {
+              "sha256": "ded59a6131ea104050b2cee849a6f2726e6dccf8625e3fabb923f5c6652f4c41",
+              "state": "present"
+            }
+          },
+          "queries": {
+            "port-refs": {
+              "definition": "583573d9bd3033247551aeb641af63e068bcd52e1a62ffd4bdd1caa2c6e223ea",
+              "gaps": [],
+              "hits": {
+                "config/settings.py": {
+                  "lines": [
+                    1
+                  ],
+                  "sha256": "ded59a6131ea104050b2cee849a6f2726e6dccf8625e3fabb923f5c6652f4c41"
+                }
+              }
+            }
+          }
+        },
+        "quote": {
+          "definition": "71e6486c032198fbaabb58713047a0a113736412072654598b0e83985ca741e4",
+          "evidence": {
+            "src/owner.py": {
+              "sha256": "b46f788cfbb2f7c3f5368b8a3e2ca8e14b1500082b2d1e04a979c1966e2ba757",
+              "state": "present"
+            }
+          },
+          "queries": {
+            "quote-refs": {
+              "definition": "9ba24ed12cfcbec22a9e96a43d284c6094aea339839b87994fcb82924ab2d0bb",
+              "gaps": [],
+              "hits": {
+                "src/owner.py": {
+                  "lines": [
+                    1
+                  ],
+                  "sha256": "b46f788cfbb2f7c3f5368b8a3e2ca8e14b1500082b2d1e04a979c1966e2ba757"
+                }
+              }
+            }
+          }
+        }
+      },
+      "last_review": {},
+      "pending": []
+    },
+    "facts": [
+      {
+        "depends_on": [],
+        "evidence": [
+          {
+            "path": "src/owner.py"
+          }
+        ],
+        "id": "quote",
+        "kind": "implementation",
+        "queries": [
+          "quote-refs"
+        ],
+        "statement": "quote doubles its input"
+      },
+      {
+        "depends_on": [],
+        "evidence": [
+          {
+            "path": "config/settings.py"
+          }
+        ],
+        "id": "port",
+        "kind": "implementation",
+        "queries": [
+          "port-refs"
+        ],
+        "statement": "The default port is 8000"
+      },
+      {
+        "depends_on": [],
+        "evidence": [
+          {
+            "path": "notes.md"
+          }
+        ],
+        "id": "notes",
+        "kind": "decision",
+        "queries": [],
+        "statement": "Conventions are in notes.md"
+      }
+    ],
+    "queries": [
+      {
+        "id": "quote-refs",
+        "include": [
+          "src/**/*.py"
+        ],
+        "terms": [
+          "quote"
+        ]
+      },
+      {
+        "id": "port-refs",
+        "include": [
+          "config/**/*.py"
+        ],
+        "terms": [
+          "DEFAULT_PORT"
+        ]
+      }
+    ],
+    "report": {
+      "coverage_gaps": [],
+      "evidence_changes": [],
+      "facts": [
+        {
+          "id": "quote",
+          "reasons": [],
+          "status": "current"
+        },
+        {
+          "id": "port",
+          "reasons": [],
+          "status": "current"
+        },
+        {
+          "id": "notes",
+          "reasons": [],
+          "status": "current"
+        }
+      ],
+      "limitations": [
+        "Search hits are textual reference candidates, not semantic proof of a call or ownership.",
+        "Coverage is limited to declared file patterns and terms; dynamic and external consumers can be missed.",
+        "Current evidence does not establish that a statement is true or that its behavior has been tested.",
+        "Refresh invalidates evidence; an agent must read affected code and update statements before confirming."
+      ],
+      "new_reference_candidates": [],
+      "ready": true,
+      "reference_changes": [],
+      "snapshot_id": "91f947249d0df820d38f615d1a638b00c463e876829f0247b214efe49c46f14a"
+    },
+    "schema_version": 1
+  },
+  "refreshed": {
+    "_state": {
+      "basis": {
+        "notes": {
+          "definition": "ad872c612b0c0ba88ae5caf7164935c5f1a44fdef89be460fb2a20e9aad3ada4",
+          "evidence": {
+            "notes.md": {
+              "sha256": "9894eb751bb9d6af8edcc9372a3ae6d43318c9d67735c6127f2f1a544ed64a1b",
+              "state": "present"
+            }
+          },
+          "queries": {}
+        },
+        "port": {
+          "definition": "af8ba4d56845c81da3c856d95dc9caca74cd729cec517024c2aae35ba37f7fe8",
+          "evidence": {
+            "config/settings.py": {
+              "sha256": "ded59a6131ea104050b2cee849a6f2726e6dccf8625e3fabb923f5c6652f4c41",
+              "state": "present"
+            }
+          },
+          "queries": {
+            "port-refs": {
+              "definition": "583573d9bd3033247551aeb641af63e068bcd52e1a62ffd4bdd1caa2c6e223ea",
+              "gaps": [],
+              "hits": {
+                "config/settings.py": {
+                  "lines": [
+                    1
+                  ],
+                  "sha256": "ded59a6131ea104050b2cee849a6f2726e6dccf8625e3fabb923f5c6652f4c41"
+                }
+              }
+            }
+          }
+        },
+        "quote": {
+          "definition": "71e6486c032198fbaabb58713047a0a113736412072654598b0e83985ca741e4",
+          "evidence": {
+            "src/owner.py": {
+              "sha256": "b46f788cfbb2f7c3f5368b8a3e2ca8e14b1500082b2d1e04a979c1966e2ba757",
+              "state": "present"
+            }
+          },
+          "queries": {
+            "quote-refs": {
+              "definition": "9ba24ed12cfcbec22a9e96a43d284c6094aea339839b87994fcb82924ab2d0bb",
+              "gaps": [],
+              "hits": {
+                "src/owner.py": {
+                  "lines": [
+                    1
+                  ],
+                  "sha256": "b46f788cfbb2f7c3f5368b8a3e2ca8e14b1500082b2d1e04a979c1966e2ba757"
+                }
+              }
+            }
+          }
+        }
+      },
+      "last_review": {},
+      "pending": [
+        "port",
+        "quote"
+      ]
+    },
+    "facts": [
+      {
+        "depends_on": [],
+        "evidence": [
+          {
+            "path": "src/owner.py"
+          }
+        ],
+        "id": "quote",
+        "kind": "implementation",
+        "queries": [
+          "quote-refs"
+        ],
+        "statement": "quote doubles its input"
+      },
+      {
+        "depends_on": [],
+        "evidence": [
+          {
+            "path": "config/settings.py"
+          }
+        ],
+        "id": "port",
+        "kind": "implementation",
+        "queries": [
+          "port-refs"
+        ],
+        "statement": "The default port is 8000"
+      },
+      {
+        "depends_on": [],
+        "evidence": [
+          {
+            "path": "notes.md"
+          }
+        ],
+        "id": "notes",
+        "kind": "decision",
+        "queries": [],
+        "statement": "Conventions are in notes.md"
+      }
+    ],
+    "queries": [
+      {
+        "id": "quote-refs",
+        "include": [
+          "src/**/*.py"
+        ],
+        "terms": [
+          "quote"
+        ]
+      },
+      {
+        "id": "port-refs",
+        "include": [
+          "config/**/*.py"
+        ],
+        "terms": [
+          "DEFAULT_PORT"
+        ]
+      }
+    ],
+    "report": {
+      "coverage_gaps": [
+        "symlink directory not scanned: unrelated-link"
+      ],
+      "evidence_changes": [],
+      "facts": [
+        {
+          "id": "quote",
+          "reasons": [
+            "declared fact, evidence, or reference search changed",
+            "evidence is unavailable, ambiguous, or the search has a coverage gap"
+          ],
+          "status": "unknown"
+        },
+        {
+          "id": "port",
+          "reasons": [
+            "declared fact, evidence, or reference search changed",
+            "evidence is unavailable, ambiguous, or the search has a coverage gap"
+          ],
+          "status": "unknown"
+        },
+        {
+          "id": "notes",
+          "reasons": [],
+          "status": "current"
+        }
+      ],
+      "limitations": [
+        "Search hits are textual reference candidates, not semantic proof of a call or ownership.",
+        "Coverage is limited to declared file patterns and terms; dynamic and external consumers can be missed.",
+        "Current evidence does not establish that a statement is true or that its behavior has been tested.",
+        "Refresh invalidates evidence; an agent must read affected code and update statements before confirming."
+      ],
+      "new_reference_candidates": [],
+      "ready": false,
+      "reference_changes": [],
+      "snapshot_id": "6d3b151d25b1a78805e09da9bcaf796cf3cd7535b179aa7ad1ef3db1da288389"
+    },
+    "schema_version": 1
+  },
+  "restored": {
+    "_state": {
+      "basis": {
+        "notes": {
+          "definition": "ad872c612b0c0ba88ae5caf7164935c5f1a44fdef89be460fb2a20e9aad3ada4",
+          "evidence": {
+            "notes.md": {
+              "sha256": "9894eb751bb9d6af8edcc9372a3ae6d43318c9d67735c6127f2f1a544ed64a1b",
+              "state": "present"
+            }
+          },
+          "queries": {}
+        },
+        "port": {
+          "definition": "af8ba4d56845c81da3c856d95dc9caca74cd729cec517024c2aae35ba37f7fe8",
+          "evidence": {
+            "config/settings.py": {
+              "sha256": "ded59a6131ea104050b2cee849a6f2726e6dccf8625e3fabb923f5c6652f4c41",
+              "state": "present"
+            }
+          },
+          "queries": {
+            "port-refs": {
+              "definition": "583573d9bd3033247551aeb641af63e068bcd52e1a62ffd4bdd1caa2c6e223ea",
+              "gaps": [],
+              "hits": {
+                "config/settings.py": {
+                  "lines": [
+                    1
+                  ],
+                  "sha256": "ded59a6131ea104050b2cee849a6f2726e6dccf8625e3fabb923f5c6652f4c41"
+                }
+              }
+            }
+          }
+        },
+        "quote": {
+          "definition": "71e6486c032198fbaabb58713047a0a113736412072654598b0e83985ca741e4",
+          "evidence": {
+            "src/owner.py": {
+              "sha256": "b46f788cfbb2f7c3f5368b8a3e2ca8e14b1500082b2d1e04a979c1966e2ba757",
+              "state": "present"
+            }
+          },
+          "queries": {
+            "quote-refs": {
+              "definition": "9ba24ed12cfcbec22a9e96a43d284c6094aea339839b87994fcb82924ab2d0bb",
+              "gaps": [],
+              "hits": {
+                "src/owner.py": {
+                  "lines": [
+                    1
+                  ],
+                  "sha256": "b46f788cfbb2f7c3f5368b8a3e2ca8e14b1500082b2d1e04a979c1966e2ba757"
+                }
+              }
+            }
+          }
+        }
+      },
+      "last_review": {},
+      "pending": [
+        "port",
+        "quote"
+      ]
+    },
+    "facts": [
+      {
+        "depends_on": [],
+        "evidence": [
+          {
+            "path": "src/owner.py"
+          }
+        ],
+        "id": "quote",
+        "kind": "implementation",
+        "queries": [
+          "quote-refs"
+        ],
+        "statement": "quote doubles its input"
+      },
+      {
+        "depends_on": [],
+        "evidence": [
+          {
+            "path": "config/settings.py"
+          }
+        ],
+        "id": "port",
+        "kind": "implementation",
+        "queries": [
+          "port-refs"
+        ],
+        "statement": "The default port is 8000"
+      },
+      {
+        "depends_on": [],
+        "evidence": [
+          {
+            "path": "notes.md"
+          }
+        ],
+        "id": "notes",
+        "kind": "decision",
+        "queries": [],
+        "statement": "Conventions are in notes.md"
+      }
+    ],
+    "queries": [
+      {
+        "id": "quote-refs",
+        "include": [
+          "src/**/*.py"
+        ],
+        "terms": [
+          "quote"
+        ]
+      },
+      {
+        "id": "port-refs",
+        "include": [
+          "config/**/*.py"
+        ],
+        "terms": [
+          "DEFAULT_PORT"
+        ]
+      }
+    ],
+    "report": {
+      "coverage_gaps": [],
+      "evidence_changes": [],
+      "facts": [
+        {
+          "id": "quote",
+          "reasons": [
+            "previous review remains unresolved"
+          ],
+          "status": "needs-review"
+        },
+        {
+          "id": "port",
+          "reasons": [
+            "previous review remains unresolved"
+          ],
+          "status": "needs-review"
+        },
+        {
+          "id": "notes",
+          "reasons": [],
+          "status": "current"
+        }
+      ],
+      "limitations": [
+        "Search hits are textual reference candidates, not semantic proof of a call or ownership.",
+        "Coverage is limited to declared file patterns and terms; dynamic and external consumers can be missed.",
+        "Current evidence does not establish that a statement is true or that its behavior has been tested.",
+        "Refresh invalidates evidence; an agent must read affected code and update statements before confirming."
+      ],
+      "new_reference_candidates": [],
+      "ready": false,
+      "reference_changes": [],
+      "snapshot_id": "91f947249d0df820d38f615d1a638b00c463e876829f0247b214efe49c46f14a"
+    },
+    "schema_version": 1
+  },
+  "commands": [
+    {
+      "command": [
+        "python",
+        "-B",
+        "<repository>/project-evolution-engine/scripts/refresh_context.py",
+        "capture",
+        "--root",
+        "<evaluation>/convergence-review/scope-krardjxw",
+        "--record",
+        "-"
+      ],
+      "exit_code": 0,
+      "stderr": ""
+    },
+    {
+      "command": [
+        "python",
+        "-B",
+        "<repository>/project-evolution-engine/scripts/refresh_context.py",
+        "refresh",
+        "--root",
+        "<evaluation>/convergence-review/scope-krardjxw",
+        "--record",
+        "-"
+      ],
+      "exit_code": 1,
+      "stderr": ""
+    },
+    {
+      "command": [
+        "python",
+        "-B",
+        "<repository>/project-evolution-engine/scripts/refresh_context.py",
+        "confirm",
+        "--root",
+        "<evaluation>/convergence-review/scope-krardjxw",
+        "--record",
+        "-",
+        "--facts",
+        "quote",
+        "port",
+        "--against",
+        "6d3b151d25b1a78805e09da9bcaf796cf3cd7535b179aa7ad1ef3db1da288389",
+        "--note",
+        "Read declared evidence and reference scopes; the files are unchanged."
+      ],
+      "exit_code": 2,
+      "stderr": ""
+    },
+    {
+      "command": [
+        "python",
+        "-B",
+        "<repository>/project-evolution-engine/scripts/refresh_context.py",
+        "refresh",
+        "--root",
+        "<evaluation>/convergence-review/scope-krardjxw",
+        "--record",
+        "-"
+      ],
+      "exit_code": 1,
+      "stderr": ""
+    },
+    {
+      "command": [
+        "python",
+        "-B",
+        "<repository>/project-evolution-engine/scripts/refresh_context.py",
+        "refresh",
+        "--root",
+        "<evaluation>/convergence-review/scope-krardjxw",
+        "--record",
+        "-"
+      ],
+      "exit_code": 1,
+      "stderr": ""
+    }
+  ]
+}

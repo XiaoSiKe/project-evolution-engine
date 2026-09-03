@@ -16,6 +16,10 @@ Tool names and coverage vary by backend. Do not invent an MCP invocation or assu
 
 If Serena is unavailable, use native search, file reading, and relevant commands. Continue the update without installing or configuring global tools unless that is part of the user's authorization. State optional-tool limitations only when they affect the conclusion.
 
+When native tools are unavailable but the user has an installed Serena runtime, [stdio integration](serena-stdio.md) provides an optional real MCP client. It binds each connection to an explicit project and dedicated external state directory, reads live schemas, and exposes a limited query interface. Use the native tools first when already available. A successful connection is not evidence that a symbol query found the intended code.
+
+After files are created, renamed, or changed, query their current symbols and affected references again. Confirm returned paths and source snippets in the current workspace. Preserve the tool's position convention until converting it against the file; the pinned LSP backend used in this project's evaluation reports zero-based body locations.
+
 ## Codebase Convergence
 
 When an available `codebase-convergence` Skill can help with an integration defect or review, provide:

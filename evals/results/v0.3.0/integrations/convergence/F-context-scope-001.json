@@ -1,0 +1,72 @@
+{
+  "canonical_owner": {
+    "path": "project-evolution-engine/scripts/refresh_context.py",
+    "status": "confirmed"
+  },
+  "category": "bug",
+  "claim": "An unrelated symlink directory outside every declared include is propagated as a coverage gap to all queries, invalidating otherwise unchanged independent facts.",
+  "confidence": "confirmed",
+  "disposition": "direct-repair",
+  "evidence": [
+    {
+      "end_line": 139,
+      "kind": "file",
+      "path": "project-evolution-engine/scripts/refresh_context.py",
+      "start_line": 129,
+      "summary": "The root-wide traversal records every non-built-in-excluded directory symlink in the shared walk_gaps list before checking any query include or exclude."
+    },
+    {
+      "end_line": 171,
+      "kind": "file",
+      "path": "project-evolution-engine/scripts/refresh_context.py",
+      "start_line": 170,
+      "summary": "Every shared traversal gap is appended to every query outcome, regardless of which declared scope could reach the path."
+    },
+    {
+      "end_line": 224,
+      "kind": "file",
+      "path": "project-evolution-engine/scripts/refresh_context.py",
+      "start_line": 219,
+      "summary": "A query gap changes the captured observation and incomplete(current) marks the associated fact pending."
+    },
+    {
+      "end_line": 94,
+      "kind": "test",
+      "path": "tests/test_refresh_context.py",
+      "start_line": 92,
+      "summary": "The existing contract preserves facts for unrelated changes, but this test only covers an ordinary out-of-scope file, not an unrelated symlink directory."
+    },
+    {
+      "kind": "reproduction",
+      "summary": "Run PYTHONDONTWRITEBYTECODE=1 uv run --python 3.12 --with-requirements requirements-dev.txt python <evaluation>/convergence-review/reproduce_scope_gap.py from the repository. It captures independent src/**/*.py and config/**/*.py facts, adds unrelated-link -> src outside both scopes, and observes both facts become unknown with gap 'symlink directory not scanned: unrelated-link'. The capture CLI exits 0; refresh exits 1. Their source hashes are unchanged; deleting the link leaves both pending. Full JSON evidence is in scope-gap-evidence.json."
+    }
+  ],
+  "evidence_basis": {
+    "files": [
+      {
+        "path": "project-evolution-engine/scripts/change_evidence.py",
+        "role": "subject",
+        "sha256": "sha256:b601879a57a09a3da8ea076e3c4d4df4b2219a5177da6e75df1e24eca721dc6f",
+        "state": "present"
+      },
+      {
+        "path": "project-evolution-engine/scripts/refresh_context.py",
+        "role": "canonical-owner",
+        "sha256": "sha256:293ae260705ca527c24f2c1024f8e432e0b9e8df3a340848b9b3bb1822cd73ea",
+        "state": "present"
+      },
+      {
+        "path": "tests/test_refresh_context.py",
+        "role": "test",
+        "sha256": "sha256:34ca5eb0b4e234b1be557ad1a0eaadd1ccd7d9cc9f417cbf88f160b1d404a03c",
+        "state": "present"
+      }
+    ],
+    "method": "sha256-file-content-v1"
+  },
+  "freshness": "current",
+  "id": "F-context-scope-001",
+  "impact": "Adding an unrelated directory symlink makes every query-backed fact unknown and creates persistent pending review even though no declared evidence or in-scope reference changed. The affected facts cannot be confirmed while the unrelated link exists, and removing it still leaves unnecessary review work.",
+  "schema_version": 1,
+  "severity": "medium"
+}

@@ -33,7 +33,7 @@
 
 它适合功能添加、能力扩展、流程调整，以及这些更新所需的相关修复。核心继承自[代码整理修复大师](https://github.com/XiaoSiKe/codebase-convergence)，进一步补齐了需求到实现的接入分析。
 
-**v0.2.0** 增加了可核对的改动证据、文件变化提醒，以及基于 TodoMVC 和 Flaskr 的成对应用试验。核心仍可独立运行，小更新不需要额外的规格框架或持久化计划。
+**v0.3.0** 加入了项目认知的增量刷新、Serena 的真实 MCP 查询接口，以及代码整理修复大师的实际审核联调。核心仍可独立运行，小更新不需要额外的规格框架或持久化计划。
 
 <a id="demo"></a>
 
@@ -139,6 +139,14 @@ python3 project-evolution-engine/scripts/change_evidence.py check --root /path/t
 
 记录格式与完整示例见[改动证据指南](project-evolution-engine/references/change-evidence.md)。工具会提示证据过期、缺少验证或声明的未知影响；它不会自动发现全部调用方，也不会执行记录中的测试命令。文件指纹仍然有效，不代表功能已经通过验收。
 
+### 🔄 让项目认知随更新刷新
+
+需要跨次迭代保留认知时，可以声明重要结论、证据文件、引用搜索范围和结论之间的依赖。刷新工具会找出新的引用候选，并把受影响的结论标为待核实；无关结论继续保留。
+
+工作顺序是 **发现变化 → 重读相关代码与调用方 → 更新结论和验证 → 绑定当前快照确认**。重复刷新不会把尚未核实的内容自动变成有效；确认期间代码再变动，旧确认会被拒绝。
+
+详见[增量认知指南](project-evolution-engine/references/incremental-context.md)。文本候选需要结合代码或语义工具核实，工具不会自动编写业务结论。
+
 <a id="capabilities"></a>
 
 ## 🧩 能力与边界
@@ -151,12 +159,12 @@ python3 project-evolution-engine/scripts/change_evidence.py check --root /path/t
 | 🛡️ 保留旧能力 | 区分有意变化与需要保留的接口、权限、格式和状态 |
 | 🧪 验证结果 | 区分新能力、接入关系与保留行为，核对实际差异和遗留缺口 |
 | 📍 保持证据有效 | 检查声明文件与文本位置的变化，提示需要重新阅读的依据 |
-| 📚 更新认知 | 修正受影响的文档，只保留值得复用的新经验 |
+| 📚 更新认知 | 扫描声明范围内的引用变化，传播证据失效，核实后只更新相关结论 |
 
 | 可选增强 | 当前状态 |
 | --- | --- |
-| Serena | 内置可用性检查和符号查询路由；本次发布环境未连接，未进行真实 MCP 集成测试 |
-| 代码整理修复大师 | 可按新需求与限定范围处理相关修复或审核；首发行为评测验证的是核心独立路径 |
+| Serena | 已通过 Python、TypeScript 的真实 stdio MCP 查询与更新验证；提供[可选桥接器](project-evolution-engine/references/serena-stdio.md)，不包含上游服务器，也不等同于宿主原生工具注册 |
+| 代码整理修复大师 | 已实际读取并执行限定审核、Finding 校验及修复复核；按本轮新要求验收，记录见[联调结果](evals/results/v0.3.0/integrations/summary.json) |
 | OpenSpec / cc-sdd / GSD 等 | 方法已适配到核心参考资料，运行时不要求安装整套框架 |
 
 工具结果和项目图谱用于提供证据，最终接入判断仍需要结合当前代码。完成声明只覆盖实际验证过的范围。
@@ -174,7 +182,7 @@ python3 -m unittest discover -s tests -v
 python3 scripts/eval_cases.py validate-cases
 ```
 
-GitHub Actions 在 Python 3.11 和 3.12 上运行包、只读工具、安装器及评测基础设施测试。另一个任务验证公开应用的原始行为，并确认验收程序会拒绝尚未实现的新功能。CI 不运行独立编码代理。
+GitHub Actions 在 Python 3.11 和 3.12 上运行包、只读工具、安装器及评测基础设施测试。另有公开应用基线检查，以及真实 Serena 的 Python／TypeScript 联调。CI 不运行独立编码代理。
 
 七类行为案例覆盖批量能力、授权规则变化、用户未提交修改、生成链、过期项目说明、缺少外部工具，以及业务冲突下的部分完成。评测者核对实际差异，并运行代理未读过的验收检查。
 
@@ -185,7 +193,9 @@ v0.2.0 另加入两个固定版本的公开应用：TodoMVC 的批量清除撤�
 | TodoMVC：批量清除撤销 | 9/9 通过 | 9/9 通过 |
 | Flaskr：草稿与数据库升级 | 7/7 通过 | 7/7 通过 |
 
-两种条件在本轮均通过，未观察到成功率差异。项目本身的包与工具测试为 **65 项**；它们与上述独立应用验收分别统计。
+两种条件在 v0.2.0 试验中均通过，未观察到成功率差异。v0.3.0 进一步使用 HTTPX 与 Datasette，按相同模型配置、工具、项目状态和原始需求各运行两轮有／无 Skill 对照，并记录实际耗时及 token 用量。详见[重复评测方法](evals/repeated-projects/README.md)和[结果记录](evals/results/v0.3.0/repeated/results.json)。
+
+v0.3.0 的 **108 项包与工具测试、22 项真实 MCP 联调、8 次独立实现的 64 项验收均通过**。这轮有／无 Skill 两组都通过，有 Skill 组中位耗时高约 17%–31%，尚未显示效率收益。完整记录保留了实际成本及覆盖边界。
 
 详见[验证记录](docs/verification.md)和[公开应用试验的复现方法](evals/real-projects/README.md)。这轮属于小样本探索，不能据此推断普遍收益，也不能替代业务项目自身的测试。
 
@@ -198,7 +208,7 @@ project-evolution-engine/
 ├── SKILL.md                 核心入口与触发边界
 ├── agents/openai.yaml       中文名称与默认调用
 ├── references/              工作流、项目认知、接入分析、验证和来源
-├── scripts/                 只读项目采集与改动证据核验
+├── scripts/                 项目采集、证据核验、认知刷新与可选 MCP 客户端
 ├── LICENSE
 └── THIRD_PARTY_NOTICES.md
 scripts/                     安装、包校验、评测与发布打包
@@ -216,7 +226,7 @@ README 的居中标题、图标导航和徽章排版参考 [Square-Q/subconsciou
 
 每个来源的固定提交与改写范围见[来源说明](project-evolution-engine/references/sources.md)，原始许可见[第三方声明](project-evolution-engine/THIRD_PARTY_NOTICES.md)。
 
-公开应用试验使用 [TodoMVC](https://github.com/tastejs/todomvc) 与 [Flaskr](https://github.com/pallets/flask/tree/main/examples/tutorial) 的固定快照，保留其 [MIT 与 BSD-3-Clause 许可](evals/real-projects/THIRD_PARTY_NOTICES.md)。这些应用仅用于评测，不包含在可安装的 Skill 包中。
+公开应用试验使用 [TodoMVC](https://github.com/tastejs/todomvc)、[Flaskr](https://github.com/pallets/flask/tree/main/examples/tutorial)、[HTTPX](https://github.com/encode/httpx) 和 [Datasette](https://github.com/simonw/datasette) 的固定快照，保留[首轮应用许可](evals/real-projects/THIRD_PARTY_NOTICES.md)与[重复评测项目许可](evals/repeated-projects/THIRD_PARTY_NOTICES.md)。这些项目仅用于评测，不包含在可安装的 Skill 包中。
 
 ---
 

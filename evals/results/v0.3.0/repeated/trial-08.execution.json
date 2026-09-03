@@ -1,0 +1,247 @@
+{
+  "id": 8,
+  "exit_code": 0,
+  "started_at": 1788421777.436121,
+  "finished_at": 1788422370.605875,
+  "wall_seconds": 593.161,
+  "timed_out": false,
+  "configured_model": {
+    "model": "gpt-5.6-sol",
+    "model_provider": null,
+    "model_reasoning_effort": "max",
+    "profile": null
+  },
+  "usage": {
+    "input_tokens": 2044655,
+    "cached_input_tokens": 1918848,
+    "cache_write_input_tokens": 0,
+    "output_tokens": 27092,
+    "reasoning_output_tokens": 16574
+  },
+  "usage_events": 1,
+  "command_count": 40,
+  "tool_count": 0,
+  "other_tools": [],
+  "errors": [],
+  "commands": [
+    {
+      "command": "/bin/zsh -lc pwd",
+      "exit_code": 0,
+      "status": "completed"
+    },
+    {
+      "command": "/bin/zsh -lc \"rg --files -g 'AGENTS.md' -g 'CLAUDE.md' -g '*csv*' -g 'pyproject.toml' -g 'setup.cfg' -g 'pytest.ini' -g 'README*' -g '.openai/hosting.json' -g '\"'!node_modules'\"' -g '\"'!vendor'\"'\"",
+      "exit_code": 0,
+      "status": "completed",
+      "output_excerpt": "pyproject.toml\npytest.ini\nsetup.cfg\nREADME.md\ndemos/apache-proxy/README.md\ntests/test_csv.py\ndocs/csv_export.rst\n",
+      "output_truncated": false
+    },
+    {
+      "command": "/bin/zsh -lc 'cat <evaluation>/repeated-trials/fixed-skill/project-evolution-engine/SKILL.md'",
+      "exit_code": 0,
+      "status": "completed"
+    },
+    {
+      "command": "/bin/zsh -lc 'git status --short'",
+      "exit_code": 0,
+      "status": "completed"
+    },
+    {
+      "command": "/bin/zsh -lc 'cat <evaluation>/repeated-trials/fixed-skill/project-evolution-engine/references/execution-workflow.md <evaluation>/repeated-trials/fixed-skill/project-evolution-engine/references/project-context.md <evaluation>/repeated-trials/fixed-skill/project-evolution-engine/references/integration-analysis.md <evaluation>/repeated-trials/fixed-skill/project-evolution-engine/references/change-evidence.md <evaluation>/repeated-trials/fixed-skill/project-evolution-engine/references/verification.md'",
+      "exit_code": 0,
+      "status": "completed"
+    },
+    {
+      "command": "/bin/zsh -lc 'cat pytest.ini pyproject.toml setup.cfg'",
+      "exit_code": 0,
+      "status": "completed",
+      "output_excerpt": "[pytest]\nfilterwarnings=\n    # https://github.com/pallets/jinja/issues/927\n    ignore:Using or importing the ABCs::jinja2\n    # https://bugs.launchpad.net/beautifulsoup/+bug/1778909\n    ignore:Using or importing the ABCs::bs4.element\nmarkers =\n    serial: tests to avoid using with pytest-xdist\n    playwright: browser automation tests, skipped unless --playwright is passed\nasyncio_mode = strict\n[project]\nname = \"datasette\"\ndynamic = [\"version\"]\ndescription = \"An open source multi-tool for exploring and publishing data\"\nreadme = { file = \"README.md\", content-type = \"text/markdown\" }\nauthors = [\n    { name = \"Simon Willison\" },\n]\nlicense = \"Apache-2.0\"\nrequires-python = \">=3.10\"\nclassifiers = [\n    \"Development Status :: 4 - Beta\",\n    \"Framework :: Datasette\",\n    \"Intended Audience :: Developers\",\n    \"Intended Audience :: Science/Research\",\n    \"Intended Audience :: End Users/Desktop\",\n    \"Topic :: Database\",\n    \"Programming Language :: Python :: 3.10\",\n    \"Programming Language :: Python :: 3.11\",\n    \"Programming Language :: Python :: 3.12\",\n    \"Programming Language :: Python :: 3.13\",\n    \"Programming Language :: Python :: 3.14\",\n]\n\ndependencies = [\n    \"asgiref>=3.2.10\",\n    \"click>=7.1.1\",\n    \"click-default-group>=1.2.3\",\n    \"Jinja2>=2.10.3\",\n    \"hupper>=1.9\",\n    \"httpx>=0.20,<1.0\",\n    \"pluggy>=1.0\",\n    \"uvicorn>=0.29\",\n    \"aiofiles>=0.4\",\n    \"PyYAML>=5.3\",\n    \"mergedeep>=1.1.1\",\n    \"itsdangerous>=1.1\",\n    \"sqlite-utils>=4.0\",\n    \"asyncinject>=0.7\",\n    \"setuptools\",\n    \"pip\",\n    \"pydantic>=2\",\n]\n\n[project.urls]\nHomepage = \"https://datasette.io/\"\nDocumentation = \"https://docs.datasette.io/en/stable/\"\nChangelog = \"https://docs.datasette.io/en/stable/changelog.html\"\n\"Live demo\" = \"https://latest.datasette.io/\"\n\"Source code\" = \"https://github.com/simonw/datasette\"\nIssues = \"https://github.com/simonw/datasette/issues\"\nCI = \"https://github.com/simonw/datasette/actions?query=workflow%3ATest\"\n\n[project.scripts]\ndatasette = \"datasette.cli:cli\"\n\n[project.entry-points.pytest11]\ndatasette = \"datasette._pytest_plugin\"\n\n[dependency-groups]\ndev = [\n    \"pytest>=9\",\n    \"pytest-xdist>=2.2.1\",\n    \"pytest-asyncio>=1.2.0\",\n    \"beautifulsoup4>=4.8.1\",\n    \"black==26.3.1\",\n    \"blacken-docs==1.20.0\",\n    \"pytest-timeout>=1.4.2\",\n    \"trustme>=0.7\",\n    \"cogapp>=3.3.0\",\n    \"multipart-form-data-conformance==0.1a0\",\n    \"ruff>=0.16.0\",\n    # docs\n    \"Sphinx==7.4.7\",\n    \"furo==2025.9.25\",\n    \"sphinx-autobuild\",\n    \"codespell>=2.2.5\",\n    \"sphinx-copybutton\",\n    \"sphinx-inline-tabs\",\n    \"myst-parser\",\n    \"sphinx-markdown-builder\",\n    \"ruamel.yaml\",\n    \"psutil>=5.9\",\n]\nplaywright = [\n    \"pytest-playwright>=0.8.0\",\n]\n\n[project.optional-dependencies]\nrich = [\"rich\"]\n\n[build-system]\nrequires = [\"setuptools\"]\nbuild-backend = \"setuptools.build_meta\"\n\n[tool.setuptools.packages.find]\ninclude = [\"datasette*\"]\n\n[tool.setuptools.package-data]\ndatasette = [\"templates/*.html\"]\n\n[tool.setuptools.dynamic]\nversion = {attr = \"datasette.version.__version__\"}\n\n[tool.uv]\npackage = true\n[aliases]\ntest=pytest\n",
+      "output_truncated": false
+    },
+    {
+      "command": "/bin/zsh -lc \"rg -n 'csv|blob|_labels' datasette/views/base.py datasette/views/table.py datasette/views/database.py datasette/renderer* tests/test_csv.py docs/csv_export.rst\"",
+      "exit_code": 0,
+      "status": "completed"
+    },
+    {
+      "command": "/bin/zsh -lc \"rg --files --hidden -g 'AGENTS.md' -g 'CLAUDE.md' -g 'CONTEXT.md' -g '*context*' -g 'docs/adr/**' -g '\"'!**/.git/**'\"'\"",
+      "exit_code": 0,
+      "status": "completed"
+    },
+    {
+      "command": "/bin/zsh -lc 'cat tests/test_csv.py docs/csv_export.rst'",
+      "exit_code": 0,
+      "status": "completed"
+    },
+    {
+      "command": "/bin/zsh -lc \"sed -n '1,380p' datasette/views/base.py\"",
+      "exit_code": 0,
+      "status": "completed"
+    },
+    {
+      "command": "/bin/zsh -lc \"sed -n '790,905p' datasette/views/database.py\nsed -n '1630,1810p' datasette/views/table.py\nsed -n '2120,2265p' datasette/views/table.py\"",
+      "exit_code": 0,
+      "status": "completed"
+    },
+    {
+      "command": "/bin/zsh -lc \"rg -n 'simple_primary_key|binary_data|foreign_key_references|facetable|ds_client|app_client_with_cors|app_client_with_trace|allow_csv_stream|row_blob|class.*Table|primary_keys' tests/conftest.py tests/fixtures.py tests/test_blob.py datasette/views/row.py datasette/utils/__init__.py datasette/urls.py datasette/views/table.py\"",
+      "exit_code": 2,
+      "status": "failed"
+    },
+    {
+      "command": "/bin/zsh -lc '<evaluation>/datasette-env/bin/python -m pytest -q tests/test_csv.py'",
+      "exit_code": 0,
+      "status": "completed",
+      "output_excerpt": "...........x....                                                         [100%]\n15 passed, 1 xfailed in 1.93s\n",
+      "output_truncated": false
+    },
+    {
+      "command": "/bin/zsh -lc \"sed -n '155,300p' tests/test_csv.py\ncat docs/csv_export.rst\"",
+      "exit_code": 0,
+      "status": "completed"
+    },
+    {
+      "command": "/bin/zsh -lc \"rg -n 'def path_from_row_pks|def row_blob|class EscapeHtmlWriter|class LimitedWriter|allow_csv_stream|binary_data|foreign_key_references|simple_primary_key' datasette tests -g '*.py'\"",
+      "exit_code": 0,
+      "status": "completed"
+    },
+    {
+      "command": "/bin/zsh -lc \"rg --files datasette tests -g '*blob*' -g '*url*' -g '*permission*' -g '*utils*' -g '*fixture*'\nsed -n '1910,2050p' datasette/views/table.py\nsed -n '2250,2395p' datasette/views/table.py\"",
+      "exit_code": 0,
+      "status": "completed"
+    },
+    {
+      "command": "/bin/zsh -lc \"sed -n '285,325p' datasette/utils/__init__.py\nsed -n '1040,1080p' datasette/utils/__init__.py\nsed -n '1,100p' datasette/url_builder.py\ncat datasette/blob_renderer.py\"",
+      "exit_code": 0,
+      "status": "completed"
+    },
+    {
+      "command": "/bin/zsh -lc \"sed -n '1,115p' tests/conftest.py\nsed -n '205,285p' tests/fixtures.py\nsed -n '1,145p' tests/test_permissions.py\nsed -n '1240,1345p' tests/test_table_api.py\"",
+      "exit_code": 0,
+      "status": "completed"
+    },
+    {
+      "command": "/bin/zsh -lc \"sed -n '2030,2135p' datasette/views/table.py\nsed -n '345,385p' datasette/views/table_extras.py\nrg -n -A 22 'async def primary_keys|async def label_column_for_table' datasette/database.py\nrg -n -A 85 'async def expand_foreign_keys' datasette/app.py\"",
+      "exit_code": 0,
+      "status": "completed"
+    },
+    {
+      "command": "/bin/zsh -lc \"sed -n '165,220p' tests/test_permissions.py\nsed -n '780,885p' tests/test_html.py\nsed -n '1,125p' tests/test_table_api.py\nsed -n '1,125p' tests/test_docs.py\"",
+      "exit_code": 0,
+      "status": "completed"
+    },
+    {
+      "command": "/bin/zsh -lc \"rg -n -A 30 'def add_memory_database' datasette/app.py\nrg -n -A 95 'async def _next_value_and_url' datasette/views/table.py\nsed -n '485,610p' datasette/views/database.py\"",
+      "exit_code": 0,
+      "status": "completed"
+    },
+    {
+      "command": "/bin/zsh -lc \"rg --files --hidden -g '*ruff*' -g '*black*' -g '.github/workflows/*' -g 'Makefile' -g '\"'!**/.git/**'\"'\nrg -n 'execute-sql|execute_sql|view-query' tests/test_permissions.py datasette/views/database.py\nsed -n '670,730p' datasette/database.py\"",
+      "exit_code": 0,
+      "status": "completed"
+    },
+    {
+      "command": "/bin/zsh -lc 'cat tests/test_csv.py'",
+      "exit_code": 0,
+      "status": "completed"
+    },
+    {
+      "command": "/bin/zsh -lc \"cat ruff.toml\nsed -n '260,305p' tests/test_permissions.py\nsed -n '705,770p' datasette/views/database.py\nsed -n '1,110p' .github/workflows/test.yml\"",
+      "exit_code": 0,
+      "status": "completed"
+    },
+    {
+      "command": "/bin/zsh -lc '<evaluation>/datasette-env/bin/python -m pytest -q tests/test_csv.py::test_csv_null tests/test_csv.py::test_csv_blob_primary_keys --tb=short'",
+      "exit_code": 1,
+      "status": "failed",
+      "output_excerpt": "-------------------\ntable labels already exists\n=================================== FAILURES ===================================\n______________________ test_csv_null[NULL-on-True-query] _______________________\ntests/test_csv.py:115: in test_csv_null\n    assert list(csv.reader(io.StringIO(response.text))) == expected\nE   AssertionError: assert [['id', 'valu...3', '0', '0']] == [['id', 'valu...3', '0', '0']]\nE     \nE     At index 1 diff: ['1', '', ''] != ['1', 'NULL', 'NULL']\nE     Use -v to get more diff\n_______________________ test_csv_null[0-on-False-table] ________________________\ntests/test_csv.py:115: in test_csv_null\n    assert list(csv.reader(io.StringIO(response.text))) == expected\nE   AssertionError: assert [['id', 'valu...3', '0', '0']] == [['id', 'valu...3', '0', '0']]\nE     \nE     At index 1 diff: ['1', '', ''] != ['1', '0', '0']\nE     Use -v to get more diff\n_______________________ test_csv_null[0-off-False-table] _______________________\ntests/test_csv.py:115: in test_csv_null\n    assert list(csv.reader(io.StringIO(response.text))) == expected\nE   AssertionError: assert [['1', '', ''...3', '0', '0']] == [['1', '0', '...3', '0', '0']]\nE     \nE     At index 0 diff: ['1', '', ''] != ['1', '0', '0']\nE     Use -v to get more diff\n_ test_csv_null[\\u7f3a\\u5931,\"\\u7a7a\"\\n\\u4e0b\\u4e00\\u884c\\r\\u672b\\u884c-on-False-table] _\ntests/test_csv.py:115: in test_csv_null\n    assert list(csv.reader(io.StringIO(response.text))) == expected\nE   assert [['id', 'valu...3', '0', '0']] == [['id', 'valu...3', '0', '0']]\nE     \nE     At index 1 diff: ['1', '', ''] != ['1', '缺失,\"空\"\\n下一行\\r末行', '缺失,\"空\"\\n下一行\\r末行']\nE     Use -v to get more diff\n_ test_csv_null[\\u7f3a\\u5931,\"\\u7a7a\"\\n\\u4e0b\\u4e00\\u884c\\r\\u672b\\u884c-off-False-query] _\ntests/test_csv.py:115: in test_csv_null\n    assert list(csv.reader(io.StringIO(response.text))) == expected\nE   assert [['1', '', ''...3', '0', '0']] == [['1', '缺失,\"空...3', '0', '0']]\nE     \nE     At index 0 diff: ['1', '', ''] != ['1', '缺失,\"空\"\\n下一行\\r末行', '缺失,\"空\"\\n下一行\\r末行']\nE     Use -v to get more diff\n________________ test_csv_blob_primary_keys[False-key, version] ________________\ntests/test_csv.py:190: in test_csv_blob_primary_keys\n    assert len(rows) == 3\nE   AssertionError: assert 1 == 3\nE    +  where 1 = len([{'label_id': 'No item with that key', 'content': None, 'key': None, 'version': None, ...}])\n----------------------------- Captured stderr call -----------------------------\nCaught this error: No item with that key\n=========================== short test summary info ============================\nFAILED tests/test_csv.py::test_csv_null[NULL-on-True-query] - AssertionError:...\nFAILED tests/test_csv.py::test_csv_null[0-on-False-table] - AssertionError: a...\nFAILED tests/test_csv.py::test_csv_null[0-off-False-table] - AssertionError: ...\nFAILED tests/test_csv.py::test_csv_null[\\u7f3a\\u5931,\"\\u7a7a\"\\n\\u4e0b\\u4e00\\u884c\\r\\u672b\\u884c-on-False-table]\nFAILED tests/test_csv.py::test_csv_null[\\u7f3a\\u5931,\"\\u7a7a\"\\n\\u4e0b\\u4e00\\u884c\\r\\u672b\\u884c-off-False-query]\nFAILED tests/test_csv.py::test_csv_blob_primary_keys[False-key, version] - As...\nERROR tests/test_csv.py::test_csv_null[None-on-False-query] - sqlite3.Operati...\nERROR tests/test_csv.py::test_csv_null[None-on-True-query] - sqlite3.Operatio...\nERROR tests/test_csv.py::test_csv_null[None-off-False-table] - sqlite3.Operat...\nERROR tests/test_csv.py::test_csv_null[None-off-False-query] - sqlite3.Operat...\nERROR tests/test_csv.py::test_csv_null[None-off-True-query] - sqlite3.Operati...\nERROR tests/test_csv.py::test_csv_null[-on-False-table] - sqlite3.Operational...\nERROR tests/test_csv.py::test_csv_null[-on-False-query] - sqlite3.Operational...\nERROR tests/test_csv.py::test_csv_null[-on-True-table] - sqlite3.OperationalE...\nERROR tests/test_csv.py::test_csv_null[-off-False-table] - sqlite3.Operationa...\nERROR tests/test_csv.py::test_csv_null[-off-False-query] - sqlite3.Operationa...\nERROR tests/test_csv.py::test_csv_null[-off-True-table] - sqlite3.Operational...\nERROR tests/test_csv.py::test_csv_null[NULL-on-False-table] - sqlite3.Operati...\nERROR tests/test_csv.py::test_csv_null[NULL-on-False-query] - sqlite3.Operati...\nERROR tests/test_csv.py::test_csv_null[NULL-on-True-table] - sqlite3.Operatio...\nERROR tests/test_csv.py::test_csv_null[NULL-off-False-table] - sqlite3.Operat...\nERROR tests/test_csv.py::test_csv_null[NULL-off-False-query] - sqlite3.Operat...\nERROR tests/test_csv.py::test_csv_null[NULL-off-True-table] - sqlite3.Operati...\nERROR tests/test_csv.py::test_csv_null[NULL-off-True-query] - sqlite3.Operati...\nERROR tests/test_csv.py::test_csv_null[0-on-False-query] - sqlite3.Operationa...\nERROR tests/test_csv.py::test_csv_null[0-on-True-table] - sqlite3.Operational...\nERROR tests/test_csv.py::test_csv_null[0-on-True-query] - sqlite3.Operational...\nERROR tests/test_csv.py::test_csv_null[0-off-False-query] - sqlite3.Operation...\nERROR tests/test_csv.py::test_csv_null[0-off-True-table] - sqlite3.Operationa...\nERROR tests/test_csv.py::test_csv_null[0-off-True-query] - sqlite3.Operationa...\nERROR tests/test_csv.py::test_csv_null[\\u7f3a\\u5931,\"\\u7a7a\"\\n\\u4e0b\\u4e00\\u884c\\r\\u672b\\u884c-on-False-query]\nERROR tests/test_csv.py::test_csv_null[\\u7f3a\\u5931,\"\\u7a7a\"\\n\\u4e0b\\u4e00\\u884c\\r\\u672b\\u884c-on-True-table]\nERROR tests/test_csv.py::test_csv_null[\\u7f3a\\u5931,\"\\u7a7a\"\\n\\u4e0b\\u4e00\\u884c\\r\\u672b\\u884c-on-True-query]\nERROR tests/test_csv.py::test_csv_null[\\u7f3a\\u5931,\"\\u7a7a\"\\n\\u4e0b\\u4e00\\u884c\\r\\u672b\\u884c-off-False-table]\nERROR tests/test_csv.py::test_csv_null[\\u7f3a\\u5931,\"\\u7a7a\"\\n\\u4e0b\\u4e00\\u884c\\r\\u672b\\u884c-off-True-table]\nERROR tests/test_csv.py::test_csv_null[\\u7f3a\\u5931,\"\\u7a7a\"\\n\\u4e0b\\u4e00\\u884c\\r\\u672b\\u884c-off-True-query]\nERROR tests/test_csv.py::test_csv_blob_primary_keys[False-key] - sqlite3.Oper...\nERROR tests/test_csv.py::test_csv_blob_primary_keys[True-key] - sqlite3.Opera...\nERROR tests/test_csv.py::test_csv_blob_primary_keys[True-key, version] - sqli...\n6 failed, 5 passed, 33 errors in 0.98s\n",
+      "output_truncated": true
+    },
+    {
+      "command": "/bin/zsh -lc \"<evaluation>/datasette-env/bin/python -m pytest -q 'tests/test_csv.py::test_csv_null[NULL-on-False-table]' 'tests/test_csv.py::test_csv_null[NULL-on-False-query]' 'tests/test_csv.py::test_csv_blob_primary_keys[False-key]' 'tests/test_csv.py::test_csv_blob_primary_keys[True-key, version]' --tb=short\"",
+      "exit_code": 1,
+      "status": "failed",
+      "output_excerpt": "FFFF                                                                     [100%]\n=================================== FAILURES ===================================\n______________________ test_csv_null[NULL-on-False-table] ______________________\ntests/test_csv.py:116: in test_csv_null\n    assert list(csv.reader(io.StringIO(response.text))) == expected\nE   AssertionError: assert [['id', 'valu...3', '0', '0']] == [['id', 'valu...3', '0', '0']]\nE     \nE     At index 1 diff: ['1', '', ''] != ['1', 'NULL', 'NULL']\nE     Use -v to get more diff\n______________________ test_csv_null[NULL-on-False-query] ______________________\ntests/test_csv.py:116: in test_csv_null\n    assert list(csv.reader(io.StringIO(response.text))) == expected\nE   AssertionError: assert [['id', 'valu...3', '0', '0']] == [['id', 'valu...3', '0', '0']]\nE     \nE     At index 1 diff: ['1', '', ''] != ['1', 'NULL', 'NULL']\nE     Use -v to get more diff\n____________________ test_csv_blob_primary_keys[False-key] _____________________\ntests/test_csv.py:191: in test_csv_blob_primary_keys\n    assert len(rows) == 3\nE   AssertionError: assert 1 == 3\nE    +  where 1 = len([{'label_id': 'No item with that key', 'content': None, 'key': None, 'version': None, ...}])\n----------------------------- Captured stderr call -----------------------------\nCaught this error: No item with that key\n________________ test_csv_blob_primary_keys[True-key, version] _________________\ntests/test_csv.py:191: in test_csv_blob_primary_keys\n    assert len(rows) == 3\nE   assert 1 == 3\nE    +  where 1 = len([{'label_id': \"'rowid'\", 'label_id_label': None, 'content': None, 'key': None, ...}])\n----------------------------- Captured stderr call -----------------------------\nCaught this error: 'rowid'\n=========================== short test summary info ============================\nFAILED tests/test_csv.py::test_csv_null[NULL-on-False-table] - AssertionError...\nFAILED tests/test_csv.py::test_csv_null[NULL-on-False-query] - AssertionError...\nFAILED tests/test_csv.py::test_csv_blob_primary_keys[False-key] - AssertionEr...\nFAILED tests/test_csv.py::test_csv_blob_primary_keys[True-key, version] - ass...\n4 failed in 0.10s\n",
+      "output_truncated": false
+    },
+    {
+      "command": "/bin/zsh -lc \"sed -n '30,70p' docs/csv_export.rst\nsed -n '145,275p' tests/test_csv.py\"",
+      "exit_code": 0,
+      "status": "completed"
+    },
+    {
+      "command": "/bin/zsh -lc \"sed -n '178,339p' datasette/views/base.py\nsed -n '1745,1782p' datasette/views/table.py\"",
+      "exit_code": 0,
+      "status": "completed"
+    },
+    {
+      "command": "/bin/zsh -lc \"rg -n 'def actor_cookie|def sign\\\\(' datasette/app.py tests/fixtures.py tests/utils.py\nrg -n -A 26 'def setting\\\\(' datasette/app.py\"",
+      "exit_code": 0,
+      "status": "completed"
+    },
+    {
+      "command": "/bin/zsh -lc '<evaluation>/datasette-env/bin/python -m pytest -q tests/test_csv.py'",
+      "exit_code": 1,
+      "status": "failed",
+      "output_excerpt": "v_null_permissions[null_csv_ds0-False-table] ______________\n\nnull_csv_ds = <datasette.app.Datasette object at 0x10aa1c4a0>, query = False\nstream = False\n\n    @pytest.mark.asyncio\n    @pytest.mark.parametrize(\"query\", [False, True], ids=[\"table\", \"query\"])\n    @pytest.mark.parametrize(\"stream\", [False, True])\n    @pytest.mark.parametrize(\n        \"null_csv_ds\", [{\"config\": {\"allow\": {\"id\": \"root\"}}}], indirect=True\n    )\n    async def test_csv_null_permissions(null_csv_ds, query, stream):\n        path = \"/csv_null/records.csv\"\n        params = {\"_null\": \"NULL\"}\n        if query:\n            path = \"/csv_null/-/query.csv\"\n            params[\"sql\"] = \"select * from records order by id\"\n        if stream:\n            params[\"_stream\"] = \"1\"\n        denied = await null_csv_ds.client.get(path, params=params)\n        assert denied.status_code == 403\n        allowed = await null_csv_ds.client.get(\n>           path, params=params, cookies={\"ds_actor\": null_csv_ds.actor_cookie({\"id\": \"root\"})}\n                                                      ^^^^^^^^^^^^^^^^^^^^^^^^\n        )\nE       AttributeError: 'Datasette' object has no attribute 'actor_cookie'. Did you mean: 'set_actor_cookie'?\n\ntests/test_csv.py:303: AttributeError\n_____________ test_csv_null_permissions[null_csv_ds0-False-query] ______________\n\nnull_csv_ds = <datasette.app.Datasette object at 0x10aa04260>, query = True\nstream = False\n\n    @pytest.mark.asyncio\n    @pytest.mark.parametrize(\"query\", [False, True], ids=[\"table\", \"query\"])\n    @pytest.mark.parametrize(\"stream\", [False, True])\n    @pytest.mark.parametrize(\n        \"null_csv_ds\", [{\"config\": {\"allow\": {\"id\": \"root\"}}}], indirect=True\n    )\n    async def test_csv_null_permissions(null_csv_ds, query, stream):\n        path = \"/csv_null/records.csv\"\n        params = {\"_null\": \"NULL\"}\n        if query:\n            path = \"/csv_null/-/query.csv\"\n            params[\"sql\"] = \"select * from records order by id\"\n        if stream:\n            params[\"_stream\"] = \"1\"\n        denied = await null_csv_ds.client.get(path, params=params)\n        assert denied.status_code == 403\n        allowed = await null_csv_ds.client.get(\n>           path, params=params, cookies={\"ds_actor\": null_csv_ds.actor_cookie({\"id\": \"root\"})}\n                                                      ^^^^^^^^^^^^^^^^^^^^^^^^\n        )\nE       AttributeError: 'Datasette' object has no attribute 'actor_cookie'. Did you mean: 'set_actor_cookie'?\n\ntests/test_csv.py:303: AttributeError\n______________ test_csv_null_permissions[null_csv_ds0-True-table] ______________\n\nnull_csv_ds = <datasette.app.Datasette object at 0x10aa10e30>, query = False\nstream = True\n\n    @pytest.mark.asyncio\n    @pytest.mark.parametrize(\"query\", [False, True], ids=[\"table\", \"query\"])\n    @pytest.mark.parametrize(\"stream\", [False, True])\n    @pytest.mark.parametrize(\n        \"null_csv_ds\", [{\"config\": {\"allow\": {\"id\": \"root\"}}}], indirect=True\n    )\n    async def test_csv_null_permissions(null_csv_ds, query, stream):\n        path = \"/csv_null/records.csv\"\n        params = {\"_null\": \"NULL\"}\n        if query:\n            path = \"/csv_null/-/query.csv\"\n            params[\"sql\"] = \"select * from records order by id\"\n        if stream:\n            params[\"_stream\"] = \"1\"\n        denied = await null_csv_ds.client.get(path, params=params)\n        assert denied.status_code == 403\n        allowed = await null_csv_ds.client.get(\n>           path, params=params, cookies={\"ds_actor\": null_csv_ds.actor_cookie({\"id\": \"root\"})}\n                                                      ^^^^^^^^^^^^^^^^^^^^^^^^\n        )\nE       AttributeError: 'Datasette' object has no attribute 'actor_cookie'. Did you mean: 'set_actor_cookie'?\n\ntests/test_csv.py:303: AttributeError\n______________ test_csv_null_permissions[null_csv_ds0-True-query] ______________\n\nnull_csv_ds = <datasette.app.Datasette object at 0x10aa300e0>, query = True\nstream = True\n\n    @pytest.mark.asyncio\n    @pytest.mark.parametrize(\"query\", [False, True], ids=[\"table\", \"query\"])\n    @pytest.mark.parametrize(\"stream\", [False, True])\n    @pytest.mark.parametrize(\n        \"null_csv_ds\", [{\"config\": {\"allow\": {\"id\": \"root\"}}}], indirect=True\n    )\n    async def test_csv_null_permissions(null_csv_ds, query, stream):\n        path = \"/csv_null/records.csv\"\n        params = {\"_null\": \"NULL\"}\n        if query:\n            path = \"/csv_null/-/query.csv\"\n            params[\"sql\"] = \"select * from records order by id\"\n        if stream:\n            params[\"_stream\"] = \"1\"\n        denied = await null_csv_ds.client.get(path, params=params)\n        assert denied.status_code == 403\n        allowed = await null_csv_ds.client.get(\n>           path, params=params, cookies={\"ds_actor\": null_csv_ds.actor_cookie({\"id\": \"root\"})}\n                                                      ^^^^^^^^^^^^^^^^^^^^^^^^\n        )\nE       AttributeError: 'Datasette' object has no attribute 'actor_cookie'. Did you mean: 'set_actor_cookie'?\n\ntests/test_csv.py:303: AttributeError\n=========================== short test summary info ============================\nFAILED tests/test_csv.py::test_csv_blob_primary_keys[False-key] - assert 404 ...\nFAILED tests/test_csv.py::test_csv_blob_primary_keys[False-key, version] - as...\nFAILED tests/test_csv.py::test_csv_blob_primary_keys[True-key] - assert 404 =...\nFAILED tests/test_csv.py::test_csv_blob_primary_keys[True-key, version] - ass...\nFAILED tests/test_csv.py::test_csv_null_blob_links[table] - assert 404 == 200\nFAILED tests/test_csv.py::test_csv_null_blob_links[query] - assert 404 == 200\nFAILED tests/test_csv.py::test_csv_null_max_csv_mb - httpx.InvalidURL: URL co...\nFAILED tests/test_csv.py::test_csv_null_permissions[null_csv_ds0-False-table]\nFAILED tests/test_csv.py::test_csv_null_permissions[null_csv_ds0-False-query]\nFAILED tests/test_csv.py::test_csv_null_permissions[null_csv_ds0-True-table]\nFAILED tests/test_csv.py::test_csv_null_permissions[null_csv_ds0-True-query]\n11 failed, 73 passed, 1 xfailed in 2.85s\n",
+      "output_truncated": true
+    },
+    {
+      "command": "/bin/zsh -lc \"sed -n '3190,3295p' datasette/app.py\nsed -n '145,225p' tests/test_csv.py\nsed -n '250,315p' tests/test_csv.py\"",
+      "exit_code": 0,
+      "status": "completed"
+    },
+    {
+      "command": "/bin/zsh -lc 'git diff --stat\ngit diff -- datasette/views/base.py datasette/views/table.py docs/csv_export.rst'",
+      "exit_code": 0,
+      "status": "completed"
+    },
+    {
+      "command": "/bin/zsh -lc '<evaluation>/datasette-env/bin/python -m black tests/test_csv.py'",
+      "exit_code": 1,
+      "status": "failed"
+    },
+    {
+      "command": "/bin/zsh -lc \"sed -n '1,330p' tests/test_csv.py\"",
+      "exit_code": 0,
+      "status": "completed"
+    },
+    {
+      "command": "/bin/zsh -lc \"<evaluation>/datasette-env/bin/python -c 'import importlib.util; print({name: importlib.util.find_spec(name) is not None for name in (\\\"ruff\\\", \\\"sphinx\\\", \\\"docutils\\\")})'\"",
+      "exit_code": 0,
+      "status": "completed"
+    },
+    {
+      "command": "/bin/zsh -lc '<evaluation>/datasette-env/bin/python -m pytest -q tests/test_csv.py'",
+      "exit_code": 0,
+      "status": "completed",
+      "output_excerpt": "........................................................................ [ 84%]\n........x....                                                            [100%]\n84 passed, 1 xfailed in 2.74s\n",
+      "output_truncated": false
+    },
+    {
+      "command": "/bin/zsh -lc 'git diff -- tests/test_csv.py'",
+      "exit_code": 0,
+      "status": "completed"
+    },
+    {
+      "command": "/bin/zsh -lc 'git diff --check'",
+      "exit_code": 0,
+      "status": "completed",
+      "output_excerpt": "",
+      "output_truncated": false
+    },
+    {
+      "command": "/bin/zsh -lc 'git diff --stat\ngit status --short\ngit diff -- datasette/views/base.py datasette/views/table.py docs/csv_export.rst'",
+      "exit_code": 0,
+      "status": "completed"
+    },
+    {
+      "command": "/bin/zsh -lc '<evaluation>/datasette-env/bin/python -m pytest -q tests/test_csv.py'",
+      "exit_code": 0,
+      "status": "completed",
+      "output_excerpt": "........................................................................ [ 84%]\n........x....                                                            [100%]\n84 passed, 1 xfailed in 2.07s\n",
+      "output_truncated": false
+    }
+  ],
+  "privacy_note": "Command list and verification-output excerpts only. Local paths are normalized. Reasoning and full internal event streams are not published."
+}

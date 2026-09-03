@@ -1,0 +1,169 @@
+{
+  "id": 7,
+  "exit_code": 0,
+  "started_at": 1788421417.878471,
+  "finished_at": 1788421777.425569,
+  "wall_seconds": 359.527,
+  "timed_out": false,
+  "configured_model": {
+    "model": "gpt-5.6-sol",
+    "model_provider": null,
+    "model_reasoning_effort": "max",
+    "profile": null
+  },
+  "usage": {
+    "input_tokens": 587337,
+    "cached_input_tokens": 516352,
+    "cache_write_input_tokens": 0,
+    "output_tokens": 18002,
+    "reasoning_output_tokens": 10425
+  },
+  "usage_events": 1,
+  "command_count": 26,
+  "tool_count": 0,
+  "other_tools": [],
+  "errors": [],
+  "commands": [
+    {
+      "command": "/bin/zsh -lc pwd",
+      "exit_code": 0,
+      "status": "completed"
+    },
+    {
+      "command": "/bin/zsh -lc 'git status --short'",
+      "exit_code": 0,
+      "status": "completed"
+    },
+    {
+      "command": "/bin/zsh -lc \"rg --files -g 'AGENTS.md' -g '\"'!SKILL.md'\"' -g '\"'!**/SKILL.md'\"' -g '\"'!**/.git/**'\"' -g '\"'!**/.agents/**'\"' -g '\"'!**/.codex/**'\"' -g 'pyproject.toml' -g 'setup.cfg' -g '*decoder*' -g '*response*' -g '*stream*' -g '*quickstart*' -g '*api*' -g '*compatibility*' -g '*changelog*'\"",
+      "exit_code": 0,
+      "status": "completed"
+    },
+    {
+      "command": "/bin/zsh -lc 'cat pyproject.toml'",
+      "exit_code": 0,
+      "status": "completed"
+    },
+    {
+      "command": "/bin/zsh -lc \"sed -n '1,420p' httpx/_decoders.py\"",
+      "exit_code": 0,
+      "status": "completed"
+    },
+    {
+      "command": "/bin/zsh -lc \"rg --files --hidden -g 'AGENTS.md' -g '\"'!**/.git/**'\"' -g '\"'!**/.agents/**'\"' -g '\"'!**/.codex/**'\"'\"",
+      "exit_code": 1,
+      "status": "failed"
+    },
+    {
+      "command": "/bin/zsh -lc \"rg -n 'iter_lines|aiter_lines|iter_text|aiter_text|LineDecoder' httpx tests docs\"",
+      "exit_code": 0,
+      "status": "completed"
+    },
+    {
+      "command": "/bin/zsh -lc \"sed -n '810,1070p' httpx/_models.py\"",
+      "exit_code": 0,
+      "status": "completed"
+    },
+    {
+      "command": "/bin/zsh -lc \"sed -n '55,100p' docs/api.md\nsed -n '320,390p' docs/quickstart.md\nsed -n '55,115p' docs/async.md\ncat tests/conftest.py\"",
+      "exit_code": 0,
+      "status": "completed"
+    },
+    {
+      "command": "/bin/zsh -lc \"sed -n '1,410p' tests/test_decoders.py\"",
+      "exit_code": 0,
+      "status": "completed"
+    },
+    {
+      "command": "/bin/zsh -lc \"sed -n '1,230p' tests/models/test_responses.py\nsed -n '480,810p' tests/models/test_responses.py\"",
+      "exit_code": 0,
+      "status": "completed"
+    },
+    {
+      "command": "/bin/zsh -lc '<evaluation>/eval-env/bin/python -m pytest -q tests/test_decoders.py tests/models/test_responses.py'",
+      "exit_code": 0,
+      "status": "completed",
+      "output_excerpt": "........................................................................ [ 49%]\n........................................................................ [ 98%]\n..                                                                       [100%]\n146 passed in 0.21s\n",
+      "output_truncated": false
+    },
+    {
+      "command": "/bin/zsh -lc \"sed -n '1,60p' tests/models/test_responses.py\nsed -n '470,705p' tests/models/test_responses.py\nsed -n '1010,1085p' httpx/_models.py\"",
+      "exit_code": 0,
+      "status": "completed"
+    },
+    {
+      "command": "/bin/zsh -lc \"rg --files scripts tests/models -g '\"'!SKILL.md'\"' -g '\"'!**/SKILL.md'\"'\"",
+      "exit_code": 0,
+      "status": "completed"
+    },
+    {
+      "command": "/bin/zsh -lc \"rg -n 'SyncByteStream|AsyncByteStream|close_called|is_stream_consumed|num_bytes_downloaded|request_context|StreamClosed|StreamConsumed' tests/models/test_responses.py tests/test_decoders.py tests/utils.py httpx/_content.py httpx/_types.py\"",
+      "exit_code": 2,
+      "status": "failed"
+    },
+    {
+      "command": "/bin/zsh -lc 'git diff --check'",
+      "exit_code": 0,
+      "status": "completed",
+      "output_excerpt": "",
+      "output_truncated": false
+    },
+    {
+      "command": "/bin/zsh -lc 'git diff --stat\ncat scripts/check\ncat scripts/lint'",
+      "exit_code": 0,
+      "status": "completed"
+    },
+    {
+      "command": "/bin/zsh -lc \"<evaluation>/eval-env/bin/python - <<'PY'\nimport importlib.util\nimport sys\nimport httpx\nprint('Python executable:', sys.executable)\nprint('Imported HTTPX:', httpx.__file__)\nfor package in ('ruff', 'mypy', 'black'):\n    print(package, 'available' if importlib.util.find_spec(package) else 'unavailable')\nPY\"",
+      "exit_code": 0,
+      "status": "completed"
+    },
+    {
+      "command": "/bin/zsh -lc '<evaluation>/eval-env/bin/python -m pytest -q tests/test_decoders.py tests/models/test_responses.py'",
+      "exit_code": 0,
+      "status": "completed",
+      "output_excerpt": "........................................................................ [ 14%]\n........................................................................ [ 29%]\n........................................................................ [ 43%]\n........................................................................ [ 58%]\n........................................................................ [ 73%]\n........................................................................ [ 87%]\n...........................................................              [100%]\n491 passed in 0.31s\n",
+      "output_truncated": false
+    },
+    {
+      "command": "/bin/zsh -lc 'git diff -- tests/test_decoders.py tests/models/test_responses.py'",
+      "exit_code": 0,
+      "status": "completed"
+    },
+    {
+      "command": "/bin/zsh -lc 'git diff -- httpx/_decoders.py httpx/_models.py docs/api.md docs/async.md docs/quickstart.md'",
+      "exit_code": 0,
+      "status": "completed"
+    },
+    {
+      "command": "/bin/zsh -lc \"<evaluation>/eval-env/bin/python - <<'PY'\nfrom pathlib import Path\nfor name in ('httpx/_decoders.py', 'httpx/_models.py', 'tests/test_decoders.py', 'tests/models/test_responses.py'):\n    for number, line in enumerate(Path(name).read_text().splitlines(), 1):\n        if len(line) > 88 and (name == 'tests/test_decoders.py' or 'keepends' in line):\n            print(f'{name}:{number}: {len(line)} characters: {line}')\nPY\"",
+      "exit_code": 0,
+      "status": "completed"
+    },
+    {
+      "command": "/bin/zsh -lc \"<evaluation>/eval-env/bin/python - <<'PY'\nfrom pathlib import Path\npath = Path('docs/async.md')\ncontent = path.read_bytes()\nif content.endswith(b'\\\\n'):\n    path.write_bytes(content[:-1])\nPY\"",
+      "exit_code": 0,
+      "status": "completed"
+    },
+    {
+      "command": "/bin/zsh -lc 'git diff --check'",
+      "exit_code": 0,
+      "status": "completed",
+      "output_excerpt": "",
+      "output_truncated": false
+    },
+    {
+      "command": "/bin/zsh -lc \"git diff --stat\ngit status --short\ngit diff -- docs/async.md\nsed -n '320,390p' httpx/_decoders.py\nsed -n '340,445p' tests/test_decoders.py\"",
+      "exit_code": 0,
+      "status": "completed"
+    },
+    {
+      "command": "/bin/zsh -lc '<evaluation>/eval-env/bin/python -m pytest -q tests/test_decoders.py tests/models/test_responses.py'",
+      "exit_code": 0,
+      "status": "completed",
+      "output_excerpt": "........................................................................ [ 14%]\n........................................................................ [ 28%]\n........................................................................ [ 42%]\n........................................................................ [ 56%]\n........................................................................ [ 71%]\n........................................................................ [ 85%]\n........................................................................ [ 99%]\n...                                                                      [100%]\n507 passed in 0.37s\n",
+      "output_truncated": false
+    }
+  ],
+  "privacy_note": "Command list and verification-output excerpts only. Local paths are normalized. Reasoning and full internal event streams are not published."
+}
